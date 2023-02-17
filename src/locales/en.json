@@ -1,0 +1,16 @@
+{
+  "login_with": "Login with Email",
+  "powered_by": "Powered by Crescent",
+  "password": "Password",
+  "wrong_password": "Wrong Password",
+  "login": "Login",
+  "set_your_password": "Set Your Password",
+  "set_your_password_desc": "Password will be used for your seed phrase encryption and wallet unlocking. The more complex it is the more secure your wallet will be.",
+  "new_password": "New password",
+  "enter_password_here": "Enter password here, 6 digits at least",
+  "confirm_your_password": "Confirm your password",
+  "enter_again_to_confirm": "Enter again to confirm",
+  "six_digits_at_least": "6 digits at least",
+  "password_not_match": "Password not match",
+  "next": "Next"
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Development</title>
+
+  <script src="./dist/umd/index.bundle.js"></script>
+<!--  <script src="./dist/esm/index.bundle.js"></script>-->
+
+</head>
+<body style="text-align: center;">
+
+<div id="test">
+  <button id="btnPay" type="button">Buy</button>
+</div>
+
+<script>
+  const element = document.getElementById('test');
+  var button = document.getElementById("btnPay");
+  button.addEventListener("click",function(e){
+    button.style.display= "none";
+
+    let destroy;
+    function onComplete(obj) {
+  //     console.log(obj.receiver, obj.order_id, obj.tx_hash, obj.chain_id, obj.quantity, obj.blockchain);
+      destroy();
+  //     alert("payment success!!!");
+  //     button.style.display= "";
+    }
+
+    destroy = CrescentSDK.CrescentEntry({
+      container: element,
+      style: '.MainSize {width: 400px; height: 400px} :root {--base-bg-color: #220000;  }',
+      language: 'zh',
+      onComplete
+    });
+  });
+</script>
+
+</body>
+</html>
+
