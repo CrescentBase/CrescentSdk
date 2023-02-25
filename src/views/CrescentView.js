@@ -3,10 +3,12 @@ import NavigateContext from "../contexts/NavigateContext";
 import ConfigContext from "../contexts/ConfigContext";
 import Main from "./Main";
 import History from "./History";
-import Token from "./Token";
+import Asset from "./Asset";
 import SelectEmail from "./SelectEmail";
 import Login from "./Login";
 import SetPassword from "./SetPassword";
+import ChangePassword from "./ChangePassword"
+import Setting from "./Setting";
 
 export default (props) => {
 
@@ -20,18 +22,19 @@ export default (props) => {
     const routers = {
         Main: <Main params={params} />,
         History: <History params={params} />,
-        Token: <Token params={params} />,
+        Asset: <Asset params={params} />,
         SelectEmail: <SelectEmail params={params} />,
         Login: <Login params={params} />,
-        SetPassword: <SetPassword params={params} />
+        SetPassword: <SetPassword params={params} />,
+        ChangePassword: <ChangePassword params={params} />,
+        Setting: <Setting params={params} />
     }
 
     return (
-        <div className="App">
-            <div className="MainSize">
-                <div className={'content'}>
-                    {routers[navigator]}
-                </div>
+        <div className={'content-inter'}>
+            {navigator !== 'Main' && routers[navigator]}
+            <div className={'entry-main-wrap-layout'} style={navigator === 'Main' ? {display: 'flex'} : {display: 'none'}}>
+                <Main params={params}/>
             </div>
         </div>
     )

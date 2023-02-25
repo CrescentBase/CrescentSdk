@@ -16,7 +16,10 @@ export default (props)=>{
 
     return (
         <div className={'widget-textinput-base-layout'} style={props.style}>
-            <div className={'widget-textinput-tip'}>{props.tip}</div>
+            {!props.tipHide && (
+                <div className={'widget-textinput-tip'}>{props.tip}</div>
+            )}
+
             <div className={'widget-textinput-edit-layout'}>
                 <input className={'widget-textinput-edittext'}
                        type={props.type || "password"}

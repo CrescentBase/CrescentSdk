@@ -1,8 +1,5 @@
 export default () => {
     return(`
-        .App * {#42FD86
-            box-sizing: border-box;
-        }
      
         :root {
             --base-bg-color: #000000;

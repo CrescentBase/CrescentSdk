@@ -2,11 +2,10 @@ import ConfigContext from './ConfigContext'
 import React, {useState} from 'react'
 
 export default (props)=>{
-    const [quantity, setQuantity] = useState(props.config.quantity || 1);
-    const isConfigQuantity = !!props.config.quantity;
+    const [mainVisible, setMainVisible] = useState(true);
 
     return(
-        <ConfigContext.Provider value={{...props.config, setQuantity, quantity, isConfigQuantity}}>
+        <ConfigContext.Provider value={{...props.config, mainVisible, setMainVisible}}>
             { props.children }
         </ConfigContext.Provider>
     )

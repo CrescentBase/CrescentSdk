@@ -1,3 +1,12 @@
 {
-  "login_with": "用邮箱登录"
+  "current_lng": "中文",
+  "language": "语言",
+  "change_password_up": "修改密码",
+  "change_password": "修改密码",
+  "settings": "设置",
+  "all_network": "所有",
+  "eth_etwork": "以太坊",
+  "polygon_network": "Polygon",
+  "arbitrum_network": "Arbitrum",
+  "bsc_network": "BSC"
 }

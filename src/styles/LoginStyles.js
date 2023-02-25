@@ -7,7 +7,6 @@ export default () => {
             display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
-            color: #939DA5;
             padding-left: 20px;
             padding-right: 20px;
         }

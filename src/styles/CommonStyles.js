@@ -37,17 +37,17 @@ export default ()=>{
         
         .justify-between {
             display: flex;
-             justify-content: space-between;
+            justify-content: space-between;
         }
         
         .align-start {
-             display: flex;
+            display: flex;
             align-items: flex-start;
         }
         
         .align-center {
-             display: flex;
-             align-items: center;
+            display: flex;
+            align-items: center;
         }
         
         .align-end {
@@ -55,5 +55,9 @@ export default ()=>{
              align-items: flex-end;
         }
 
+        .flex-full {
+            display: flex;
+            flex: 1;
+        }
   `)
 }

@@ -4,7 +4,7 @@ export default (props)=>{
 
     const { navigate } = useContext(NavigateContext);
     return (
-        <div>
+        <div className={'history'}>
             History
 
         </div>

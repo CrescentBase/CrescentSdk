@@ -7,6 +7,10 @@ import EntryStyles from "../styles/EntryStyles";
 import LoginStyles from "../styles/LoginStyles";
 import SetPwStyles from "../styles/SetPwStyles";
 import WidgetStyles from "../styles/WidgetStyles"
+import ChangePwStyles from "../styles/ChangePwStyles"
+import SettingStyles from "../styles/SettingStyles";
+import HistoryStyles from "../styles/HistoryStyles";
+import AssetStyles from "../styles/AssetStyles"
 
 function getStyle(style = '') {
     const allStyle = [
@@ -18,7 +22,11 @@ function getStyle(style = '') {
         FontStyle(),
         MainStyle(),
         WidgetStyles(),
+        ChangePwStyles(),
+        SettingStyles(),
         SelectEmailStyle(),
+        HistoryStyles(),
+        AssetStyles(),
         style
     ].join('');
     return trimStyle(allStyle);
