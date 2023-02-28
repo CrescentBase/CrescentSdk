@@ -71,7 +71,7 @@ export default () => {
         }
         
         .widget-textinput-edittext::placeholder {
-            color: var(--medium-color-4);
+            color: var(--medium-color-3);
         }
         
         .widget-textinput-edittext:focus {

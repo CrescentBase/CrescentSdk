@@ -65,6 +65,8 @@ export default (props)=>{
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
 
+    const walletAddress = '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
+
     const goTokens = async () => {
         navigate('Token')
     }
@@ -72,16 +74,6 @@ export default (props)=>{
     const goHistorys = async () => {
         navigate('History')
     }
-
-    const handleCopy = async (text) => {
-        // toggleSubbmitLoading();
-        // return;
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (err) {
-        }
-        showAddressCopied();
-    };
 
     function sleep(time){
         return new Promise((resolve)=>setTimeout(resolve,time)
@@ -103,7 +95,7 @@ export default (props)=>{
             let newData = [];
             const length = isSearch ? 2: 20;
             for (let i = 0; i < length; i++) {
-                newData.push({ name: "GRT" + i,
+                newData.push({ symbol: "GRT" + i,
                     logo: "https://www.sohamkamani.com/favicon/favicon.ico",
                     amount: i * 10,
                     balance: '$' + (i*20),
@@ -160,7 +152,7 @@ export default (props)=>{
                     </div>
                     <div className={'main-asset-item-token-left-layout'}>
                         <div className={'main-asset-item-token-name'}>
-                            {item.name}
+                            {item.symbol}
                         </div>
                         <div className={'main-asset-item-token-amount'}>
                             {item.amount}
@@ -201,9 +193,9 @@ export default (props)=>{
                         <div className={'main-title-email'}>
                             yyyyang@gmail.com
                         </div>
-                        <div className={'main-title-address-layout'} onClick={() => handleCopy('0x480eBa…a89C3')}>
+                        <div className={'main-title-address-layout'} onClick={() => showAddressCopied(walletAddress)}>
                             <div className={'main-title-address'}>
-                                0x480eBa…a89C351e
+                                {walletAddress.substring(0, 13) + "..." + walletAddress.substring(30)}
                             </div>
                             <img className={'main-title-address-copy-icon'} src={ic_copy}/>
                         </div>

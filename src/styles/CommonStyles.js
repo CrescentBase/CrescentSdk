@@ -59,5 +59,10 @@ export default ()=>{
             display: flex;
             flex: 1;
         }
+        
+        .flex-width-full {
+            display: flex;
+            width: 100%;
+        }
   `)
 }

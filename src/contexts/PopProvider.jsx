@@ -5,31 +5,48 @@ import {useTranslation} from "react-i18next";
 
 export default (props) => {
     const { t } = useTranslation();
-    const [addressCopied, setAddressCopied] = useState(false);
+    const [copiedPop, setCopiedPop] = useState(false);
+    const [isTxHash, setIsTxHash] = useState(false);
 
-    const showAddressCopied = () => {
-        setAddressCopied(true);
+    const showAddressCopied = (text) => {
+        try {
+            navigator.clipboard.writeText(text);
+        } catch (err) {
+        }
+        setIsTxHash(false);
+        setCopiedPop(true);
         setTimeout(() => {
-            setAddressCopied(false);
+            setCopiedPop(false);
         }, 2000);
     }
 
+    const showTxHashCopied = (text) => {
+        try {
+            navigator.clipboard.writeText(text);
+        } catch (err) {
+        }
+        setIsTxHash(true);
+        setCopiedPop(true);
+        setTimeout(() => {
+            setCopiedPop(false);
+        }, 2000);
+    }
 
-    const renderAddressCopied = () => {
+    const renderCopiedPop = () => {
         return (
             <div className={'pop-provider-address-copied-layout'}>
                 <img className={'pop-provider-address-copied-icon'} src={ic_success_white}/>
                 <div className={'pop-provider-address-copied-text'}>
-                    {t('address_copied')}
+                    {isTxHash ? t('hash_copied_to_clipboard') : t('address_copied')}
                 </div>
             </div>
         );
     }
 
     return (
-        <PopContext.Provider value={{ showAddressCopied }}>
+        <PopContext.Provider value={{ showAddressCopied, showTxHashCopied }}>
             {props.children}
-            {addressCopied && renderAddressCopied()}
+            {copiedPop && renderCopiedPop()}
         </PopContext.Provider>
     );
 };

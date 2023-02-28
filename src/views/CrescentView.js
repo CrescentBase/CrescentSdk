@@ -9,6 +9,9 @@ import Login from "./Login";
 import SetPassword from "./SetPassword";
 import ChangePassword from "./ChangePassword"
 import Setting from "./Setting";
+import Send from "./Send";
+import Receive from "./Receive";
+import OngoingTx from "./OngoingTx";
 
 export default (props) => {
 
@@ -27,7 +30,10 @@ export default (props) => {
         Login: <Login params={params} />,
         SetPassword: <SetPassword params={params} />,
         ChangePassword: <ChangePassword params={params} />,
-        Setting: <Setting params={params} />
+        Setting: <Setting params={params} />,
+        Send: <Send params={params} />,
+        Receive: <Receive params={params} />,
+        OngoingTx: <OngoingTx params={params} />
     }
 
     return (

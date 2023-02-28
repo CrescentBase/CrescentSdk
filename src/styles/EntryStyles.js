@@ -33,14 +33,13 @@ export default () => {
         .pop-provider-address-copied-layout {
             display: flex;
             flex-direction: column;
-            width: 155px;
-            height: 84px;
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
             background: var(--medium-color-1);
             justify-content: center;
             align-items: center;
             position: absolute;
+            padding: 16px 30px;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);

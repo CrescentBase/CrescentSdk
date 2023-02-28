@@ -1,6 +1,6 @@
 export default () => {
     return(`
-        .history {
+        .ongoingtx {
             height: 100%;
             display: flex;
             display: -webkit-flex;
@@ -10,7 +10,7 @@ export default () => {
             overflow: hidden;
         }
         
-        .history-base {
+        .ongoingtx-base {
             height: 100%;
             display: flex;
             display: -webkit-flex;
@@ -18,7 +18,7 @@ export default () => {
             position: relative;
         }
         
-        .history-tilte-layout {
+        .ongoingtx-tilte-layout {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -27,25 +27,25 @@ export default () => {
             align-self: flex-start;
         }
         
-        .history-title-back-icon {
+        .ongoingtx-title-back-icon {
             width: 24px;
             height: 24px;
         }
         
-        .history-title-text {
+        .ongoingtx-title-text {
             font-size: 16px;
             font-weight: 400;
             color: var(--system-color-4);
             line-height: 20px;
         }
         
-        .history-tilte-line {
+        .ongoingtx-tilte-line {
             background: var(--system-color-5);
             opacity: 1;
             height: 1px;
         }
         
-        .history-content-layout {
+        .ongoingtx-content-layout {
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -54,7 +54,7 @@ export default () => {
             overflow-x: hidden;
         }
         
-        .history-time-text {
+        .ongoingtx-time-text {
             font-size: 18px;
             font-weight: 600;
             color: var(--system-color-4);
@@ -63,7 +63,7 @@ export default () => {
             text-align: left;
         }
         
-        .hirtory-item-layout {
+        .ongoingtx-item-layout {
             padding: 16px;
             background: var(--medium-color-2);
             border-radius: 10px 10px 10px 10px;
@@ -72,25 +72,25 @@ export default () => {
             overflow: hidden;
         }
         
-        .history-item-row-layout {
+        .ongoingtx-item-row-layout {
             display: flex;
             align-items: center;
         }
         
-        .history-item-icon-layout {
+        .ongoingtx-item-icon-layout {
             position: relative;
             width: 42px;
             height: 36px;
         }
         
-        .history-item-icon {
+        .ongoingtx-item-icon {
             width: 36px;
             height: 36px;
             min-width: 36px;
             min-height: 36px;
         }
         
-        .history-item-chain-tag {
+        .ongoingtx-item-chain-tag {
             width: 18px;
             height: 18px;
             position: absolute;
@@ -98,14 +98,14 @@ export default () => {
             bottom: 2px;
         }
         
-        .history-item-symbol-layout {
+        .ongoingtx-item-symbol-layout {
             display: flex;
             flex-direction: column;
             margin-left: 8px;
             justify-content: center;
         }
         
-        .history-item-symbol {
+        .ongoingtx-item-symbol {
             font-size: 18px;
             font-weight: 600;
             color: var(--system-color-4);
@@ -113,64 +113,58 @@ export default () => {
             text-align: left;
         }
         
-        .history-item-from-address {
+        .ongoingtx-item-to-address {
             margin-top: 2px;
             font-size: 10px;
             font-weight: 400;
             color: var(--medium-color-3);
             line-height: 12px;
             text-align: left;
+            cursor: pointer;
         }
         
-        .history-item-amount-add {
+        .ongoingtx-item-amount-add {
             font-size: 18px;
             font-weight: 600;
             color: var(--function-color-1);
             line-height: 22px;
         }
         
-        .history-item-amount-reduce {
+        .ongoingtx-item-amount-reduce {
             font-size: 18px;
             font-weight: 600;
             color: var(--function-color-2);
             line-height: 22px;
         }
         
-        .history-item-txhash-layout {
+        .ongoingtx-item-txhash-layout {
             display: flex;
             margin-top: 17px;
             align-items: center;
         }
         
-        .history-item-txhash-icon {
+        .ongoingtx-item-txhash-icon {
             width: 16px;
             height: 16px;
-            margin-right: 8px;
         }
         
-        .history-item-txhash-text {
+        .ongoingtx-item-txhash-text {
             font-size: 12px;
             font-weight: 400;
             color: var(--medium-color-3);
             line-height: 16px;
             text-align: left;
+            margin-left: 8px;
         }
         
-        .history-item-copy-icon {
+        .ongoingtx-item-copy-icon {
             width: 12px;
             height: 12px;
             margin-left: 8px;
             cursor: pointer;
         }
         
-        .history-item-gas-layout {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            margin-top: 8px;
-        }
-        
-        .history-no-more-transactions {
+        .ongoingtx-no-more-transactions {
             font-size: 12px;
             font-weight: 400;
             color: rgba(147,157,165,0.6);
@@ -179,30 +173,5 @@ export default () => {
             margin-bottom: 20px;
             text-align: center;
         }
-        
-        .history-no-transaction-layout {
-            display: flex;
-            position: absolute;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .history-no-transaction-icon {
-            width: 84px;
-            height: 84px;
-        }
-        
-        .history-no-transaction-text {
-            font-size: 10px;
-            font-weight: 400;
-            color: var(--medium-color-3);
-            line-height: 12px;
-            margin-top: 4px;
-        }
-        
     `)
 }

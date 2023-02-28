@@ -44,6 +44,8 @@ export default () => {
         .asset-token-logo {
             width: 50px;
             height: 50px;
+            min-width: 50px;
+            min-height: 50px;
         }
         
         .asset-top-right-layout {

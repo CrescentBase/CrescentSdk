@@ -11,6 +11,9 @@ import ChangePwStyles from "../styles/ChangePwStyles"
 import SettingStyles from "../styles/SettingStyles";
 import HistoryStyles from "../styles/HistoryStyles";
 import AssetStyles from "../styles/AssetStyles"
+import ReceiveStyles from "../styles/ReceiveStyles"
+import SendStyles from "../styles/SendStyles"
+import OngoingTxStyles from "../styles/OngoingTxStyles";
 
 function getStyle(style = '') {
     const allStyle = [
@@ -27,6 +30,9 @@ function getStyle(style = '') {
         SelectEmailStyle(),
         HistoryStyles(),
         AssetStyles(),
+        ReceiveStyles(),
+        SendStyles(),
+        OngoingTxStyles(),
         style
     ].join('');
     return trimStyle(allStyle);

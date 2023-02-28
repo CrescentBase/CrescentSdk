@@ -8,5 +8,6 @@
   "eth_etwork": "以太坊",
   "polygon_network": "Polygon",
   "arbitrum_network": "Arbitrum",
-  "bsc_network": "BSC"
+  "bsc_network": "BSC",
+  "hash_copied_to_clipboard": "交易哈希已复制"
 }
