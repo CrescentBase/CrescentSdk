@@ -6,38 +6,137 @@
   <title>Development</title>
 
 <!--  <script src="./dist/umd/index.js"></script>-->
-  <script src="./dist/esm/index.bundle.js"></script>
+  <script src="./dist/umd/index.bundle.js"></script>
 
 </head>
-<body style="text-align: center;">
+<body style="text-align: center; margin: 0px; background-color: transparent">
 
-<div id="test">
-  <button id="btnPay" type="button">Buy</button>
+<div id="parent-id" style="display: flex; position: relative">
+  <div style="display: flex; position: absolute; justify-content: center" id="parent-div1"></div>
+  <div style="display: flex; position: absolute; justify-content: center" id="parent-div2"></div>
+<!--  <button id="btnPay" type="button" style="display: none">Buy</button>-->
 </div>
 
 <script>
-  const element = document.getElementById('test');
-  var button = document.getElementById("btnPay");
-  button.addEventListener("click",function(e){
-    button.style.display= "none";
 
-    let destroy;
+  function loadSelectEmail(params) {
+    const element = document.getElementById('parent-div2');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
     function onComplete(obj) {
-  //     console.log(obj.receiver, obj.order_id, obj.tx_hash, obj.chain_id, obj.quantity, obj.blockchain);
       destroy();
-  //     alert("payment success!!!");
-  //     button.style.display= "";
     }
 
-    destroy = CrescentSDK.CrescentEntry({
+    let paramMap  = !!params ? params : {};
+    const allParams = {
       container: element,
-      width: 350,
-      height: 350,
+      width: 360,
+      height: 360,
+      // style: '.MainSize {width: 350px; height: 350px} :root {--base-bg-color: #220000;  }',
+      language: 'zh',
+      onComplete,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.EmailEntry(allParams);
+  }
+
+  function loadLoading(params) {
+    const element = document.getElementById('parent-div2');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+    function onComplete(obj) {
+      destroy();
+    }
+
+    let paramMap  = !!params ? params : {};
+    const allParams = {
+      container: element,
+      width: 360,
+      height: 360,
+      language: 'zh',
+      onComplete,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.LoadingEntry(allParams);
+  }
+
+  function loadMain(params) {
+    const element = document.getElementById('parent-div1');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+
+    function removeLoading() {
+      const element2 = document.getElementById('parent-div2');
+      while (element2.firstChild) {
+        element2.removeChild(element2.firstChild);
+      }
+    }
+
+    function onComplete(obj) {
+      destroy();
+    }
+
+    let paramMap  = !!params ? params : {};
+    const allParams = {
+      container: element,
+      width: 360,
+      height: 360,
+      language: 'zh',
+      onComplete,
+      removeLoading,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.CrescentEntry(allParams);
+  }
+
+
+
+
+
+  // var button = document.getElementById("btnPay");
+
+  function initParams (params){
+    // button.style.display= "none";
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+
+
+    function onComplete(obj) {
+      //     console.log(obj.receiver, obj.order_id, obj.tx_hash, obj.chain_id, obj.quantity, obj.blockchain);
+      destroy();
+      //     alert("payment success!!!");
+      //     button.style.display= "";
+    }
+    //
+    // const jsonObject = JSON.parse(params);
+    // const keyMap = Object.keys(jsonObject).reduce((map, key) => {
+    //   map[key] = jsonObject[key];
+    //   return map;
+    // }, {});
+    //
+    // prompt("js4337://4377sdk?arg1=gmail&arg2=" + params);
+    // prompt("js4337://4377sdk?arg1=gmail&arg2=" + jsonObject);
+    // prompt("js4337://4377sdk?arg1=gmail&arg2=" + keyMap);
+
+    let kk  = !!params ? params : {};
+    const aa = {
+      container: element,
+      width: 360,
+      height: 360,
       style: '.MainSize {width: 350px; height: 350px} :root {--base-bg-color: #220000;  }',
       language: 'zh',
-      onComplete
-    });
-  });
+      onComplete,
+      ...kk
+    }
+
+    let destroy = CrescentSDK.EmailEntry(aa);
+  };
+  // initParams();
+  // button.addEventListener("click", func);
 </script>
 
 </body>

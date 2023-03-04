@@ -43,6 +43,7 @@ import {useTranslation} from "react-i18next";
 import {ChainType} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -62,17 +63,30 @@ export default (props)=>{
     const chainIconAlphas = [ic_card_all_alpha, ic_card_eth_alpha, ic_card_polygon_alpha, ic_card_arb_alpha, ic_card_bsc_alpha];
     const chainNames = [t('all_network'), t('eth_etwork'), t('polygon_network'), t('arbitrum_network'), t('bsc_network')];
 
+    const { platform } = useContext(ConfigContext);
+
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
 
     const walletAddress = '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
 
-    const goTokens = async () => {
-        navigate('Token')
+    const goAsset = async () => {
+        navigate('Asset')
     }
 
-    const goHistorys = async () => {
-        navigate('History')
+    const goHistory = async () => {
+        // fetch('https://apis.matic.network/api/v1/mumbai/block-included/1')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //
+        //
+        //         // Do something with the data
+        //     })
+        //     .catch(error => {
+        //         // Handle any errors
+        //     });
+
+        // navigate('History')
     }
 
     function sleep(time){
@@ -96,7 +110,7 @@ export default (props)=>{
             const length = isSearch ? 2: 20;
             for (let i = 0; i < length; i++) {
                 newData.push({ symbol: "GRT" + i,
-                    logo: "https://www.sohamkamani.com/favicon/favicon.ico",
+                    logo: "https://huobicfg.s3.amazonaws.com/currency_icon/ht.png",//https://www.sohamkamani.com/favicon/favicon.ico",
                     amount: i * 10,
                     balance: '$' + (i*20),
                     isNativeCurrency: (i%4 === 0)
@@ -141,9 +155,7 @@ export default (props)=>{
 
     const renderItem = (item) => {
         return (
-            <div className={'flex-col'} onClick={() => {
-                navigate('Asset')
-            }}>
+            <div className={'flex-col'} onClick={goAsset}>
                 <div className={'main-asset-item-layout'} onClick={() => {
                 }}>
                     <div className={'main-asset-item-icon-layout'}>
@@ -217,7 +229,7 @@ export default (props)=>{
                             <div className={'main-card-balance-text'}>
                                 $3,900.12
                             </div>
-                            <div className={'main-card-history-wrap-layout'} onClick={() => navigate('History')}>
+                            <div className={'main-card-history-wrap-layout'} onClick={() => goHistory()}>
                                 <img src={ic_history_black} className={'main-card-history-icon'}/>
                                 <div className={'main-card-history-text'}>
                                     {t('tx_history')}

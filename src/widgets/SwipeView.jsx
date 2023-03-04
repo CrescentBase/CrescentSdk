@@ -46,7 +46,7 @@ const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
 
     const animatedProps = useSpring({
         transform: 'translateX(' + swipeDistance +'px)',
-        config: { duration: 300 },
+        config: { duration: 150 },
     });
 
     return (

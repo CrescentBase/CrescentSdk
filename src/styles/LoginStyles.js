@@ -4,7 +4,6 @@ export default () => {
         .login {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             padding-left: 20px;

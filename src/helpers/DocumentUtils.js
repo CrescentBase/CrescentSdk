@@ -12,7 +12,7 @@ export const ensureDocument = (document) => {
 export const createContainer = (element, document, style) => {
     const container = document.createElement('div');
     // container.setAttribute('class', className);
-    container.setAttribute('style', trimStyle('height: 100%;width: 100%;display: flex;display: -webkit-flex;'));
+    container.setAttribute('style', trimStyle('height: 100%;width: 100%;display: flex;'));
     element.appendChild(container);
 
 

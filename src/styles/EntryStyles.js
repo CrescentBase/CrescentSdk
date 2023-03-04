@@ -4,14 +4,12 @@ export default () => {
             height: 100%;
             width: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             align-items: center;
         }
       
         .content {
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             position: relative;
             height: 100%;
@@ -23,7 +21,6 @@ export default () => {
         
         .content-inter {
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             position: relative;
             height: 100%;

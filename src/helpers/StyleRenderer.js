@@ -14,6 +14,7 @@ import AssetStyles from "../styles/AssetStyles"
 import ReceiveStyles from "../styles/ReceiveStyles"
 import SendStyles from "../styles/SendStyles"
 import OngoingTxStyles from "../styles/OngoingTxStyles";
+import CreateLoadingStyles from "../styles/CreateLoadingStyles";
 
 function getStyle(style = '') {
     const allStyle = [
@@ -33,6 +34,7 @@ function getStyle(style = '') {
         ReceiveStyles(),
         SendStyles(),
         OngoingTxStyles(),
+        CreateLoadingStyles(),
         style
     ].join('');
     return trimStyle(allStyle);

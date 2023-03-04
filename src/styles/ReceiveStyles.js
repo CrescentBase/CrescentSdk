@@ -3,7 +3,6 @@ export default () => {
         .receive {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             position: relative;
@@ -12,7 +11,6 @@ export default () => {
         .receive-base {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             position: relative;
         }
@@ -70,7 +68,7 @@ export default () => {
         .receive-only-send {
             font-size: 13px;
             font-weight: 400;
-            color: #939DA5;
+            color: var(--medium-color-3);
             line-height: 16px;
             color: var(--medium-color-3);
             margin-top: 24px;

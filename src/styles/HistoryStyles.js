@@ -3,7 +3,6 @@ export default () => {
         .history {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             position: relative;
@@ -13,7 +12,6 @@ export default () => {
         .history-base {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             position: relative;
         }
@@ -190,6 +188,7 @@ export default () => {
             top: 50%;
             transform: translate(-50%, -50%);
         }
+        
         
         .history-no-transaction-icon {
             width: 84px;

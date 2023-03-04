@@ -4,11 +4,9 @@ export default () => {
             height: 100%;
             width: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             align-items: center;
             background-color: var(--system-color-2);
-            color: #939DA5;
         }
       
         .select-email-logo {
@@ -22,7 +20,7 @@ export default () => {
             font-weight: 600;
             font-size: 14px;
             line-height: 20px;
-            color: #939DA5;
+            color: var(--medium-color-3);
             margin-top: 24px;
             margin-bottom: 8px;
         }
@@ -30,10 +28,19 @@ export default () => {
         .select-email-email-layout {
             width: 100%;
             flex: 1;
-            padding: 0px 20px 0px; 20px;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+        
+        .select-email-email-layout-inter {
+            width: 100%;
+            flex: 1;
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+            white-space: nowrap;
+            padding: 0px 20px 0px 20px;
         }
       
         .select-email-email-wrap {

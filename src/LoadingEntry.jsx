@@ -1,17 +1,15 @@
-import React, {useContext, useEffect, useState} from "react";
+import React from "react";
 import {createContainer, ensureDocument} from "./helpers/DocumentUtils";
 import {getStyle} from "./helpers/StyleRenderer";
 import ConfigProvider from "./contexts/ConfigProvider";
-import NavigateProvider from "./contexts/NavigateProvider";
-import PopProvider from "./contexts/PopProvider";
 import * as ReactDOMClient from "react-dom/client";
-import CrescentView from "./views/CrescentView";
 import i18n from "i18next";
 import {initReactI18next} from "react-i18next";
 import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
+import Loading from "./views/Loading";
 
-const CrescentEntry = (props) => {
+const EmailEntry = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
     const style = getStyle(props.style);
@@ -23,7 +21,6 @@ const CrescentEntry = (props) => {
     }
 
     const language = localStorage.getItem('language');
-
     if (!i18n.use(initReactI18next).isInitialized) {
         i18n.use(initReactI18next).init({
             lng: language || props.language || 'en', // 默认语言
@@ -45,13 +42,9 @@ const CrescentEntry = (props) => {
             <div className="App">
                 <div style={{width: props.width, height: props.height}}>
                     <div className={'content'} id={'crescent-content'}>
-                        <PopProvider>
-                            <div className={'content-inter'}>
-                                <NavigateProvider initView={props.initView || 'CreateLoading'}>
-                                    <CrescentView id={'CrescentViewId'}/>
-                                </NavigateProvider>
-                            </div>
-                        </PopProvider>
+                        <div className={'content-inter'}>
+                            <Loading />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -67,4 +60,4 @@ const CrescentEntry = (props) => {
     return unmount;
 }
 
-export default CrescentEntry;
+export default EmailEntry;

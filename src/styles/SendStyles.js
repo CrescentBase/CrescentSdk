@@ -3,7 +3,6 @@ export default () => {
         .send {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             position: relative;
@@ -13,7 +12,6 @@ export default () => {
         .send-base {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             position: relative;
         }

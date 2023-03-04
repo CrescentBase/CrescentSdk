@@ -4,7 +4,6 @@ export default () => {
             height: 100%;
             width: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             position: relative;

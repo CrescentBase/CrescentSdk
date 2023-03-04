@@ -78,5 +78,6 @@
   "no_more_transactions": "No more transactions",
   "hash_copied_to_clipboard": "Txn copied",
   "ongoing_tx": "Ongoing Tx",
-  "no_transaction_history": "No transaction history"
+  "no_transaction_history": "No transaction history",
+  "loading": "Loading..."
 }

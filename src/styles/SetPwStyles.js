@@ -4,7 +4,6 @@ export default () => {
         .setpw {
             height: 100%;
             display: flex;
-            display: -webkit-flex;
             flex-direction: column;
             background-color: var(--system-color-2);
             padding: 16px 20px 10px 20px;
