@@ -11,6 +11,7 @@ export default (props)=>{
     const { removeLoading, emailAccount } = useContext(ConfigContext);
 
     useEffect(() => {
+        localStorage.setItem('emailAccount', emailAccount);
         setTimeout(() => {
             navigate('SetPassword');
             removeLoading();

@@ -3,9 +3,13 @@ import NavigateContext from "../contexts/NavigateContext";
 import {ILocal } from '../locales/i18n'
 import TextInput from "../widgets/TextInput";
 import Button from "../widgets/Button";
+import {ethers} from "ethers";
+import {callToNativeMsg} from "../helpers/Utils";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const { platform } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
     const [password2, setPassword2] = useState("");
@@ -48,7 +52,21 @@ export default (props)=>{
             />
 
             <Button style={{marginTop: 24}} text={ILocal('next')} disable={password === '' || password2 === ''} onClick={() => {
-                setIsWrongPw2(true);
+                if (password.length < 6) {
+                    setIsWrongPw(true);
+                } else if (password !== password2) {
+                    setIsWrongPw2(true);
+                } else {
+                    const privateKey = localStorage.getItem('privateKey');
+                    const wallet = new ethers.Wallet(privateKey);
+                    const options = {scrypt: {N: 256}};
+                    wallet.encrypt(password, options).then((keystoreKey) => {
+                        localStorage.setItem('walletKeystore', keystoreKey);
+                        localStorage.removeItem("privateKey")
+                        navigate("Main");
+                        callToNativeMsg(keystoreKey, platform)
+                    });
+                }
             }}/>
         </div>
     );

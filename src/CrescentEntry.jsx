@@ -47,7 +47,7 @@ const CrescentEntry = (props) => {
                     <div className={'content'} id={'crescent-content'}>
                         <PopProvider>
                             <div className={'content-inter'}>
-                                <NavigateProvider initView={props.initView || 'CreateLoading'}>
+                                <NavigateProvider initView={props.initView || 'Login'}>
                                     <CrescentView id={'CrescentViewId'}/>
                                 </NavigateProvider>
                             </div>

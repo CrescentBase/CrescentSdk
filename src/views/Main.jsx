@@ -44,6 +44,7 @@ import {ChainType} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
+import {callToNativeMsg} from "../helpers/Utils";
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -56,6 +57,8 @@ export default (props)=>{
     const [showTransak, setShowTransak] = useState(false);
     const [transationLoading, setTransationLoading] = useState(false);
     const [transationStyle, setTransationStyle] = useSpring(() => ({ width: 0 }));
+    const [emailAccount, setEmailAccount] = useState('test@gmail.com');
+    const [address, setAddress] = useState('');
 
     const chainTypes = [ChainType.All, ChainType.Ethereum, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];
     const chainCards = [img_card_all, img_card_eth, img_card_polygon, img_card_arb, img_card_bsc];
@@ -68,7 +71,7 @@ export default (props)=>{
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
 
-    const walletAddress = '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
+    // const walletAddress = '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
 
     const goAsset = async () => {
         navigate('Asset')
@@ -100,6 +103,11 @@ export default (props)=>{
         const cardHeight = (width - 40) * 1.0 /319.0 * 100;
         setCardHeight(cardHeight);
         fetchData();
+
+        const address = localStorage.getItem("address");
+        const emailAccount = localStorage.getItem('emailAccount');
+        setAddress(address);
+        emailAccount && setEmailAccount(emailAccount);
     }, []);
 
     const fetchData = async () => {
@@ -203,11 +211,11 @@ export default (props)=>{
                 <div className={'main-title-layout'}>
                     <div className={'main-title-email-and-adrress-layout'}>
                         <div className={'main-title-email'}>
-                            yyyyang@gmail.com
+                            {emailAccount}
                         </div>
                         <div className={'main-title-address-layout'} onClick={() => showAddressCopied(walletAddress)}>
                             <div className={'main-title-address'}>
-                                {walletAddress.substring(0, 13) + "..." + walletAddress.substring(30)}
+                                {address.substring(0, 13) + "..." + address.substring(30)}
                             </div>
                             <img className={'main-title-address-copy-icon'} src={ic_copy}/>
                         </div>

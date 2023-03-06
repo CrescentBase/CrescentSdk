@@ -26,6 +26,7 @@ export default {
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {})
+    // 'secp256k1'
   ],
   plugins: [
     url(),
