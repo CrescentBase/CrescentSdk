@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
 import ic_back_white from "../assets/ic_back_white.png"
 import ic_address from "../assets/ic_address.png"
@@ -16,22 +16,10 @@ import PopContext from "../contexts/PopContext";
 export default (props)=>{
     const { showAddressCopied } = useContext(PopContext)
     const { navigate } = useContext(NavigateContext);
-
+    const asset = props.params.asset;
     const { t } = useTranslation();
-
     const [showAddressPop, setShowAddressPop] = useState(false);
 
-    const token = {
-        logo: 'https://www.sohamkamani.com/favicon/favicon.ico',
-        symbol: 'GRT',
-        chainType: ChainType.Bsc,
-        price: 12.33,
-        priceChange: -15.5,
-        balance: 57000.33652,
-        networth: 125311253122328,
-        address: '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5'
-    };
-   // , t('polygon_network'), t('arbitrum_network'), t('bsc_network')
     const chainTypeMap = {
         [ChainType.Ethereum]: {
             color: '#627EEA',
@@ -62,26 +50,26 @@ export default (props)=>{
                 <div className={'asset-tilte-line'}/>
                 <div className={'asset-content-layout'}>
                     <div className={'asset-top-layout'}>
-                        <img className={'asset-token-logo'} src={token.logo}/>
+                        <img className={'asset-token-logo'} src={asset.image}/>
                         <div className={'asset-top-right-layout'}>
                             <div className={'asset-tokenname-and-price'}>
                             <span className={'asset-token-name'}>
-                                {token.symbol}
+                                {asset.symbol}
                             </span>
-                                <img className={'asset-address-copy-icon'} src={ic_address} onClick={() => setShowAddressPop(true)}/>
+                                {!asset.nativeCurrency && <img className={'asset-address-copy-icon'} src={ic_address} onClick={() => setShowAddressPop(true)}/>}
                                 <div className={'flex-full'}/>
                                 <span className={'asset-token-price'}>
-                                ${token.price}
+                                {asset.price}
                             </span>
                             </div>
                             <div className={'asset-chain-and-price-change'}>
-                                <div className={'asset-chain-name'} style={{borderColor: chainTypeMap[token.chainType].color, color: chainTypeMap[token.chainType].color}}>
-                                    {chainTypeMap[token.chainType].name}
+                                <div className={'asset-chain-name'} style={{borderColor: chainTypeMap[asset.chainType].color, color: chainTypeMap[asset.chainType].color}}>
+                                    {chainTypeMap[asset.chainType].name}
                                 </div>
                                 <div className={'flex-full'}/>
-                                <div className={'asset-price-change-text'} style={token.priceChange < 0 ? {color: 'var(--function-color-2)'} : {}}>
-                                    <img className={'asset-price-change-icon'} src={token.priceChange < 0 ? ic_down : ic_up}/>
-                                    15.5%
+                                <div className={'asset-price-change-text'} style={asset.change24h < 0 ? {color: 'var(--function-color-2)'} : {}}>
+                                    <img className={'asset-price-change-icon'} src={asset.change24h < 0 ? ic_down : ic_up}/>
+                                    {asset.change24h}
                                 </div>
                             </div>
                         </div>
@@ -91,34 +79,34 @@ export default (props)=>{
                         {t('balance')}
                     </span>
                         <span className={'asset-balance'}>
-                        {token.balance}
+                        {asset.amount}
                     </span>
                         <div className={'flex-full'}/>
                         <span className={'asset-networth-tip'}>
                         {t('networth')}
                     </span>
                         <span className={'asset-networth'}>
-                        {token.networth}
+                        {asset.balanceFiatUsd}
                     </span>
 
                     <div className={'flex-full'}/>
                     <div className={'flex-full'}/>
                     <div className={'asset-action-layout'}>
-                        <div className={'asset-action-item-layout'}  onClick={() => navigate('Send')}>
+                        <div className={'asset-action-item-layout'}  onClick={() => navigate('Send', { asset})}>
                             <img className={'asset-action-icon'} src={ic_send}/>
                             <span className={'asset-action-text'}>
                             {t('send')}
                         </span>
                         </div>
                         <div style={{width: 12}}></div>
-                        <div className={'asset-action-item-layout'} onClick={() => navigate('Receive')}>
+                        <div className={'asset-action-item-layout'} onClick={() => navigate('Receive', { asset})}>
                             <img className={'asset-action-icon'} src={ic_receive}/>
                             <span className={'asset-action-text'}>
                             {t('receive')}
                         </span>
                         </div>
                         <div style={{width: 12}}></div>
-                        <div className={'asset-action-item-layout'} onClick={() => navigate('History')}>
+                        <div className={'asset-action-item-layout'} onClick={() => navigate('History', { asset, fromAsset: true})}>
                             <img className={'asset-action-icon'} src={ic_history}/>
                             <span className={'asset-action-text'}>
                             {t('tx_history')}
@@ -131,14 +119,14 @@ export default (props)=>{
             {showAddressPop && (
                 <div className={'asset-address-pop-layout'}>
                     <div className={'asset-address-pop-contract'}>
-                        {t('contract_address_colon')}
+                        {t('contract_address')}
                     </div>
                     <div className={'asset-address-pop-address-detail-layout'} onClick={() => {
-                        showAddressCopied(token.address);
+                        showAddressCopied(asset.tokenAddress);
                         setShowAddressPop(false);
                     }}>
                         <span className={'asset-address-pop-address-detail'}>
-                            {token.address ? token.address.substring(0, 13) + '...' + token.address.substring(30) : ''}
+                            {asset.tokenAddress ? asset.tokenAddress.substring(0, 13) + '...' + asset.tokenAddress.substring(30) : ''}
                         </span>
                         <img className={'asset-address-pop-address-copy-icon'} src={ic_copy}/>
                     </div>

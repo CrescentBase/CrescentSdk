@@ -40,16 +40,21 @@ import ic_close from "../assets/ic_close.png"
 import img_transak from "../assets/img_transak.png"
 
 import {useTranslation} from "react-i18next";
-import {ChainType} from "../helpers/Config";
+import {ChainType, NetworkConfig} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg} from "../helpers/Utils";
+import {renderAmount, renderShortValue, renderBalanceFiat} from "../helpers/number";
+import {ethers} from "ethers";
 
 export default (props)=>{
     const { t } = useTranslation();
     const [data, setData] = useState([]);
+    const [displayData, setDisplayData] = useState([]);
+    const [dataLoading, setDataLoading] = useState(true);
     const [cardHeight, setCardHeight] = useState(0);
+    const [displayBalanceFait, setDisplayBalanceFait] = useState(0);
     const [currentChainType, setCurrentChainType] = useState(ChainType.All);
     const [searchText, setSearchText] = useState('');
     const [isSearch, setIsSearch] = useState(false);
@@ -68,68 +73,97 @@ export default (props)=>{
 
     const { platform } = useContext(ConfigContext);
 
-    const { navigate } = useContext(NavigateContext);
+    const { navigate, navigator } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
 
-    // const walletAddress = '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
+    const [initLoaded, setInitLoaded] = useState(false);
 
-    const goAsset = async () => {
-        navigate('Asset')
+    const goAsset = (item) => {
+        navigate('Asset', { asset: item });
     }
 
     const goHistory = async () => {
-        // fetch('https://apis.matic.network/api/v1/mumbai/block-included/1')
-        //     .then(response => response.json())
-        //     .then(data => {
-        //
-        //
-        //         // Do something with the data
-        //     })
-        //     .catch(error => {
-        //         // Handle any errors
-        //     });
-
-        // navigate('History')
-    }
-
-    function sleep(time){
-        return new Promise((resolve)=>setTimeout(resolve,time)
-        )
+        navigate('History');
     }
 
     useEffect(() => {
-        var element = document.getElementById("crescent-content");
-        var width = element.clientWidth;
-        const cardHeight = (width - 40) * 1.0 /319.0 * 100;
-        setCardHeight(cardHeight);
-        fetchData();
+        if (navigator === "Main" && !initLoaded) {
+            setInitLoaded(true);
+            var element = document.getElementById("crescent-content");
+            var width = element.clientWidth;
+            const cardHeight = (width - 40) * 1.0 /319.0 * 100;
+            setCardHeight(cardHeight);
+            const address = localStorage.getItem("address");
+            const emailAccount = localStorage.getItem('emailAccount');
+            setAddress(address);
+            emailAccount && setEmailAccount(emailAccount);
+            fetchData();
+        }
+    }, [navigator]);
 
-        const address = localStorage.getItem("address");
-        const emailAccount = localStorage.getItem('emailAccount');
-        setAddress(address);
-        emailAccount && setEmailAccount(emailAccount);
-    }, []);
+    const loadDisplayData = (allData, type) => {
+        let balanceFait = 0;
+        if (type === ChainType.All) {
+            allData.map((item, index) => {
+                balanceFait = balanceFait + item.balanceFiat;
+            })
+
+            setDisplayBalanceFait("$" + renderShortValue(balanceFait));
+            setDisplayData(allData);
+        } else {
+            let displayData = [];
+            allData.map((item, index) => {
+                if (item.chainType === type) {
+                    displayData.push(item);
+                    balanceFait = balanceFait + item.balanceFiat;
+                }
+            })
+            setDisplayBalanceFait("$" + renderShortValue(balanceFait));
+            setDisplayData(displayData);
+        }
+    }
 
     const fetchData = async () => {
-        try {
-            // const response = await fetch(`/api/data?page=${this.state.currentPage}`);
-            // const newData = await response.json();
-            let newData = [];
-            const length = isSearch ? 2: 20;
-            for (let i = 0; i < length; i++) {
-                newData.push({ symbol: "GRT" + i,
-                    logo: "https://huobicfg.s3.amazonaws.com/currency_icon/ht.png",//https://www.sohamkamani.com/favicon/favicon.ico",
-                    amount: i * 10,
-                    balance: '$' + (i*20),
-                    isNativeCurrency: (i%4 === 0)
-                });
+        setDataLoading(true);
+        let chainIds = "[";
+        chainTypes.map((item, index) => {
+            if (item != ChainType.All) {
+                chainIds += (NetworkConfig[item].MainChainId + ",");
             }
-            setData(newData);
-
-        } catch (error) {
-            console.error(error);
-        } finally {
-        }
+        })
+        chainIds = chainIds.substring(0, chainIds.length - 1);
+        chainIds += "]";
+        fetch('http://192.168.2.117:7017/api/v1/getAssets?address=0x6c3f14da26556585706c02af737a44e67dc6954d&chainIds=' + chainIds + '&rate=usd&offset=0&count=200')
+            .then(response => response.json())
+            .then(data => {
+                const tokens = data.data;
+                if (!tokens || tokens.length === 0) {
+                    setData([]);
+                    return;
+                }
+                const assets = [];
+                tokens.map((item, index) => {
+                    const amount = renderAmount(item.balances, item.decimals);
+                    const balanceFiat = Number(renderBalanceFiat(item.balances, item.decimals, item.price));
+                    const balanceFiatUsd = "$" + renderBalanceFiat(item.balances, item.decimals, item.price);
+                    const nativeCurrency = item.tokenAddress === "0x0";
+                    let chainType = ChainType.Ethereum;
+                    chainTypes.map((type, index) => {
+                        if (type != ChainType.All) {
+                            if (String(NetworkConfig[type].MainChainId) === String(item.chainId)) {
+                                chainType = type;
+                            }
+                        }
+                    })
+                    assets.push({...item, amount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
+                })
+                setDataLoading(false);
+                loadDisplayData(assets, ChainType.All);
+                setData(assets);
+            }).catch(error => {
+                console.log(error)
+                setDataLoading(false);
+            });
     };
 
     const toastWalletCreated = () => {
@@ -163,12 +197,12 @@ export default (props)=>{
 
     const renderItem = (item) => {
         return (
-            <div className={'flex-col'} onClick={goAsset}>
+            <div className={'flex-col'} onClick={() => goAsset(item)}>
                 <div className={'main-asset-item-layout'} onClick={() => {
                 }}>
                     <div className={'main-asset-item-icon-layout'}>
-                        <img className={'main-asset-item-icon'} src={item.logo}/>
-                        <img className={'main-asset-item-chain-tag'} src={ic_eth_tag}/>
+                        <img className={'main-asset-item-icon'} src={item.image}/>
+                        <img className={'main-asset-item-chain-tag'} src={NetworkConfig[item.chainType].tag}/>
                     </div>
                     <div className={'main-asset-item-token-left-layout'}>
                         <div className={'main-asset-item-token-name'}>
@@ -180,7 +214,7 @@ export default (props)=>{
                     </div>
                     <div className={'flex-full'}/>
                     <div className={'main-asset-item-token-balance'}>
-                        {item.balance}
+                        {item.balanceFiatUsd}
                     </div>
                 </div>
                 <div className={'main-asset-item-line'}/>
@@ -190,7 +224,7 @@ export default (props)=>{
 
     const renderItemAction = (item) => {
         const isAdd = false;
-        const isEnable = item.isNativeCurrency;
+        const isEnable = item.nativeCurrency;
         return (
             <div className={'main-asset-item-action-base-layout'} onClick={() => {
             }}>
@@ -213,7 +247,7 @@ export default (props)=>{
                         <div className={'main-title-email'}>
                             {emailAccount}
                         </div>
-                        <div className={'main-title-address-layout'} onClick={() => showAddressCopied(walletAddress)}>
+                        <div className={'main-title-address-layout'} onClick={() => showAddressCopied(address)}>
                             <div className={'main-title-address'}>
                                 {address.substring(0, 13) + "..." + address.substring(30)}
                             </div>
@@ -235,7 +269,7 @@ export default (props)=>{
                     <div className={'main-card-content'} style={{height: cardHeight}}>
                         <div className={'main-card-top-layout'}>
                             <div className={'main-card-balance-text'}>
-                                $3,900.12
+                                {displayBalanceFait}
                             </div>
                             <div className={'main-card-history-wrap-layout'} onClick={() => goHistory()}>
                                 <img src={ic_history_black} className={'main-card-history-icon'}/>
@@ -247,7 +281,10 @@ export default (props)=>{
                         <div className={'main-card-chain-layout'}>
                             {chainTypes.map((item, index) => {
                                 return (
-                                    <div className={'main-card-chain-item-layout'} onClick={() => setCurrentChainType(item)}>
+                                    <div className={'main-card-chain-item-layout'} onClick={() => {
+                                        loadDisplayData(data, item);
+                                        setCurrentChainType(item)
+                                    }}>
                                         <img className={'main-card-chain-logo'} src={currentChainType === item ? chainIcons[index] : chainIconAlphas[index]}/>
                                         <div className={'main-card-chain-name'}>{currentChainType === item ? chainNames[index] : '  '}</div>
                                     </div>
@@ -287,16 +324,7 @@ export default (props)=>{
                     </div>
                 )}
 
-                {data.length > 0 ? (
-                    data.map((item, index) => (
-                        <SwipeView btnWidth={42} rowRenderer={renderItem(item)} actionBtn={renderItemAction(item)} key={'swipeview' + index}/>
-                    ))
-                ) : isSearch ? (
-                    <div className={'main-search-empty-data'}>
-                        <img src={img_empty_search} className={'main-search-empty-icon'}/>
-                        <div className={'main-search-empty-tip'}>{t('no_token_found')}</div>
-                    </div>
-                ) : (
+                {dataLoading ? (
                     <Lottie style={{marginTop: 32}} options={{
                         loop: true,
                         autoplay: true,
@@ -308,6 +336,15 @@ export default (props)=>{
                             height={48}
                             width={48}
                     />
+                ) : displayData.length > 0 ? (
+                    displayData.map((item, index) => (
+                        <SwipeView btnWidth={42} rowRenderer={renderItem(item)} actionBtn={renderItemAction(item)} key={'swipeview' + index}/>
+                    ))
+                ) : (
+                    <div className={'main-search-empty-data'}>
+                        <img src={img_empty_search} className={'main-search-empty-icon'}/>
+                        <div className={'main-search-empty-tip'}>{t('no_token_found')}</div>
+                    </div>
                 )}
             </div>
 

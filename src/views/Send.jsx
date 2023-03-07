@@ -18,33 +18,23 @@ import ReactSlider from "../widgets/ReactSlider";
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate } = useContext(NavigateContext);
-    const [step, setStep] = useState(2);
+    const [step, setStep] = useState(1);
     const [gasPageIndex, setGasPageIndex] = useState(0);
     const [addressCorrect, setAddressCorrect] = useState(false);
-    const [addressInput, setAddressInput] = useState('0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5');
+    const [addressInput, setAddressInput] = useState('');
     const [balanceInput, setBalanceInput] = useState('');
     const [dollerInput, setDollerInput] = useState('');
     const [gasPrice, setGasPrice] = useState('');
     const [gasLimit, setGasLimit] = useState('');
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
-    const [gasSpeedSelected, setGasSpeedSelected] =  useState(currentChainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
-    const middleSpeed = currentChainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
+
+    const asset = props.params.asset;
+    const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
+    const middleSpeed = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
 
     const { t } = useTranslation();
-
-    const currentChainType = ChainType.Ethereum
     const chainName = 'Ethereum';
-    const token = {
-        logo: 'https://www.sohamkamani.com/favicon/favicon.ico',
-        symbol: 'GRT',
-        chainType: ChainType.Bsc,
-        price: 12.33,
-        priceChange: -15.5,
-        balance: 57000.33652,
-        networth: 125311253122328,
-        address: '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5'
-    };
 
     const inputAddressChange = (text) => {
         setAddressInput(text);
@@ -181,7 +171,7 @@ export default (props)=>{
     return (
         <div className={'send'}>
             <div className={'send-base'}>
-                <div className={'send-tilte-layout'} onClick={() => navigate('Asset')}>
+                <div className={'send-tilte-layout'} onClick={() => navigate('Asset', { asset })}>
                     <img className={'send-title-back-icon'} src={ic_back_white} />
                     <span className={'send-title-text'}>
                         {t('send')}
@@ -243,7 +233,7 @@ export default (props)=>{
                                 </span>
                             </div>
                             <div className={'send-input-token-layout'}>
-                                <img className={'send-input-token-icon'} src={token.symbol}/>
+                                <img className={'send-input-token-icon'} src={asset.symbol}/>
                                 <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
                                 <span className={'send-input-token-max'} onClick={() => {
                                     setBalanceInput(1000);

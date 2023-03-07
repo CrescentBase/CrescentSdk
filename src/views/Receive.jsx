@@ -5,15 +5,14 @@ import Button from "../widgets/Button";
 import PopContext from "../contexts/PopContext";
 import {ChainType} from "../helpers/Config";
 import {useTranslation} from "react-i18next";
+import {getTokenName} from "../helpers/number";
 
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext)
 
-    const address = props.address || '0x7b319aa22Ef7827896dDAbB3bd4b6b046C8170e5';
-    const name = "GRT";
-    const chainType = ChainType.Ethereum;
+    const asset = props.params.asset;
 
     const chanTypeMap = {
         [ChainType.Ethereum]: {
@@ -30,10 +29,19 @@ export default (props)=>{
         },
     }
 
+    const getAddrStr = () => {
+        const chainType = asset.chainType ? asset.chainType : ChainType.Ethereum;
+        if (asset.nativeCurrency) {
+            return '';
+        }
+        const addr = getTokenName(chainType)
+        return '(' + addr + ')';
+    };
+
     return (
         <div className={'receive'}>
             <div className={'receive-base'}>
-                <div className={'receive-tilte-layout'} onClick={() => navigate('Asset')}>
+                <div className={'receive-tilte-layout'} onClick={() => navigate('Asset', { asset })}>
                     <img className={'receive-title-back-icon'} src={ic_back_white} />
                     <span className={'receive-title-text'}>
                         {t('receive')}
@@ -47,7 +55,7 @@ export default (props)=>{
                     </span>
 
                     <span className={'receive-address-text'}>
-                        {address ? address.substring(0, 13) + '...' + address.substring(30) : ''}
+                        {asset.account.substring(0, 13) + '...' + asset.account.substring(30)}
                     </span>
 
                     <span className={'receive-only-send'}>
@@ -55,7 +63,7 @@ export default (props)=>{
                     </span>
 
                     <div className={'receive-chain'}>
-                        {t('token_on_chain', {tokenName: name, chainName: chanTypeMap[chainType].name})}
+                        {t('token_on_net', {symbol: asset.symbol, chain: chanTypeMap[asset.chainType].name, addr: getAddrStr()})}
                     </div>
 
                     <span className={'receive-to-this-address'}>
@@ -64,7 +72,7 @@ export default (props)=>{
 
                     <div className={'flex-width-full'}>
                         <Button text={t('copy_address')} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {
-                            showAddressCopied(address);
+                            showAddressCopied(asset.account);
                         }}/>
                     </div>
 

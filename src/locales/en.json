@@ -49,7 +49,7 @@
   "my_wallet_address": "My Wallet Address",
   "only_send": "Only send",
   "to_this_address": "to this address",
-  "token_on_chain": "{{tokenName}}(ERC20 on {{chainName}})",
+  "token_on_net": "{{symbol}}{{addr}} on {{chain}}",
   "recipient": "Recipient",
   "address": "Address",
   "paste": "PASTE",
@@ -79,5 +79,6 @@
   "hash_copied_to_clipboard": "Txn copied",
   "ongoing_tx": "Ongoing Tx",
   "no_transaction_history": "No transaction history",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "contract_address": "Contract Address:"
 }

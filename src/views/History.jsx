@@ -15,6 +15,7 @@ export default (props)=>{
     const { showTxHashCopied } = useContext(PopContext)
 
     const isEmpty = false;
+    const asset = props.params.asset;
 
     const token1 = {
         isTime: true,
@@ -155,7 +156,13 @@ export default (props)=>{
     return (
         <div className={'history'}>
             <div className={'history-base'}>
-                <div className={'history-tilte-layout'} onClick={() => navigate('Asset')}>
+                <div className={'history-tilte-layout'} onClick={() => {
+                    if (props.params.fromAsset) {
+                        navigate('Asset', { asset: asset })
+                    } else {
+                        navigate('Main')
+                    }
+                }}>
                     <img className={'history-title-back-icon'} src={ic_back_white} />
                     <span className={'history-title-text'}>
                         {t('transaction_history')}
