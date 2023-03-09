@@ -6,28 +6,14 @@ import PopContext from "../contexts/PopContext";
 import {ChainType} from "../helpers/Config";
 import {useTranslation} from "react-i18next";
 import {getTokenName} from "../helpers/number";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext)
-
+    const { NetworkConfig } = useContext(ConfigContext);
     const asset = props.params.asset;
-
-    const chanTypeMap = {
-        [ChainType.Ethereum]: {
-            name: t('eth_etwork')
-        },
-        [ChainType.Arbitrum]: {
-            name: t('arbitrum_network')
-        },
-        [ChainType.Polygon]: {
-            name: t('polygon_network')
-        },
-        [ChainType.Bsc]: {
-            name: t('bsc_network')
-        },
-    }
 
     const getAddrStr = () => {
         const chainType = asset.chainType ? asset.chainType : ChainType.Ethereum;
@@ -63,7 +49,7 @@ export default (props)=>{
                     </span>
 
                     <div className={'receive-chain'}>
-                        {t('token_on_net', {symbol: asset.symbol, chain: chanTypeMap[asset.chainType].name, addr: getAddrStr()})}
+                        {t('token_on_net', {symbol: asset.symbol, chain: NetworkConfig[asset.chainType].name, addr: getAddrStr()})}
                     </div>
 
                     <span className={'receive-to-this-address'}>

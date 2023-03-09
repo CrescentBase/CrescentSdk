@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useSpring, animated } from 'react-spring';
 
-const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
-    const [swipeDistance, setSwipeDistance] = React.useState(0);
+const SwipeView = (props) => {
+    const [swipeDistance, setSwipeDistance] = useState(0);
     let startX = 0;
     let startY = 0;
     let deltaX = 0;
+
+    useEffect(() => {
+        if (props.swipeKey !== props.id && swipeDistance != 0) {
+            console.log('====swipeDistance = ', swipeDistance);
+            setSwipeDistance(0);
+        }
+    }, [props.swipeKey]);
 
     const handleTouchStart = (event) => {
         deltaX = 0;
@@ -15,7 +22,6 @@ const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
         startY = touch.clientY;
         event.target.addEventListener('touchmove', handleTouchMove);
         event.target.addEventListener('touchend', handleTouchEnd);
-
     };
 
     const handleTouchMove = (event) => {
@@ -23,8 +29,8 @@ const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
         deltaX = touch.clientX - startX;
         const deltaY = touch.clientY - startY;
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (deltaX < -btnWidth && Math.abs(deltaY) < 10) {
-                deltaX = -btnWidth;
+            if (deltaX < -props.btnWidth && Math.abs(deltaY) < 10) {
+                deltaX = -props.btnWidth;
             } else if (deltaX > 0){
                 deltaX = 0;
             }
@@ -38,7 +44,8 @@ const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
         event.target.removeEventListener('touchmove', handleTouchMove);
         event.target.removeEventListener('touchend', handleTouchEnd);
         if (deltaX < -30) {
-            setSwipeDistance(-btnWidth);
+            setSwipeDistance(-props.btnWidth);
+            props.swipe(props.id);
         } else {
             setSwipeDistance(0);
         }
@@ -51,13 +58,22 @@ const SwipeView = ({ rowRenderer, actionBtn, btnWidth }) => {
 
     return (
         <div style={{position: 'relative', width: '100%'}}>
-            <div style={{position: 'absolute', right: 0, width: btnWidth}} onClick={() => {
+            <div style={{position: 'absolute', right: 0, width: props.btnWidth}} onClick={() => {
                 setSwipeDistance(0);
+                props.onClickAction();
             }}>
-                {actionBtn}
+                {props.actionBtn}
             </div>
-            <animated.div onTouchStart={handleTouchStart} style={{...animatedProps}}>
-                {rowRenderer}
+            <animated.div onTouchStart={handleTouchStart} style={{...animatedProps}} onClick={() => {
+                console.log('==swipeDistance = ', swipeDistance);
+                if (props.swipeKey === props.id) {
+                    setSwipeDistance(0);
+                    props.swipe('');
+                } else {
+                    props.onClickItem();
+                }
+            }}>
+                {props.rowRenderer}
             </animated.div>
         </div>
     );

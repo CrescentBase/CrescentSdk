@@ -8,36 +8,17 @@ import ic_send from "../assets/ic_send.png"
 import ic_receive from "../assets/ic_receive.png"
 import ic_history from "../assets/ic_history.png"
 import ic_copy from "../assets/ic_copy.png"
-
-import {ChainType} from "../helpers/Config";
 import {useTranslation} from "react-i18next";
 import PopContext from "../contexts/PopContext";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { showAddressCopied } = useContext(PopContext)
     const { navigate } = useContext(NavigateContext);
+    const { NetworkConfig } = useContext(ConfigContext);
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
-
-    const chainTypeMap = {
-        [ChainType.Ethereum]: {
-            color: '#627EEA',
-            name: t('eth_etwork')
-        },
-        [ChainType.Arbitrum]: {
-            color: '#23A1F0',
-            name: t('arbitrum_network')
-        },
-        [ChainType.Polygon]: {
-            color: '#8247E5',
-            name: t('polygon_network')
-        },
-        [ChainType.Bsc]: {
-            color: '#FEBF27',
-            name: t('bsc_network')
-        },
-    }
 
     return (
         <div className={'asset'}>
@@ -63,14 +44,16 @@ export default (props)=>{
                             </span>
                             </div>
                             <div className={'asset-chain-and-price-change'}>
-                                <div className={'asset-chain-name'} style={{borderColor: chainTypeMap[asset.chainType].color, color: chainTypeMap[asset.chainType].color}}>
-                                    {chainTypeMap[asset.chainType].name}
+                                <div className={'asset-chain-name'} style={{borderColor: NetworkConfig[asset.chainType].color, color: NetworkConfig[asset.chainType].color}}>
+                                    {NetworkConfig[asset.chainType].displayName}
                                 </div>
                                 <div className={'flex-full'}/>
-                                <div className={'asset-price-change-text'} style={asset.change24h < 0 ? {color: 'var(--function-color-2)'} : {}}>
-                                    <img className={'asset-price-change-icon'} src={asset.change24h < 0 ? ic_down : ic_up}/>
-                                    {asset.change24h}
-                                </div>
+                                {asset.price !== null && (
+                                    <div className={'asset-price-change-text'} style={asset.change24h < 0 ? {color: 'var(--function-color-2)'} : {}}>
+                                        <img className={'asset-price-change-icon'} src={asset.change24h < 0 ? ic_down : ic_up}/>
+                                        {asset.change24h}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

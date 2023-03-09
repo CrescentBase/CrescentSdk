@@ -14,10 +14,13 @@ import {ChainType} from "../helpers/Config";
 import {isValidAddress} from "../helpers/Utils";
 import {animated, useSpring} from 'react-spring';
 import ReactSlider from "../widgets/ReactSlider";
+import ConfigContext from "../contexts/ConfigContext";
+import {getTokenName} from "../helpers/number";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate } = useContext(NavigateContext);
+    const { NetworkConfig } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
     const [gasPageIndex, setGasPageIndex] = useState(0);
     const [addressCorrect, setAddressCorrect] = useState(false);
@@ -28,13 +31,10 @@ export default (props)=>{
     const [gasLimit, setGasLimit] = useState('');
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
-
     const asset = props.params.asset;
     const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
     const middleSpeed = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
-
     const { t } = useTranslation();
-    const chainName = 'Ethereum';
 
     const inputAddressChange = (text) => {
         setAddressInput(text);
@@ -71,9 +71,26 @@ export default (props)=>{
         inputAddressChange(text);
     };
 
+    const readClipboardText = async() => {
+        try {
+            const text = await navigator.clipboard.readText();
+            return text;
+        } catch (err) {
+            console.error('Failed to read clipboard contents:', err);
+            // Provide a fallback method for reading the clipboard contents
+            const textarea = document.createElement('textarea');
+            document.body.appendChild(textarea);
+            textarea.focus();
+            document.execCommand('paste');
+            const text = textarea.value;
+            document.body.removeChild(textarea);
+            return text;
+        }
+    }
+
     const handleClipboardRead = async () => {
         try {
-            const clipboardData = await navigator.clipboard.readText();
+            const clipboardData = await readClipboardText();
             inputAddressChange(clipboardData);
         } catch (err) {
             console.error("Failed to read clipboard contents: ", err);
@@ -167,6 +184,27 @@ export default (props)=>{
         opacity: gasPageIndex === 1 ? 1 : 0,
         config: { duration: 300 },
     });
+    const getFromToken = () => {
+        if (asset.nativeCurrency) {
+            return asset.symbol;
+        }
+        const addr = getTokenName(asset.type);
+        return asset.symbol + '(' + addr + ')';
+    };
+
+    const getToToken = () => {
+        if (asset.nativeCurrency) {
+            if (asset.type === ChainType.Ethereum) {
+                if (asset.chainType === ChainType.Polygon) {
+                    return 'WETH';
+                }
+            }
+            return asset.symbol;
+        }
+
+        const addr = getTokenName(asset.chainType);
+        return asset.symbol + '(' + addr + ')';
+    };
 
     return (
         <div className={'send'}>
@@ -215,13 +253,13 @@ export default (props)=>{
                                 {t('to_network')}
                             </span>
                             <div className={'send-chain'}>
-                                {chainName}
+                                {NetworkConfig[asset.chainType].displayName}
                             </div>
                             <span className={'send-will-receive-tip'}>
                                 {t('send_note', {
-                                    fromToken: "GRT(ERC20)",//this.getFromToken(),
-                                    network: "BSC",//getChainTypeName(asset.type),
-                                    toToken: "GRT(BEP20)"//this.getToToken()
+                                    fromToken: getFromToken(),
+                                    network: NetworkConfig[asset.type].displayName,
+                                    toToken: getToToken()
                                 })}
                             </span>
                             <div className={'send-amount-layout'}>
@@ -229,14 +267,14 @@ export default (props)=>{
                                     {t('amount')}
                                 </span>
                                 <span className={'send-amount-available-text'}>
-                                    {t('amount_available', { amount: 1000 })}
+                                    {t('amount_available', { amount: asset.amount })}
                                 </span>
                             </div>
                             <div className={'send-input-token-layout'}>
-                                <img className={'send-input-token-icon'} src={asset.symbol}/>
+                                <img className={'send-input-token-icon'} src={asset.image}/>
                                 <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
                                 <span className={'send-input-token-max'} onClick={() => {
-                                    setBalanceInput(1000);
+                                    setBalanceInput(asset.amount);
                                 }}>
                                     {t('max')}
                                 </span>
@@ -265,7 +303,7 @@ export default (props)=>{
                                     {t('to')}
                                 </span>
                                 <span className={'send-step2-chain'}>
-                                    {chainName}
+                                    {NetworkConfig[asset.chainType].displayName}
                                 </span>
                             </div>
                             <span className={'send-step2-address-text'}>
