@@ -31,10 +31,12 @@ import ConfigContext from "../contexts/ConfigContext";
 import {callUrlToNative} from "../helpers/Utils";
 import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
 import {ethers} from "ethers";
-import {estimateGas} from "../helpers/custom-gas";
+import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
+import BigNumber from 'bignumber.js';
 const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
 const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
 export const LOCAL_STORAGE_ONGOING_INFO = "storage_ongoin_info";
+
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -68,14 +70,32 @@ export default (props)=>{
         navigate('History');
     }
 
+    // decGWEI =  0.3
+    // index.bundle.js:58 ===wei =  BigNumber$1 {_hex: '0x11e1a300', _isBigNumber: true}
     useEffect(async () => {
-        estimateGas(null);
-        const provider = new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com');
-
-// 调用 eth_gasPrice 方法获取最大优先费用
-        const maxPriorityFeePerGas = await provider.getFeeData();
-        console.log('Max Priority Fee Per Gas: ', maxPriorityFeePerGas);
+        // const gwei = ethers.utils.parseEther(String(0.3)).div(1000000000); //decGWEI有小数点的时候奔溃
+        // console.log('==gwei = ', gwei);
+        // const wei = ethers.BigNumber.from(gwei);
+        // console.log('===wei = ', wei.toString());
         //
+        // const a = ethers.BigNumber.from('100');
+        // console.log('===a = ', a);
+        // const d = a.mul(2);
+        // console.log('===d= ', d.toString());
+
+        // const Ethereum = await getSuggestedGasEstimates(ChainType.Ethereum);
+        // console.log('==Ethereum = ', Ethereum);
+        //
+        // const Polygon = await getSuggestedGasEstimates(ChainType.Polygon);
+        // console.log('==Polygon = ', Polygon);
+        //
+        // const Bsc = await getSuggestedGasEstimates(ChainType.Bsc);
+        // console.log('==Bsc = ', Bsc);
+        //
+        // const Arbitrum = await getSuggestedGasEstimates(ChainType.Arbitrum);
+        // console.log('==Arbitrum = ', Arbitrum);
+
+        //x
         // const { rpcTarget, chainId, ticker, nickname } = NetworkConfig[ChainType.Bsc].Networks['BSC Mainnet'].provider;
         // let provider;
         // console.log(rpcTarget, nickname);

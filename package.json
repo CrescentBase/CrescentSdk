@@ -32,7 +32,7 @@
     "build": "rm -rf dist && npx rollup --config rollup.module.config.js && npx rollup --config rollup.bundle.config.js"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.2",
+    "bignumber.js": "^9.1.1",
     "copy-to-clipboard": "^3.3.1",
     "ethers": "^5.6.5",
     "human-standard-token-abi": "^2.0.0",

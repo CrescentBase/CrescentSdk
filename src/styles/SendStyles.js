@@ -432,5 +432,12 @@ export default () => {
             border-radius: 3px;
         }
         
+        .send-load-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
     `)
 }

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import ic_back_white from "../assets/ic_back_white.png"
 import ic_clear from "../assets/ic_clear.png"
 import ic_correct from "../assets/ic_correct.png"
@@ -10,32 +10,249 @@ import slider_dot from '../assets/slider_dot.png'
 import NavigateContext from "../contexts/NavigateContext";
 import {useTranslation} from "react-i18next";
 import Button from "../widgets/Button";
-import {ChainType, NetworkConfig} from "../helpers/Config";
+import {ChainType, NetworkConfig, HOST} from "../helpers/Config";
 import {isValidAddress} from "../helpers/Utils";
 import {animated, useSpring} from 'react-spring';
 import ReactSlider from "../widgets/ReactSlider";
 import ConfigContext from "../contexts/ConfigContext";
-import {getTokenName, renderAmount, renderBalanceFiat, renderFullAmount} from "../helpers/number";
+import {ethers} from "ethers";
+import {
+    getTokenName,
+    renderAmount,
+    renderBalanceFiat,
+    renderFullAmount,
+    renderSplitAmount,
+    renderShortValue,
+    weiToGwei,
+    formatNumberStr,
+    isDecimalValue,
+    apiEstimateModifiedToWEI,
+    renderGwei
+} from "../helpers/number";
+import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee} from "../helpers/custom-gas";
+import loadig_index from "../assets/loadig_index.json";
+import Lottie from "react-lottie";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate, showOngoing } = useContext(NavigateContext);
     const { ChainDisplayNames } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
-    const [gasPageIndex, setGasPageIndex] = useState(0);
     const [addressCorrect, setAddressCorrect] = useState(false);
     const [addressInput, setAddressInput] = useState('');
     const [balanceInput, setBalanceInput] = useState('');
     const [dollerInput, setDollerInput] = useState('');
-    const [gasPrice, setGasPrice] = useState('');
-    const [gasLimit, setGasLimit] = useState('');
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
     const asset = props.params.asset;
-    console.log('===asset = ', asset);
+    // console.log('===asset = ', asset);
     const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
     const middleSpeed = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
+    const [suggestedGasFees, setSuggestedGasFees] = useState(null);
+    const [customGasPrice, setCustomGasPrice] = useState(null);
+    const [customTotalGas, setCustomTotalGas] = useState(null);
+    const [customGasLimit, setCustomGasLimit] = useState(null);
+    const [selectTotalGas, setSelectTotalGas] = useState(null);
+    const [oldSelectTotalGas, setOldSelectTotalGas] = useState(null);
+    const [limitGas, setLimitGas] = useState(null);
+    const [ready, setReady] = useState(false);
+    const [selectGas, setSelectGas] = useState(true);
+    const [reloadGas, setReloadGas] = useState(false);
+    const [nativeAsset, setNativeAsset] = useState(null);
+
     const { t } = useTranslation();
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (ready && selectGas) {
+                reloadBasicEstimates();
+            }
+        }, 7000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        console.log('=====useEffect')
+        handleFetchBasicEstimates();
+    }, [])
+
+    const getGweiText = () => {
+        let baseText = 'Gwei';
+        // if (asset.chainType === ChainType.Avax) {
+        //     baseText = 'nAVAX';
+        // }
+        return `${renderGwei(selectTotalGas)} ${baseText}`;
+    }
+
+    const fetchNaitveAsset = async () => {
+        const url = HOST + "/api/v1/getTokenInfo?address=0x0&chain_id=" + NetworkConfig[asset.chainType].MainChainId;
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            const data = json.data;
+            return data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleFetchBasicEstimates = async () => {
+        setReady(false);
+        const nativeAsset = await fetchNaitveAsset();
+        setNativeAsset(nativeAsset);
+        let suggestedGasFees = await getSuggestedGasEstimates(asset.chainType);
+        suggestedGasFees = fixGas(suggestedGasFees);
+        setSuggestedGasFees(suggestedGasFees);
+        const customGasPrice = renderShortValue(
+            weiToGwei(
+                asset.chainType === ChainType.Bsc ? suggestedGasFees.safeLowGwei : suggestedGasFees.averageGwei
+            ).toString(),
+            5
+        );
+        setCustomGasPrice(customGasPrice);
+        setCustomTotalGas(suggestedGasFees.gasPrice);
+        setCustomGasLimit(suggestedGasFees.gas?.toString());
+        setReady(true);
+        updateGes(suggestedGasFees);
+    };
+
+    const reloadBasicEstimates = async () => {
+        setReloadGas(true);
+        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(asset.chainType);
+        setReloadGas(false);
+        if (!selectGas) {
+            return;
+        }
+        if (suggestedGasFeesInFunction?.isEIP1559 !== suggestedGasFees?.isEIP1559) {
+            return;
+        }
+        suggestedGasFeesInFunction = fixGas(suggestedGasFeesInFunction);
+        if (
+            (suggestedGasFeesInFunction.isEIP1559 &&
+                !suggestedGasFeesInFunction.estimatedBaseFee.eq(suggestedGasFees.estimatedBaseFee)) ||
+            !suggestedGasFees.safeLowGwei.eq(suggestedGasFeesInFunction.safeLowGwei) ||
+            !suggestedGasFees.averageGwei.eq(suggestedGasFeesInFunction.averageGwei) ||
+            !suggestedGasFees.fastGwei.eq(suggestedGasFeesInFunction.fastGwei)
+        ) {
+            // this.startAnimation();
+            let gasSpeedSelected = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
+            if (gasSpeedSelected !== gasSpeedSelected && !isMissGas(suggestedGasFeesInFunction)) {
+                gasSpeedSelected = loadGasSpeedSelected(suggestedGasFeesInFunction);
+            }
+            setTimeout(() => {
+                setSuggestedGasFees(suggestedGasFees);
+                setGasSpeedSelected(gasSpeedSelected);
+                const customGasPrice = renderShortValue(
+                    weiToGwei(
+                        asset.chainType === ChainType.Bsc ? suggestedGasFees.safeLowGwei : suggestedGasFees.averageGwei
+                    ).toString(),
+                    5
+                );
+                setCustomGasPrice(customGasPrice);
+                setCustomTotalGas(suggestedGasFees.gasPrice)
+                updateGes(suggestedGasFees);
+            }, 600);
+        }
+    };
+
+    const loadGasSpeedSelected = suggestedGasFees => {
+        let selectTotalGas = oldSelectTotalGas;
+        if (suggestedGasFees.isEIP1559) {
+            selectTotalGas = selectTotalGas.sub(suggestedGasFees.estimatedBaseFee);
+        }
+        const baseGwei = suggestedGasFees.fastGwei.sub(suggestedGasFees.safeLowGwei).div(10);
+        const gasSpeedSelected = selectTotalGas
+            .sub(suggestedGasFees.safeLowGwei)
+            .div(baseGwei)
+            .toNumber();
+        return Math.round(gasSpeedSelected);
+    };
+
+    // const startReloadGas = () => {
+    //     if (!this.isUnmount && this.state.selectGas) {
+    //         this.reloadTimeout = setTimeout(() => this.reloadBasicEstimates(), 7000);
+    //     }
+    // };
+
+    const isMissGas = suggestedGasFees => {
+        const selectTotalGas = oldSelectTotalGas;
+        let maxGas = suggestedGasFees.fastGwei;
+        if (suggestedGasFees.isEIP1559) {
+            maxGas = maxGas.add(suggestedGasFees.estimatedBaseFee);
+        }
+        if (selectTotalGas.gt(maxGas)) {
+            return true;
+        }
+        let minGas = suggestedGasFees.safeLowGwei;
+        if (suggestedGasFees.isEIP1559) {
+            minGas = minGas.add(suggestedGasFees.estimatedBaseFee);
+        }
+        if (selectTotalGas.lt(minGas)) {
+            return true;
+        }
+        return false;
+    };
+
+    const updateGes = (suggestedGasFees, isReload = false) => {
+        const gwei = calcGas(suggestedGasFees, gasSpeedSelected);
+        suggestedGasFees?.isEIP1559
+            ? onGasChange(suggestedGasFees, null, gwei, null, isReload)
+            : onGasChange(suggestedGasFees, gwei, null, null, isReload);
+    };
+
+    const onGasChange = (suggestedGasFees, gasPriceBNWei, maxPriorityFeePerGasBN, gas, isReload = false) => {
+        let limitGas = suggestedGasFees.gas?.toString();
+        if (gas) {
+            limitGas = gas;
+        }
+        let maxFeePerGasBN;
+        if (maxPriorityFeePerGasBN) {
+            maxFeePerGasBN = maxPriorityFeePerGasBN.add(suggestedGasFees?.estimatedBaseFee);
+        }
+        if (maxFeePerGasBN) {
+            gasPriceBNWei = maxFeePerGasBN;
+        }
+        if (selectGas) {
+            if (!isReload) {
+                setOldSelectTotalGas(gasPriceBNWei);
+            }
+            setSelectTotalGas(gasPriceBNWei);
+        } else {
+            setCustomTotalGas(gasPriceBNWei);
+        }
+        setLimitGas(limitGas);
+        // this.props.onChange &&
+        // this.props.onChange(
+        //     gasPriceBNWei,
+        //     maxPriorityFeePerGasBN,
+        //     maxFeePerGasBN,
+        //     this.state.suggestedGasFees?.estimatedBaseFee,
+        //     limitGas
+        // );
+    };
+
+    const calcGas = (suggestedGasFees, gasSpeedSelected) => {
+        const gasFees = suggestedGasFees;
+        if (!gasFees) {
+            return ethers.BigNumber.from(0);
+        }
+        let gwei;
+        const average = MAX_SLIDER / 2;
+        if (gasSpeedSelected === average) {
+            gwei = gasFees.averageGwei;
+        } else if (gasSpeedSelected < average) {
+            gwei = gasFees.averageGwei
+                .sub(gasFees.safeLowGwei)
+                .mul(gasSpeedSelected).div(average)
+                .add(gasFees.safeLowGwei);
+        } else {
+            gwei = gasFees.fastGwei
+                .sub(gasFees.averageGwei)
+                .mul((gasSpeedSelected - average)).div(average)
+                .add(gasFees.averageGwei);
+        }
+        return gwei;
+    };
 
     const inputAddressChange = (text) => {
         setAddressInput(text);
@@ -72,18 +289,63 @@ export default (props)=>{
 
     const handleGasPriceInput = (event) => {
         const text = event.target.value;
-        setGasPrice(text);
+        onCustomGasPriceChange(text);
     }
 
     const handleGasLimitInput = (event) => {
         const text = event.target.value;
-        setGasLimit(text);
+        onCustomGasLimitChange(text);
     }
-
 
     const handleAddressChange = (event) => {
         const text = event.target.value;
         inputAddressChange(text);
+    };
+
+    const onCustomChange = () => {
+        const nextSelectGas = !selectGas;
+        setSelectGas(nextSelectGas)
+        setTimeout(() => {
+            if (nextSelectGas) {
+                updateGes(suggestedGasFees);
+                reloadBasicEstimates();
+            } else {
+                onCustomChangeGas(customGasPrice, customGasLimit);
+            }
+        }, 1000);
+
+    };
+
+    const onCustomChangeGas = (gasPrice, gasLimit) => {
+        if (!gasLimit) {
+            gasLimit = '0';
+        }
+
+        gasPrice = isDecimalValue(gasPrice) ? formatNumberStr(gasPrice) : '0';
+
+        const gasPriceBN = apiEstimateModifiedToWEI(renderShortValue(gasPrice, 9));
+
+        const gasLimitBN = gasLimit && ethers.BigNumber.from(gasLimit);
+
+        suggestedGasFees?.isEIP1559
+            ? onGasChange(suggestedGasFees, null, gasPriceBN, gasLimitBN)
+            : onGasChange(suggestedGasFees, gasPriceBN, null, gasLimitBN);
+    };
+
+    const onCustomGasPriceChange = value => {
+        setCustomGasPrice(value);
+        onCustomChangeGas(value, customGasLimit);
+    };
+
+    const onCustomGasLimitChange = value => {
+        if (value && !isDecimalValue(value)) {
+            return;
+        }
+        if (value) {
+            value = formatNumberStr(value);
+        }
+        setCustomGasLimit(value);
+        onCustomChangeGas(customGasPrice, value);
     };
 
     const readClipboardText = async() => {
@@ -113,12 +375,19 @@ export default (props)=>{
     };
 
     const onSlidingChange = (value) => {
+        let gWei = calcGas(suggestedGasFees, value);
+        if (suggestedGasFees?.isEIP1559) {
+            gWei = gWei.add(suggestedGasFees?.estimatedBaseFee);
+        }
+        setGasSpeedSelected(value);
+        setSelectTotalGas(gWei);
+        setOldSelectTotalGas(gWei);
         // let gWei = this.calcGas(value);
         // if (this.state.suggestedGasFees?.isEIP1559) {
         //     gWei = gWei.add(this.state.suggestedGasFees?.estimatedBaseFee);
         // }
         // this.setState({ gasSpeedSelected: value, selectTotalGas: gWei, oldSelectTotalGas: gWei });
-        setGasSpeedSelected(value);
+
     };
 
     const networkFeePage1 = () => {
@@ -126,7 +395,7 @@ export default (props)=>{
             <div className={'send-step2-gas-layout'}>
                 <div className={'send-step2-gwei-recommend-layout'}>
                     <span className={'send-step2-gwei-recommend-text'}>
-                        25Gwei
+                        {getGweiText()}
                     </span>
                     <img  className={'send-step2-gwei-fire-icon'} src={ic_gas_fire}/>
                     <span className={'send-step2-gwei-recommend-text'}>
@@ -139,7 +408,19 @@ export default (props)=>{
                 </div>
 
                 <span className={'send-step2-gwei-equal-dollor'}>
-                    0.00114 AVAX ≈ $0.10317
+                    {renderSplitAmount(
+                        getEthGasFee(selectTotalGas, suggestedGasFees?.gas, suggestedGasFees?.l1Fee)
+                    ) +
+                    ' ' +
+                    nativeAsset.symbol +
+                    ' ≈ ' +
+                    getFiatGasFee(
+                        selectTotalGas,
+                        nativeAsset.price_usd,
+                        "USD",
+                        suggestedGasFees?.gas,
+                        suggestedGasFees?.l1Fee
+                    )}
                 </span>
 
                 <ReactSlider
@@ -164,9 +445,9 @@ export default (props)=>{
                     <div className={'send-step2-gas-price-and-limit-item-layout'}>
                         <div className={'send-step2-gas-price-and-limit-item-row-layout'}>
                             <span className={'send-step2-gas-price-and-limit-item-row-tip'}>
-                                {t('gas_price')}
+                                {suggestedGasFees?.isEIP1559 ? t('tip') : t('gas_price')}
                             </span>
-                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasPriceInput} value={gasPrice}/>
+                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasPriceInput} value={customGasPrice}/>
                         </div>
                         <div className={'send-line'}/>
                     </div>
@@ -176,27 +457,39 @@ export default (props)=>{
                             <span className={'send-step2-gas-price-and-limit-item-row-tip'}>
                                 {t('gas_limit')}
                             </span>
-                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasLimitInput} value={gasLimit}/>
+                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasLimitInput} value={customGasLimit}/>
                         </div>
                         <div className={'send-line'}/>
                     </div>
                 </div>
                 <span className={'send-step2-gas-equal-dollor'}>
-                    0.05 ETH ≈ $55
+                    {renderSplitAmount(
+                        getEthGasFee(customTotalGas, ethers.BigNumber.from(customGasLimit), suggestedGasFees?.l1Fee)
+                    ) +
+                    ' ' +
+                    nativeAsset.symbol +
+                    ' ≈ ' +
+                    getFiatGasFee(
+                        customTotalGas,
+                        nativeAsset.price_usd,
+                        "USD",
+                        ethers.BigNumber.from(customGasLimit),
+                        suggestedGasFees?.l1Fee
+                    )}
                 </span>
             </div>
         )
     }
 
     const gasPage1Transform = useSpring({
-        transform: gasPageIndex === 0 ? 'translateX(0%)' : 'translateX(-130%)',
-        opacity: gasPageIndex === 0 ? 1 : 0,
+        transform: selectGas ? 'translateX(0%)' : 'translateX(-130%)',
+        opacity: selectGas ? 1 : 0,
         config: { duration: 300 },
     });
 
     const gasPage2Transform = useSpring({
-        transform: gasPageIndex === 1 ? 'translateX(0%)' : 'translateX(130%)',
-        opacity: gasPageIndex === 1 ? 1 : 0,
+        transform: !selectGas ? 'translateX(0%)' : 'translateX(130%)',
+        opacity: !selectGas ? 1 : 0,
         config: { duration: 300 },
     });
     const getFromToken = () => {
@@ -221,6 +514,20 @@ export default (props)=>{
         return asset.symbol + '(' + addr + ')';
     };
 
+    const fixGas = suggestedGasFees => {
+        if (suggestedGasFees.fastGwei.lte(suggestedGasFees.averageGwei)) {
+            suggestedGasFees.fastGwei = suggestedGasFees.averageGwei.mul(3).div(2);
+        }
+        if (asset.chainType === ChainType.Bsc) {
+            suggestedGasFees.safeLowGwei = suggestedGasFees.averageGwei;
+            suggestedGasFees.averageGwei = suggestedGasFees.fastGwei.add(suggestedGasFees.safeLowGwei).div(2);
+        } else if (suggestedGasFees.safeLowGwei.gte(suggestedGasFees.averageGwei)) {
+            suggestedGasFees.safeLowGwei = suggestedGasFees.averageGwei.div(2);
+        }
+
+        return suggestedGasFees;
+    };
+
     return (
         <div className={'send'}>
             <div className={'send-base'}>
@@ -233,7 +540,21 @@ export default (props)=>{
 
                 <div className={'send-tilte-line'}/>
                 <div className={'send-content-layout'}>
-                    {step === 1 ? (
+                    {!ready ? (
+                        <div className={'send-load-wrap'}>
+                            <Lottie style={{marginTop: 17}} options={{
+                                loop: true,
+                                autoplay: true,
+                                animationData: loadig_index,
+                                rendererSettings: {
+                                    preserveAspectRatio: 'xMidYMid slice'
+                                }
+                            }}
+                                    height={48}
+                                    width={48}
+                            />
+                        </div>
+                    ) : step === 1 ? (
                         <div className={'send-content-step-layout'}>
                             <span className={'send-recipient-text'}>
                                 {t('recipient')}
@@ -305,7 +626,7 @@ export default (props)=>{
                             </div>
                             <div className={'send-line'}/>
                             <div className={'flex-width-full'}>
-                                <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
+                                <Button text={t('next')} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0}
                                     //setInvalidAddressPop(true);
                                     setStep(2);
                                     showOngoing(true);
@@ -337,7 +658,7 @@ export default (props)=>{
                                 <span className={'send-step2-network-fee-text'}>
                                     {t('network_fee')}
                                 </span>
-                                <img  className={'send-step2-network-fee-switch-icon'} src={gasPageIndex === 1? ic_gas_edit : ic_slider} onClick={() => setGasPageIndex(gasPageIndex === 0 ? 1 : 0)}/>
+                                <img  className={'send-step2-network-fee-switch-icon'} src={!selectGas? ic_gas_edit : ic_slider} onClick={() => onCustomChange()}/>
                             </div>
                             <div className={'send-step2-gas-layout'} style={{position: 'relative'}}>
                                 <animated.div style={{ position: 'absolute', left: 0,  right: 0, ...gasPage1Transform}}>

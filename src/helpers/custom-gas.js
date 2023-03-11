@@ -1,14 +1,16 @@
 import {ChainType, NetworkConfig} from "./Config";
 import {ethers} from "ethers";
+import {renderFromWei, weiToFiat} from "./number";
+import {CURRENCIES} from "./currencies";
 
 const AVERAGE_GAS = 20;
 const LOW_GAS = 20;
 const FAST_GAS = 40;
 const DEFAULT_GAS_LIMIT = '0x5208';
 
-export async function getSuggestedGasEstimates(chainType, forceNormalFee = false) {
+export async function getSuggestedGasEstimates(chainType) {
 	const gasEstimates = await getBasicGasEstimates(chainType);
-	if (!forceNormalFee) {
+	if (chainType !== ChainType.Bsc) {
 		let suggestedGasFees = await getSuggestedGasFees(chainType);
 		if (!suggestedGasFees) {
 			suggestedGasFees = await getRpcSuggestedGasFees(chainType); //就是就是bsc
@@ -26,29 +28,29 @@ export async function getSuggestedGasEstimates(chainType, forceNormalFee = false
 		}
 	}
 	return {
-		// ...gasEstimates,
+		...gasEstimates,
 		isEIP1559: false
 	};
 }
 
 async function getRpcSuggestedGasFees(chainType) {
 	try {
-
-		const { rpcTarget, chainId, ticker, nickname } = NetworkConfig[chainType].Networks['BSC Mainnet'].provider;
+		const { rpcTarget, chainId, ticker, nickname } = NetworkConfig[chainType].Networks[NetworkConfig[chainType].NetworkNames[0]].provider;
 		let provider;
 		if (rpcTarget) {
 			provider = new ethers.providers.JsonRpcProvider(rpcTarget, { chainId, name: nickname });
 		}
-		const ethQuery = new ethers.providers.EtherscanProvider('bsc');
-		const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await ethQuery.getFeeData();
+		const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await provider.getFeeData();
+		// // const ethQuery = new ethers.providers.EtherscanProvider('bsc');
+		// const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await ethQuery.getFeeData();
 
 		if (maxPriorityFeePerGas && baseFeePerGas) {
 			const bnMax = hexToBN(maxPriorityFeePerGas);
 			const estimatedBaseFee = hexToBN(baseFeePerGas);
 			return {
 				averageGwei: bnMax,
-				fastGwei: bnMax.muln(1.5),
-				safeLowGwei: bnMax.muln(0.5),
+				fastGwei: bnMax.mul(3).div(2),
+				safeLowGwei: bnMax.div(2),
 				estimatedBaseFee
 			};
 		}
@@ -169,6 +171,9 @@ export async function fetchPolygonSuggestedGasFees() {
 }
 
 export async function estimateGas(transaction) {
+	if (transaction === null) {
+		return null;
+	}
 	// 连接以太坊网络
 	const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
 
@@ -199,6 +204,7 @@ export async function getBasicGasEstimates(chainType) {
 	// const chainId = transaction.chainId;
 
 	let averageGasPrice, gasLimit, basicGasEstimates;
+
 	// try {
 	// 	const estimation = await TransactionController.estimateGas({
 	// 		from: transaction.from,
@@ -266,19 +272,18 @@ export async function getBasicGasEstimates(chainType) {
 		if (averageGasPrice.isZero()) {
 			safeLow = ethers.BigNumber.from(0);
 		} else {
-			safeLow = averageGasPrice.muln(0.5);
+			safeLow = averageGasPrice.div(2);
 		}
 
 		basicGasEstimates = {
 			averageGwei: averageGasPrice,
-			fastGwei: averageGasPrice.muln(1.5),
+			fastGwei: averageGasPrice.mul(3).div(2),
 			safeLowGwei: safeLow
 		};
 	} else {
 		averageGasPrice = basicGasEstimates.averageGwei;
 	}
 	basicGasEstimates = { gas: gasLimit, gasPrice: averageGasPrice, ...basicGasEstimates };
-	console.log('===basicGasEstimates', basicGasEstimates);
 	return basicGasEstimates;
 }
 
@@ -302,10 +307,9 @@ export async function fetchMainnetGasEstimates() {
 
 
 export function decGWEIToBNWEI(decGWEI) {
-	const gwei = ethers.utils.parseUnits(String(decGWEI), 'gwei');
-	const wei = ethers.BigNumber.from(gwei);
+	const wei = ethers.utils.parseUnits(String(decGWEI), 'ether').div(1000000000);
+	//const wei = ethers.utils.parseEther(String(decGWEI)).div(1000000000);
 	return wei;
-	// return ethers.utils.parseUnits(String(decGWEI), 'gwei');
 }
 
 // export function decGWEIToHexWEI(decGWEI) {
@@ -319,7 +323,7 @@ export function apiEstimateModifiedToWEI(estimate) {
 }
 
 function toWei(value, unit = 'ether') {
-	return ethers.utils.parseUnits(value, unit);
+	return ethers.utils.parseUnits(value.toString(), unit);
 }
 
 function hexToBN(inputHex) {
@@ -331,6 +335,27 @@ function hexToBN(inputHex) {
 	// return ethers.BigNumber.from(hexString);
 }
 
+export function getEthGasFee(weiGas, gasLimitBN, moreGasFee = undefined) {
+	if (!weiGas) {
+		return '0';
+	}
+	let gasFee = weiGas.mul(gasLimitBN);
+	if (moreGasFee) {
+		gasFee = gasFee.add(moreGasFee);
+	}
+	return renderFromWei(gasFee);
+}
+
+export function getFiatGasFee(weiGas, conversionRate, currencyCode, gasLimit = 21000, moreGasFee = undefined) {
+	if (!weiGas) {
+		return '0'
+	}
+	let wei = weiGas.mul(ethers.BigNumber.from(gasLimit));
+	if (moreGasFee) {
+		wei = wei.add(moreGasFee);
+	}
+	return weiToFiat(wei, conversionRate, currencyCode);
+}
 
 // export function decGWEIToBNWEI(decGWEI) {
 // 	return hexToBN(decGWEIToHexWEI(decGWEI));

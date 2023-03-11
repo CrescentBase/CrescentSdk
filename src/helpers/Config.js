@@ -53,6 +53,7 @@ export const NetworkConfig = {
         NeedAvailableUrl: true,
         OtherCoinInfoUrl: 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswapv2',
         SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/exchange',
+        NetworkNames: ['Ethereum Mainnet', 'Ropsten', 'Kovan', 'Rinkeby', 'Goerli', 'Ropsten', ],
         Networks: {
             "Ethereum Mainnet": {
                 provider: {
@@ -135,6 +136,7 @@ export const NetworkConfig = {
         NeedAvailableUrl: true,
         OtherCoinInfoUrl: 'https://api.thegraph.com/subgraphs/name/sameepsi/quickswap06',
         SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/matic-exchange',
+        NetworkNames: ['Polygon Mainnet', 'Polygon Testnet'],
         Networks: {
             "Polygon Mainnet": {
                 "provider": {
@@ -203,6 +205,7 @@ export const NetworkConfig = {
         NeedAvailableUrl: false,
         OtherCoinInfoUrl: '',
         SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange',
+        NetworkNames: ['Arbitrum Mainnet', 'Arbitrum Testnet Rinkeby'],
         Networks: {
             "Arbitrum Mainnet": {
                 "provider": {
@@ -271,6 +274,7 @@ export const NetworkConfig = {
         NeedAvailableUrl: true,
         OtherCoinInfoUrl: 'https://bsc.streamingfast.io/subgraphs/name/pancakeswap/exchange-v2',
         SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange',
+        NetworkNames: ['BSC Mainnet', 'BSC Testnet'],
         Networks: {
             "BSC Mainnet": {
                 "provider": {
@@ -313,209 +317,6 @@ export const NetworkConfig = {
                 },
                 ExplorerUrl: 'https://testnet.bscscan.com',
                 ExplorerApiUrl: 'https://api-testnet.bscscan.com',
-            }
-        }
-    },
-    [ChainType.Avax]: {
-        Name: "Avax",
-        MainChainId: '43114',
-        ticker: "AVAX",
-        UseInfura: false,
-        Disabled: false,
-        DefiTokenChain: ['avax'],
-        CoingeckoId: 'avalanche-2',
-        SwapUrl: 'https://traderjoexyz.com/#/trade',
-        SwapTokenUrl: 'https://traderjoexyz.com/#/trade?inputCurrency=',
-        CurrencyLogo: 'https://cdn.gopocket.finance/files/avax_logo.png',
-        NeedAvailableUrl: false,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/avalanche-exchange',
-        Networks: {
-            "Avalanche Mainnet C-Chain": {
-                "provider": {
-                    "rpcTarget": "https://api.avax.network/ext/bc/C/rpc",
-                    "type": "Avalanche Mainnet C-Chain",
-                    "chainId": "43114",
-                    "ticker": "AVAX",
-                    "nickname": "Avalanche"
-                },
-                ExplorerUrl: 'https://snowtrace.io',
-                ExplorerApiUrl: 'https://api.snowtrace.io',
-            },
-            "Avalanche FUJI C-Chain": {
-                "provider": {
-                    "rpcTarget": "https://api.avax-test.network/ext/bc/C/rpc",
-                    "type": "Avalanche FUJI C-Chain",
-                    "chainId": "43113",
-                    "ticker": "AVAX",
-                    "nickname": "Avalanche"
-                },
-                ExplorerUrl: 'https://testnet.snowtrace.io',
-                ExplorerApiUrl: 'https://api-testnet.snowtrace.io',
-            }
-        }
-    },
-    [ChainType.Optimism]: {
-        Name: "Op",
-        MainChainId: '10',
-        ticker: "ETH",
-        UseInfura: true,
-        Disabled: false,
-        DefiTokenChain: ['op'],
-        CoingeckoId: 'ethereum',
-        SwapUrl: 'https://bafybeicals7ohbyykungbndrzk3qf6pydcbe2w3a3pftwrfbjjirkpxqbq.ipfs.cf-ipfs.com/#/swap',
-        SwapTokenUrl: 'https://bafybeicals7ohbyykungbndrzk3qf6pydcbe2w3a3pftwrfbjjirkpxqbq.ipfs.cf-ipfs.com/#/swap?inputCurrency=',
-        CurrencyLogo: 'https://cdn.gopocket.finance/files/eth_logo.png',
-        NeedAvailableUrl: true,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: '',
-        Networks: {
-            "Optimism Mainnet": {
-                "provider": {
-                    "rpcTarget": "https://mainnet.optimism.io",
-                    "type": "Optimism Mainnet",
-                    "chainId": "10",
-                    "ticker": "ETH",
-                    "nickname": "Optimism"
-                },
-                "partnerChainId": "1",
-                "infuraType": "optimism-mainnet",
-                ExplorerUrl: 'https://optimistic.etherscan.io',
-                ExplorerApiUrl: 'https://api-optimistic.etherscan.io',
-            },
-            "Optimism Testnet Kovan": {
-                "provider": {
-                    "rpcTarget": "https://kovan.optimism.io",
-                    "type": "Optimism Testnet Kovan",
-                    "chainId": "69",
-                    "ticker": "ETH",
-                    "nickname": "Optimism"
-                },
-                "partnerChainId": "42",
-                "infuraType": "optimism-kovan",
-                ExplorerUrl: 'https://kovan-optimistic.etherscan.io',
-                ExplorerApiUrl: 'https://api-kovan-optimistic.etherscan.io',
-            }
-        }
-    },
-    [ChainType.Syscoin]: {
-        Name: "Syscoin",
-        MainChainId: '57',
-        ticker: "SYS",
-        UseInfura: false,
-        Disabled: false,
-        DefiTokenChain: ['sys', 'syscoin'],
-        CoingeckoId: 'syscoin',
-        SwapUrl: 'https://app.pegasys.finance/#/swap',
-        SwapTokenUrl: 'https://app.pegasys.finance/#/swap?inputCurrency=',
-        CurrencyLogo: 'https://cdn.gopocket.finance/files/syscoin_logo.png',
-        NeedAvailableUrl: false,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: '',
-        Networks: {
-            "Syscoin Mainnet": {
-                "provider": {
-                    "rpcTarget": "https://rpc.syscoin.org",
-                    "type": "Syscoin Mainnet",
-                    "chainId": "57",
-                    "ticker": "SYS",
-                    "nickname": "Syscoin"
-                },
-                ExplorerUrl: 'https://explorer.syscoin.org',
-                ExplorerApiUrl: 'https://explorer.syscoin.org',
-            },
-            "Syscoin Tanenbaum Testnet": {
-                "provider": {
-                    "rpcTarget": "https://rpc.tanenbaum.io",
-                    "type": "Syscoin Tanenbaum Testnet",
-                    "chainId": "5700",
-                    "ticker": "tSYS",
-                    "nickname": "Syscoin"
-                },
-                ExplorerUrl: 'https://tanenbaum.io',
-                ExplorerApiUrl: 'https://tanenbaum.io',
-            }
-        }
-    },
-    [ChainType.Heco]: {
-        Name: "Heco",
-        MainChainId: '128',
-        ticker: "HT",
-        UseInfura: false,
-        Disabled: false,
-        DefiTokenChain: ['heco'],
-        CoingeckoId: 'huobi-token',
-        SwapUrl: 'https://ht.mdex.com/#/swap',
-        SwapTokenUrl: 'https://ht.mdex.com/#/swap?inputCurrency=',
-        CurrencyLogo: 'https://cdn.gopocket.finance/files/ht_logo.png',
-        NeedAvailableUrl: false,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: '',
-        Networks: {
-            "Heco Mainnet": {
-                "provider": {
-                    "rpcTarget": "https://http-mainnet.hecochain.com",
-                    "type": "Heco Mainnet",
-                    "chainId": "128",
-                    "ticker": "HT",
-                    "nickname": "HuoBi"
-                },
-                rpcTargets: [
-                    'https://http-mainnet-node.huobichain.com',
-                    'https://http-mainnet.hecochain.com',
-                ],
-                ExplorerUrl: 'https://hecoinfo.com',
-                ExplorerApiUrl: 'https://api.hecoinfo.com',
-            },
-            "Heco Testnet": {
-                "provider": {
-                    "rpcTarget": "https://http-testnet.hecochain.com",
-                    "type": "Heco Testnet",
-                    "chainId": "256",
-                    "ticker": "HT",
-                    "nickname": "HuoBi"
-                },
-                ExplorerUrl: 'https://testnet.hecoinfo.com',
-                ExplorerApiUrl: 'https://api-testnet.hecoinfo.com',
-            }
-        }
-    },
-    [ChainType.Tron]: {
-        Name: "Tron",
-        MainChainId: '123454321',
-        ticker: "TRX",
-        UseInfura: false,
-        Disabled: true,
-        DefiTokenChain: ['tron'],
-        SwapUrl: '',
-        SwapTokenUrl: '',
-        CurrencyLogo: '',
-        NeedAvailableUrl: false,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: '',
-        Networks: {
-            "TRON Mainnet": {
-                "provider": {
-                    "rpcTarget": "https://api.trongrid.io",
-                    "type": "TRON Mainnet",
-                    "chainId": "123454321",
-                    "ticker": "TRX",
-                    "nickname": "TronGrid"
-                },
-                "apiKey": "189ef738-d538-4007-afa7-6b14f020b921",
-                ExplorerUrl: 'https://tronscan.org/#',
-                ExplorerApiUrl: '',
-            },
-            "TRON Shasta Testnet": {
-                "provider": {
-                    "rpcTarget": "https://api.shasta.trongrid.io",
-                    "type": "TRON Shasta Testnet",
-                    "chainId": "123454322",
-                    "ticker": "TRX",
-                    "nickname": "TronGrid"
-                },
-                ExplorerUrl: '',
-                ExplorerApiUrl: '',
             }
         }
     }

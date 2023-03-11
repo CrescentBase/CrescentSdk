@@ -79,5 +79,6 @@
   "ongoing_tx": "Ongoing Tx",
   "no_transaction_history": "No transaction history",
   "loading": "Loading...",
-  "contract_address": "Contract Address:"
+  "contract_address": "Contract Address:",
+  "tip": "tip"
 }
