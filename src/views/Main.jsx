@@ -21,14 +21,20 @@ import loading_ongoing_success from '../assets/loading_ongoing_success.json'
 import ic_success_white from "../assets/ic_success_white.png"
 import ic_close from "../assets/ic_close.png"
 import img_transak from "../assets/img_transak.png"
+import ic_token_default from "../assets/ic_token_default.png"
 
 import {useTranslation} from "react-i18next";
-import { ChainType } from "../helpers/Config";
+import {ChainType, HOST, NetworkConfig} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
 import {callUrlToNative} from "../helpers/Utils";
-import {renderAmount, renderShortValue, renderBalanceFiat} from "../helpers/number";
+import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
+import {ethers} from "ethers";
+import {estimateGas} from "../helpers/custom-gas";
+const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
+const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
+export const LOCAL_STORAGE_ONGOING_INFO = "storage_ongoin_info";
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -45,13 +51,14 @@ export default (props)=>{
     const [transationLoading, setTransationLoading] = useState(false);
     const [transationStyle, setTransationStyle] = useSpring(() => ({ width: 0 }));
     const [emailAccount, setEmailAccount] = useState('test@gmail.com');
-    const [address, setAddress] = useState('');
+    const [account, setAccount] = useState('0x6c3f14da26556585706c02af737a44e67dc6954d');
     const [swipeKey, setSwipeKey] = useState('');
-    const { platform, NetworkConfig, EnableChainTypes } = useContext(ConfigContext);
-    const { navigate, navigator } = useContext(NavigateContext);
+    const { platform, ChainDisplayNames, EnableChainTypes } = useContext(ConfigContext);
+    const { navigate, navigator, ongoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
-    const account = '0x6c3f14da26556585706c02af737a44e67dc6954d';
+    const [hiddenIds, setHiddenIds] = useState([]);
+    const [ongoingNum, setOngoingNum] = useState(1);
 
     const goAsset = (item) => {
         navigate('Asset', { asset: item });
@@ -61,20 +68,91 @@ export default (props)=>{
         navigate('History');
     }
 
+    useEffect(async () => {
+        estimateGas(null);
+        const provider = new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com');
+
+// 调用 eth_gasPrice 方法获取最大优先费用
+        const maxPriorityFeePerGas = await provider.getFeeData();
+        console.log('Max Priority Fee Per Gas: ', maxPriorityFeePerGas);
+        //
+        // const { rpcTarget, chainId, ticker, nickname } = NetworkConfig[ChainType.Bsc].Networks['BSC Mainnet'].provider;
+        // let provider;
+        // console.log(rpcTarget, nickname);
+        // if (rpcTarget) {
+        //     provider = new ethers.providers.JsonRpcProvider(rpcTarget, { chainId: 56, name: 'bsc' });
+        // }
+        // const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await provider.getFeeData();
+        // console.log(maxPriorityFeePerGas, baseFeePerGas, gasPrice);
+        //
+        // const block = await provider.send('eth_getBlockByNumber', ['latest', false]);
+        // const maxPriorityFeePerGas1 = block.maxPriorityFeePerGas;
+        // console.log('=maxPriorityFeePerGas1 = ', maxPriorityFeePerGas1);
+
+        // const ethQuery = new ethers.providers.EtherscanProvider('bsc');
+        // const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await ethQuery.getFeeData();
+
+    }, [])
+
     useEffect(() => {
-        if (navigator === "Main" && !initLoaded) {
-            setInitLoaded(true);
-            var element = document.getElementById("crescent-content");
-            var width = element.clientWidth;
-            const cardHeight = (width - 40) * 1.0 /319.0 * 100;
-            setCardHeight(cardHeight);
-            const address = localStorage.getItem("address") || account;
-            const emailAccount = localStorage.getItem('emailAccount');
-            setAddress(address);
-            emailAccount && setEmailAccount(emailAccount);
-            fetchData();
+        if (navigator === "Main") {
+            if (!initLoaded) {
+                setInitLoaded(true);
+                var element = document.getElementById("crescent-content");
+                var width = element.clientWidth;
+                const cardHeight = (width - 40) * 1.0 /319.0 * 100;
+                setCardHeight(cardHeight);
+                const address = localStorage.getItem("address") || account;
+                const emailAccount = localStorage.getItem('emailAccount');
+                console.log('==address = ', address);
+                setAccount(address);
+                emailAccount && setEmailAccount(emailAccount);
+                const storedIds = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HIDDEN_ID));
+                if (storedIds) {
+                    setHiddenIds(storedIds);
+                }
+                const storedTokens = JSON.parse(localStorage.getItem(LOCAL_STORAGE_OTHER_TOKENS));
+                fetchData(storedIds);
+            }
+            if (ongoing) {
+                toggleSubbmitLoading();
+            }
+            // fetchOnGoing();
+            //fetch ongoing 数据
+            // localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO);
+            // setTransationLoading(true);
         }
     }, [navigator]);
+
+    const handleAddHiddenId = (id) => {
+        let storageId = [];
+        if (hiddenIds.includes(id)) {
+            storageId = hiddenIds.filter((hiddenId) => hiddenId !== id);
+            setHiddenIds(storageId);
+        } else {
+            storageId = [...hiddenIds, id];
+            setHiddenIds(storageId);
+        }
+        localStorage.setItem(LOCAL_STORAGE_HIDDEN_ID, JSON.stringify(storageId));
+    };
+
+    const handleRemoveHiddenId = (id) => {
+        let storageId = hiddenIds.filter((selectedId) => selectedId !== id);
+        setHiddenIds(storageId);
+        localStorage.setItem(LOCAL_STORAGE_HIDDEN_ID, JSON.stringify(storageId));
+    };
+
+    const isHiddenId = (id) => hiddenIds.includes(id);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (isSearch) {
+                fetchSearchData();
+            }
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [searchText])
 
     const loadDisplayData = (allData, type) => {
         let balanceFait = 0;
@@ -108,7 +186,7 @@ export default (props)=>{
         })
         chainIds = chainIds.substring(0, chainIds.length - 1);
         chainIds += "]";
-        fetch('http://192.168.2.117:7017/api/v1/getAssets?address=' + account + '&chainIds=' + chainIds + '&rate=usd&offset=0&count=200')
+        fetch(HOST + '/api/v1/getAssets?address=' + account + '&chainIds=' + chainIds + '&rate=usd&offset=0&count=200')
             .then(response => response.json())
             .then(data => {
                 const tokens = data.data;
@@ -118,10 +196,15 @@ export default (props)=>{
                 }
                 const assets = [];
                 tokens.map((item, index) => {
+                    // if (hiddenId.includes(item.id)) {
+                    //     return null;
+                    // }
                     const amount = renderAmount(item.balances, item.decimals);
+                    const fullAmount = renderFullAmount(item.balances, item.decimals);
                     const balanceFiat = Number(renderBalanceFiat(item.balances, item.decimals, item.price));
                     const balanceFiatUsd = "$" + renderBalanceFiat(item.balances, item.decimals, item.price);
                     const nativeCurrency = item.tokenAddress === "0x0";
+                    item.image = item.image || ic_token_default;
                     let chainType = ChainType.Ethereum;
                     EnableChainTypes.map((type, index) => {
                         if (type != ChainType.All) {
@@ -130,7 +213,7 @@ export default (props)=>{
                             }
                         }
                     })
-                    assets.push({...item, amount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
+                    assets.push({...item, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
                 setDataLoading(false);
                 loadDisplayData(assets, ChainType.All);
@@ -141,7 +224,8 @@ export default (props)=>{
             });
     };
 
-    const fetchSearchData = (text) => {
+    const fetchSearchData = () => {
+        const text = searchText;
         if (!text || text === '') {
             loadDisplayData(data, currentChainType);
             return;
@@ -158,24 +242,29 @@ export default (props)=>{
             chainIds = NetworkConfig[currentChainType].MainChainId;
         }
 
-        const url = 'http://192.168.2.117:7017/api/v1/searchToken?name=' + text + '&account=' + account + '&chain_id=' + chainIds + '&limit=30';
-        console.log('===url = ', url);
+        const url = HOST + '/api/v1/searchToken?name=' + text + '&account=' + account + '&chain_id=' + chainIds + '&limit=30';
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 const tokens = data.data;
-                console.log('====tokens = ', tokens);
-                return;
                 if (!tokens || tokens.length === 0) {
-                    setData([]);
+                    loadDisplayData([], currentChainType);
                     return;
                 }
                 const assets = [];
+
                 tokens.map((item, index) => {
+                    if (isHiddenId(item.id)) {
+                        item.isHidden = true;
+                    }
+                    item.tokenAddress = item.address;
+                    item.chainId = item.chain_id;
                     const amount = renderAmount(item.balances, item.decimals);
+                    const fullAmount = renderFullAmount(item.balances, item.decimals);
                     const balanceFiat = Number(renderBalanceFiat(item.balances, item.decimals, item.price));
                     const balanceFiatUsd = "$" + renderBalanceFiat(item.balances, item.decimals, item.price);
                     const nativeCurrency = item.tokenAddress === "0x0";
+                    item.image = item.image || ic_token_default;
                     let chainType = ChainType.Ethereum;
                     EnableChainTypes.map((type, index) => {
                         if (type != ChainType.All) {
@@ -184,16 +273,48 @@ export default (props)=>{
                             }
                         }
                     })
-                    assets.push({...item, amount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
+                    assets.push({...item, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
-                setDataLoading(false);
-                loadDisplayData(assets, ChainType.All);
-                setData(assets);
+                loadDisplayData(assets, currentChainType);
+                // setData(assets);
             }).catch(error => {
             console.log(error)
-            setDataLoading(false);
         });
     };
+
+    const addToken = (asset) => {
+        const url = HOST + '/api/v1/addToken?chain_id=' + asset.chain_id + '&account=' + account + '&address=' + asset.address + '&balances=' + (asset.balances || 0);
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const tokens = data.data;
+                asset.searchType = 0;
+
+            }).catch(error => {
+            console.log(error)
+        });
+    }
+
+    const fetchOnGoing = () => {
+        fetch('http://192.168.2.117:3000/rpc', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // body: JSON.stringify({
+            //     data: 'example data'
+            // })
+            body: JSON.stringify({
+                "jsonrpc":"2.0",
+                "id":1,
+                "method":"eth_getUserOperationReceipt",
+                "params":["0x534988b2dd27af8d95343f57e758db5afe79dd826c64e85b422fc78ce1bde954"]
+            })
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+    }
 
     const toastWalletCreated = () => {
         setShowWalletCreated(true);
@@ -212,7 +333,6 @@ export default (props)=>{
 
     const setTextChange = (text) => {
         setSearchText(text);
-        fetchSearchData(text);
     }
 
     const clickToTransak = () => {
@@ -258,14 +378,14 @@ export default (props)=>{
     }
 
     const renderItemAction = (item) => {
-        const isAdd = false;
-        const isEnable = !item.nativeCurrency;
+        const isAdd = isSearch && item.searchType === 1 && !item.isHidden;
+        const isDisable = item.nativeCurrency;
         return (
             <div className={'main-asset-item-action-base-layout'}>
                 <div className={'flex-full'}/>
                 <div className={'main-asset-item-action-wrap'}>
-                    <img className={'main-asset-item-action-icon'} src={isAdd ? ic_add : isEnable ? ic_hide : ic_hide_disable}/>
-                    <div className={'main-asset-item-action-text'} style={(!isAdd && !isEnable) ? {color: 'rgba(147,157,165,0.6)'} : {}}>
+                    <img className={'main-asset-item-action-icon'} src={isAdd ? ic_add : isDisable ? ic_hide_disable : ic_hide}/>
+                    <div className={'main-asset-item-action-text'} style={isDisable ? {color: 'rgba(147,157,165,0.6)'} : {}}>
                         {isAdd ? t('add') : t('hide')}
                     </div>
                 </div>
@@ -281,9 +401,9 @@ export default (props)=>{
                         <div className={'main-title-email'}>
                             {emailAccount}
                         </div>
-                        <div className={'main-title-address-layout'} onClick={() => showAddressCopied(address)}>
+                        <div className={'main-title-address-layout'} onClick={() => showAddressCopied(account)}>
                             <div className={'main-title-address'}>
-                                {address.substring(0, 13) + "..." + address.substring(30)}
+                                {account.substring(0, 13) + "..." + account.substring(30)}
                             </div>
                             <img className={'main-title-address-copy-icon'} src={ic_copy}/>
                         </div>
@@ -299,12 +419,12 @@ export default (props)=>{
                             <div className={'main-card-balance-text'}>
                                 {displayBalanceFait}
                             </div>
-                            <div className={'main-card-history-wrap-layout'} onClick={() => goHistory()}>
-                                <img src={ic_history_black} className={'main-card-history-icon'}/>
-                                <div className={'main-card-history-text'}>
-                                    {t('tx_history')}
-                                </div>
-                            </div>
+                            {/*<div className={'main-card-history-wrap-layout'} onClick={() => goHistory()}>*/}
+                            {/*    <img src={ic_history_black} className={'main-card-history-icon'}/>*/}
+                            {/*    <div className={'main-card-history-text'}>*/}
+                            {/*        {t('tx_history')}*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
                         </div>
                         <div className={'main-card-chain-layout'}>
                             {EnableChainTypes.map((item, index) => {
@@ -315,7 +435,7 @@ export default (props)=>{
                                         setSwipeKey('');
                                     }}>
                                         <img className={'main-card-chain-logo'} src={currentChainType === item ? NetworkConfig[item].chainIcons : NetworkConfig[item].chainIconAlphas}/>
-                                        <div className={'main-card-chain-name'}>{currentChainType === item ? NetworkConfig[item].displayName : '  '}</div>
+                                        <div className={'main-card-chain-name'}>{currentChainType === item ? ChainDisplayNames[item].displayName : '  '}</div>
                                     </div>
                                 );
                             })}
@@ -326,7 +446,12 @@ export default (props)=>{
                 {isSearch ? (
                     <div className={'main-search-base-layout'}>
                         <div className={'main-search-wrap-layout'}>
-                            <img className={'main-search-back-icon'} src={ic_back_white} onClick={() => setIsSearch(false)}/>
+                            <img className={'main-search-back-icon'} src={ic_back_white} onClick={() => {
+                                setIsSearch(false);
+                                setTextChange('');
+                                setSwipeKey('');
+                                loadDisplayData(data, currentChainType);
+                            }}/>
                             <img className={'main-search-edit-icon'} src={ic_search}/>
                             <input className={'main-search-edittext'}
                                    type={"text"}
@@ -348,7 +473,10 @@ export default (props)=>{
                             {t('asset_list')}
                         </div>
                         <div className={'flex-full'}/>
-                        <img src={ic_search} className={'main-asset-search-icon'} onClick={() => setIsSearch(true)}/>
+                        <img src={ic_search} className={'main-asset-search-icon'} onClick={() => {
+                            setIsSearch(true)
+                            setSwipeKey('');
+                        }}/>
                         <img src={ic_buy} className={'main-asset-buy-icon'} onClick={() => setShowTransak(true)}/>
                     </div>
                 )}
@@ -377,17 +505,20 @@ export default (props)=>{
                             onClickItem={() => goAsset(item)}
                             onClickAction={() => {
                                 setSwipeKey('');
-                                if (isSearch) {
-
-                                } else {
-
+                                const isAdd = isSearch && item.searchType === 1;
+                                const isDisable = item.nativeCurrency;
+                                if (!isDisable) {
+                                    if (isAdd) {
+                                        handleRemoveHiddenId(item.id);
+                                        addToken(item);
+                                    } else {
+                                        handleAddHiddenId(item.id);
+                                    }
                                 }
                             }}
                             swipe={(key) => {
                                 setSwipeKey(key);
                             }}/>
-
-
                     ))
                 ) : (
                     <div className={'main-search-empty-data'}>
@@ -436,9 +567,11 @@ export default (props)=>{
                     <animated.div className={'main-transation-submitted-layout'} style={transationStyle}>
                         {t('transaction_submitted')}
                     </animated.div>
-                    <div className={'main-transation-right-layout'}>
+                    <div className={'main-transation-right-layout'} onClick={() => {
+                        navigate("OngoingTx")
+                    }}>
                         <div className={'main-transation-number'}>
-                            1
+                            {ongoingNum}
                         </div>
                         <Lottie options={{
                             isClickToPauseDisabled: false,

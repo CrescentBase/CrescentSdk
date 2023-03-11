@@ -2,6 +2,23 @@ import ic_eth_tag from "../assets/ic_eth_tag.png";
 import ic_polygon_tag from "../assets/ic_polygon_tag.png";
 import ic_bsc_tag from "../assets/ic_bsc_tag.png";
 import ic_arb_tag from "../assets/ic_arb_tag.png";
+import img_card_all from "../assets/img_card_all";
+import ic_card_all from "../assets/ic_card_all.png";
+import ic_card_all_alpha from "../assets/ic_card_all_alpha.png";
+import img_card_eth from "../assets/img_card_eth";
+import ic_card_eth from "../assets/ic_card_eth.png";
+import ic_card_eth_alpha from "../assets/ic_card_eth_alpha.png";
+import img_card_polygon from "../assets/img_card_polygon";
+import ic_card_polygon from "../assets/ic_card_polygon.png";
+import ic_card_polygon_alpha from "../assets/ic_card_polygon_alpha.png";
+import img_card_arb from "../assets/img_card_arb";
+import ic_card_arb from "../assets/ic_card_arb.png";
+import ic_card_arb_alpha from "../assets/ic_card_arb_alpha.png";
+import img_card_bsc from "../assets/img_card_bsc";
+import ic_card_bsc from "../assets/ic_card_bsc.png";
+import ic_card_bsc_alpha from "../assets/ic_card_bsc_alpha.png";
+
+export const HOST = "https://controller.crescentbase.com";//"http://192.168.2.117:7017"
 
 export const ChainType = {
     All: 0,
@@ -12,8 +29,16 @@ export const ChainType = {
 }
 
 export const NetworkConfig = {
+    [ChainType.All]: {
+        chainCards: img_card_all,
+        chainIcons: ic_card_all,
+        chainIconAlphas: ic_card_all_alpha,
+    },
     [ChainType.Ethereum]: {
         Name: "Ethereum",
+        chainCards: img_card_eth,
+        chainIcons: ic_card_eth,
+        chainIconAlphas: ic_card_eth_alpha,
         tag: ic_eth_tag,
         ticker: "ETH",
         color: '#627EEA',
@@ -93,6 +118,9 @@ export const NetworkConfig = {
     },
     [ChainType.Polygon]: {
         Name: "Polygon",
+        chainCards: img_card_polygon,
+        chainIcons: ic_card_polygon,
+        chainIconAlphas: ic_card_polygon_alpha,
         tag: ic_polygon_tag,
         ticker: "MATIC",
         color: '#8247E5',
@@ -156,8 +184,79 @@ export const NetworkConfig = {
             }
         }
     },
+    [ChainType.Arbitrum]: {
+        Name: "Arb",
+        chainCards: img_card_arb,
+        chainIcons: ic_card_arb,
+        chainIconAlphas: ic_card_arb_alpha,
+        tag: ic_arb_tag,
+        ticker: "ETH",
+        color: '#23A1F0',
+        MainChainId: '42161',
+        UseInfura: true,
+        Disabled: false,
+        DefiTokenChain: ['arb'],
+        CoingeckoId: 'ethereum',
+        SwapUrl: 'https://sushiswap-interface-teamsushi.vercel.app/swap',
+        SwapTokenUrl: 'https://sushiswap-interface-teamsushi.vercel.app/swap/swap?inputCurrency=',
+        CurrencyLogo: 'https://cdn.gopocket.finance/files/eth_logo.png',
+        NeedAvailableUrl: false,
+        OtherCoinInfoUrl: '',
+        SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange',
+        Networks: {
+            "Arbitrum Mainnet": {
+                "provider": {
+                    "rpcTarget": "https://arb1.arbitrum.io/rpc",
+                    "type": "Arbitrum Mainnet",
+                    "chainId": "42161",
+                    "ticker": "ETH",
+                    "nickname": "Arbitrum"
+                },
+                ExplorerUrl: 'https://arbiscan.io',
+                ExplorerApiUrl: 'https://api.arbiscan.io',
+                "confirmIntervalInSecond": 604800,
+                "partnerChainId": "1",
+                "infuraType": "arbitrum-mainnet",
+                "inbox": "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f",
+                "outbox": "0x667e23ABd27E623c11d4CC00ca3EC4d0bD63337a",
+                "outbox2": "0x760723CD2e632826c38Fef8CD438A4CC7E7E1A40",
+                "l1GatewayRouter": "0x72Ce9c846789fdB6fC1f34aC4AD25Dd9ef7031ef",
+                "arbsys": "0x0000000000000000000000000000000000000064",
+                "node_interface": "0x00000000000000000000000000000000000000C8",
+                "l2GatewayRouter": "0x5288c571Fd7aD117beA99bF60FE0846C4E84F933",
+                "l1ERC20Gateway": "0xa3A7B6F88361F48403514059F1F16C8E78d60EeC",
+                "l2ERC20Gateway": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
+            },
+            "Arbitrum Testnet Rinkeby": {
+                "provider": {
+                    "rpcTarget": "https://rinkeby.arbitrum.io/rpc",
+                    "type": "Arbitrum Testnet Rinkeby",
+                    "chainId": "421611",
+                    "ticker": "ETH",
+                    "nickname": "Arbitrum"
+                },
+                ExplorerUrl: 'https://testnet.arbiscan.io',
+                ExplorerApiUrl: 'https://api-testnet.arbiscan.io',
+                "confirmIntervalInSecond": 86400,
+                "partnerChainId": "4",
+                "infuraType": "arbitrum-rinkeby",
+                "inbox": "0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e",
+                "outbox": "0xefa1a42D3c4699822eE42677515A64b658be1bFc",
+                "outbox2": "0xefa1a42D3c4699822eE42677515A64b658be1bFc",
+                "l1GatewayRouter": "0x70C143928eCfFaf9F5b406f7f4fC28Dc43d68380",
+                "arbsys": "0x0000000000000000000000000000000000000064",
+                "node_interface": "0x00000000000000000000000000000000000000C8",
+                "l2GatewayRouter": "0x9413AD42910c1eA60c737dB5f58d1C504498a3cD",
+                "l1ERC20Gateway": "0x91169Dbb45e6804743F94609De50D511C437572E",
+                "l2ERC20Gateway": "0x195C107F3F75c4C93Eba7d9a1312F19305d6375f"
+            }
+        }
+    },
     [ChainType.Bsc]: {
         Name: "Bsc",
+        chainCards: img_card_bsc,
+        chainIcons: ic_card_bsc,
+        chainIconAlphas: ic_card_bsc_alpha,
         tag: ic_bsc_tag,
         ticker: "BNB",
         color: '#FEBF27',
@@ -335,71 +434,6 @@ export const NetworkConfig = {
                 },
                 ExplorerUrl: 'https://tanenbaum.io',
                 ExplorerApiUrl: 'https://tanenbaum.io',
-            }
-        }
-    },
-    [ChainType.Arbitrum]: {
-        Name: "Arb",
-        tag: ic_arb_tag,
-        ticker: "ETH",
-        color: '#23A1F0',
-        MainChainId: '42161',
-        UseInfura: true,
-        Disabled: false,
-        DefiTokenChain: ['arb'],
-        CoingeckoId: 'ethereum',
-        SwapUrl: 'https://sushiswap-interface-teamsushi.vercel.app/swap',
-        SwapTokenUrl: 'https://sushiswap-interface-teamsushi.vercel.app/swap/swap?inputCurrency=',
-        CurrencyLogo: 'https://cdn.gopocket.finance/files/eth_logo.png',
-        NeedAvailableUrl: false,
-        OtherCoinInfoUrl: '',
-        SushiswapGraphUrl: 'https://api.thegraph.com/subgraphs/name/sushiswap/arbitrum-exchange',
-        Networks: {
-            "Arbitrum Mainnet": {
-                "provider": {
-                    "rpcTarget": "https://arb1.arbitrum.io/rpc",
-                    "type": "Arbitrum Mainnet",
-                    "chainId": "42161",
-                    "ticker": "ETH",
-                    "nickname": "Arbitrum"
-                },
-                ExplorerUrl: 'https://arbiscan.io',
-                ExplorerApiUrl: 'https://api.arbiscan.io',
-                "confirmIntervalInSecond": 604800,
-                "partnerChainId": "1",
-                "infuraType": "arbitrum-mainnet",
-                "inbox": "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f",
-                "outbox": "0x667e23ABd27E623c11d4CC00ca3EC4d0bD63337a",
-                "outbox2": "0x760723CD2e632826c38Fef8CD438A4CC7E7E1A40",
-                "l1GatewayRouter": "0x72Ce9c846789fdB6fC1f34aC4AD25Dd9ef7031ef",
-                "arbsys": "0x0000000000000000000000000000000000000064",
-                "node_interface": "0x00000000000000000000000000000000000000C8",
-                "l2GatewayRouter": "0x5288c571Fd7aD117beA99bF60FE0846C4E84F933",
-                "l1ERC20Gateway": "0xa3A7B6F88361F48403514059F1F16C8E78d60EeC",
-                "l2ERC20Gateway": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
-            },
-            "Arbitrum Testnet Rinkeby": {
-                "provider": {
-                    "rpcTarget": "https://rinkeby.arbitrum.io/rpc",
-                    "type": "Arbitrum Testnet Rinkeby",
-                    "chainId": "421611",
-                    "ticker": "ETH",
-                    "nickname": "Arbitrum"
-                },
-                ExplorerUrl: 'https://testnet.arbiscan.io',
-                ExplorerApiUrl: 'https://api-testnet.arbiscan.io',
-                "confirmIntervalInSecond": 86400,
-                "partnerChainId": "4",
-                "infuraType": "arbitrum-rinkeby",
-                "inbox": "0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e",
-                "outbox": "0xefa1a42D3c4699822eE42677515A64b658be1bFc",
-                "outbox2": "0xefa1a42D3c4699822eE42677515A64b658be1bFc",
-                "l1GatewayRouter": "0x70C143928eCfFaf9F5b406f7f4fC28Dc43d68380",
-                "arbsys": "0x0000000000000000000000000000000000000064",
-                "node_interface": "0x00000000000000000000000000000000000000C8",
-                "l2GatewayRouter": "0x9413AD42910c1eA60c737dB5f58d1C504498a3cD",
-                "l1ERC20Gateway": "0x91169Dbb45e6804743F94609De50D511C437572E",
-                "l2ERC20Gateway": "0x195C107F3F75c4C93Eba7d9a1312F19305d6375f"
             }
         }
     },

@@ -9,6 +9,7 @@ import img_empty_box from "../assets/img_empty_box";
 import {useTranslation} from "react-i18next";
 import { ChainType, NetworkConfig } from "../helpers/Config";
 import PopContext from "../contexts/PopContext";
+
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
@@ -172,9 +173,9 @@ export default (props)=>{
                 <div className={'history-tilte-line'}/>
                 <div className={'history-content-layout'}>
                     <div className={'flex-col'}>
-                        {renderTime(token1)}
-                        {renderGasFee(token2)}
-                        {renderNormalTx(token3)}
+                        {/*{renderTime(token1)}*/}
+                        {/*{renderGasFee(token2)}*/}
+                        {/*{renderNormalTx(token3)}*/}
                         <span className={'history-no-more-transactions'}>
                             {t('no_more_transactions')}
                         </span>

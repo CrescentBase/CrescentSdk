@@ -24,6 +24,14 @@ export function renderAmount(weiAmount, decimals, decimalsToShow = 5) {
     return renderShortValue(amount, decimalsToShow);
 }
 
+export function renderFullAmount(weiAmount, decimals, decimalsToShow = 5) {
+    if (!weiAmount) {
+        return 0;
+    }
+    const amount = ethers.utils.formatUnits(weiAmount, decimals);
+    return amount;
+}
+
 export function renderBalanceFiat(weiAmount, decimals, price, decimalsToShow = 5) {
     if (!weiAmount) {
         return 0;

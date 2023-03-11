@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 export default (props)=>{
     const [navigator, setNavigator] = useState(props.initView);
     const [params, setParams] = useState({});
+    const [ongoing, showOngoing] = useState(false);
 
     const navigate = (name, paramsTemp = {})=>{
         if (name != navigator) {
@@ -19,7 +20,9 @@ export default (props)=>{
             navigator,
             setNavigator,
             navigate,
-            params
+            params,
+            ongoing,
+            showOngoing
         }}>
             { props.children }
         </NavigateContext.Provider>

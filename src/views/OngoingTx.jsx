@@ -9,6 +9,7 @@ import { ChainType, NetworkConfig } from "../helpers/Config";
 import PopContext from "../contexts/PopContext";
 import loading_ongoing from "../assets/loading_ongoing.json";
 import Lottie from "react-lottie";
+import ConfigContext from "../contexts/ConfigContext";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);

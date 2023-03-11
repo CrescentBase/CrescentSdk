@@ -10,17 +10,17 @@ import slider_dot from '../assets/slider_dot.png'
 import NavigateContext from "../contexts/NavigateContext";
 import {useTranslation} from "react-i18next";
 import Button from "../widgets/Button";
-import {ChainType} from "../helpers/Config";
+import {ChainType, NetworkConfig} from "../helpers/Config";
 import {isValidAddress} from "../helpers/Utils";
 import {animated, useSpring} from 'react-spring';
 import ReactSlider from "../widgets/ReactSlider";
 import ConfigContext from "../contexts/ConfigContext";
-import {getTokenName} from "../helpers/number";
+import {getTokenName, renderAmount, renderBalanceFiat, renderFullAmount} from "../helpers/number";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
-    const { navigate } = useContext(NavigateContext);
-    const { NetworkConfig } = useContext(ConfigContext);
+    const { navigate, showOngoing } = useContext(NavigateContext);
+    const { ChainDisplayNames } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
     const [gasPageIndex, setGasPageIndex] = useState(0);
     const [addressCorrect, setAddressCorrect] = useState(false);
@@ -32,6 +32,7 @@ export default (props)=>{
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
     const asset = props.params.asset;
+    console.log('===asset = ', asset);
     const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
     const middleSpeed = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
     const { t } = useTranslation();
@@ -47,12 +48,26 @@ export default (props)=>{
 
     const handleBalanceInput = (event) => {
         const text = event.target.value;
+        changeBalanceInput(text);
+    }
+
+    const changeBalanceInput = (text) => {
         setBalanceInput(text);
+        if (asset.price && text > 0) {
+            setDollerInput(Number(text) * asset.price);
+        }
     }
 
     const handleDollerInput = (event) => {
         const text = event.target.value;
+        changeDollerInput(text);
+    }
+
+    const changeDollerInput = (text) => {
         setDollerInput(text);
+        if (asset.price && text > 0) {
+            setBalanceInput(Number(text) / asset.price);
+        }
     }
 
     const handleGasPriceInput = (event) => {
@@ -188,13 +203,13 @@ export default (props)=>{
         if (asset.nativeCurrency) {
             return asset.symbol;
         }
-        const addr = getTokenName(asset.type);
+        const addr = getTokenName(asset.chainType);
         return asset.symbol + '(' + addr + ')';
     };
 
     const getToToken = () => {
         if (asset.nativeCurrency) {
-            if (asset.type === ChainType.Ethereum) {
+            if (asset.chainType === ChainType.Ethereum) {
                 if (asset.chainType === ChainType.Polygon) {
                     return 'WETH';
                 }
@@ -253,12 +268,12 @@ export default (props)=>{
                                 {t('to_network')}
                             </span>
                             <div className={'send-chain'}>
-                                {NetworkConfig[asset.chainType].displayName}
+                                {ChainDisplayNames[asset.chainType].displayName}
                             </div>
                             <span className={'send-will-receive-tip'}>
                                 {t('send_note', {
                                     fromToken: getFromToken(),
-                                    network: NetworkConfig[asset.type].displayName,
+                                    network: ChainDisplayNames[asset.chainType].displayName,
                                     toToken: getToToken()
                                 })}
                             </span>
@@ -267,14 +282,14 @@ export default (props)=>{
                                     {t('amount')}
                                 </span>
                                 <span className={'send-amount-available-text'}>
-                                    {t('amount_available', { amount: asset.amount })}
+                                    {t('amount_available', { amount: `${asset.amount} ${asset.symbol}` })}
                                 </span>
                             </div>
                             <div className={'send-input-token-layout'}>
                                 <img className={'send-input-token-icon'} src={asset.image}/>
                                 <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
                                 <span className={'send-input-token-max'} onClick={() => {
-                                    setBalanceInput(asset.amount);
+                                    changeBalanceInput(asset.fullAmount);
                                 }}>
                                     {t('max')}
                                 </span>
@@ -283,16 +298,17 @@ export default (props)=>{
                             <span className={'send-equal'}>≈</span>
                             <div className={'send-input-token-layout'}>
                                 <img className={'send-input-token-icon'} src={ic_currency_usd}/>
-                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleDollerInput} value={dollerInput}/>
+                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleDollerInput} value={dollerInput} disabled={!asset.price}/>
                                 <span className={'send-input-dollar-usd'}>
                                     USD
                                 </span>
                             </div>
                             <div className={'send-line'}/>
                             <div className={'flex-width-full'}>
-                                <Button text={t('next')} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//disable={!addressInput || !dollerInput || !balanceInput}
-                                    //setInvalidAddressPop(true);   //invalid Address
+                                <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
+                                    //setInvalidAddressPop(true);
                                     setStep(2);
+                                    showOngoing(true);
                                 }}/>
                             </div>
                         </div>
@@ -303,7 +319,7 @@ export default (props)=>{
                                     {t('to')}
                                 </span>
                                 <span className={'send-step2-chain'}>
-                                    {NetworkConfig[asset.chainType].displayName}
+                                    {ChainDisplayNames[asset.chainType].displayName}
                                 </span>
                             </div>
                             <span className={'send-step2-address-text'}>
@@ -314,7 +330,7 @@ export default (props)=>{
                                     {t('amount')}
                                 </span>
                                 <span className={'send-step2-amount-use-text '}>
-                                    5000GRT
+                                    {`${balanceInput} ${asset.symbol}`}
                                 </span>
                             </div>
                             <div className={'send-step2-network-fee-layout'}>

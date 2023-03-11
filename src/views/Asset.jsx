@@ -11,11 +11,12 @@ import ic_copy from "../assets/ic_copy.png"
 import {useTranslation} from "react-i18next";
 import PopContext from "../contexts/PopContext";
 import ConfigContext from "../contexts/ConfigContext";
+import { NetworkConfig } from "../helpers/Config";
 
 export default (props)=>{
     const { showAddressCopied } = useContext(PopContext)
     const { navigate } = useContext(NavigateContext);
-    const { NetworkConfig } = useContext(ConfigContext);
+    const { ChainDisplayNames } = useContext(ConfigContext);
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
@@ -45,7 +46,7 @@ export default (props)=>{
                             </div>
                             <div className={'asset-chain-and-price-change'}>
                                 <div className={'asset-chain-name'} style={{borderColor: NetworkConfig[asset.chainType].color, color: NetworkConfig[asset.chainType].color}}>
-                                    {NetworkConfig[asset.chainType].displayName}
+                                    {ChainDisplayNames[asset.chainType].displayName}
                                 </div>
                                 <div className={'flex-full'}/>
                                 {asset.price !== null && (
@@ -78,22 +79,22 @@ export default (props)=>{
                         <div className={'asset-action-item-layout'}  onClick={() => navigate('Send', { asset})}>
                             <img className={'asset-action-icon'} src={ic_send}/>
                             <span className={'asset-action-text'}>
-                            {t('send')}
-                        </span>
+                                {t('send')}
+                            </span>
                         </div>
                         <div style={{width: 12}}></div>
                         <div className={'asset-action-item-layout'} onClick={() => navigate('Receive', { asset})}>
                             <img className={'asset-action-icon'} src={ic_receive}/>
                             <span className={'asset-action-text'}>
-                            {t('receive')}
-                        </span>
+                                {t('receive')}
+                            </span>
                         </div>
                         <div style={{width: 12}}></div>
                         <div className={'asset-action-item-layout'} onClick={() => navigate('History', { asset, fromAsset: true})}>
                             <img className={'asset-action-icon'} src={ic_history}/>
                             <span className={'asset-action-text'}>
-                            {t('tx_history')}
-                        </span>
+                                {t('tx_history')}
+                            </span>
                         </div>
                     </div>
                 </div>

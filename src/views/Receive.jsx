@@ -3,7 +3,7 @@ import ic_back_white from "../assets/ic_back_white.png"
 import NavigateContext from "../contexts/NavigateContext";
 import Button from "../widgets/Button";
 import PopContext from "../contexts/PopContext";
-import {ChainType} from "../helpers/Config";
+import {ChainType, NetworkConfig} from "../helpers/Config";
 import {useTranslation} from "react-i18next";
 import {getTokenName} from "../helpers/number";
 import ConfigContext from "../contexts/ConfigContext";
@@ -12,7 +12,6 @@ export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext)
-    const { NetworkConfig } = useContext(ConfigContext);
     const asset = props.params.asset;
 
     const getAddrStr = () => {
