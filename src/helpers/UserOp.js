@@ -1,5 +1,5 @@
 import {ethers} from "ethers";
-import { defaultAbiCoder } from 'ethers/lib/utils.js';
+import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils.js';
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -98,4 +98,44 @@ export const getUserOperation = async (provider, sender, callData) => {
 //0x7e1ed8acbab7d76bbf9754355d3236a20499cfa723a61266c1b417b1310836da
 export const sendUserOperation = async (provider, uo) => {
     return await provider.send("eth_sendUserOperation", [uo, "EntryPoint Address"]);
+}
+
+
+export const getGasLimit = (uo) => {
+    return Number(uo.callGas) + Number(uo.verificationGas) + Number(uo.preVerificationGas);
+}
+
+export const packUserOp = (op) => {
+    // lighter signature scheme (must match UserOperation#pack): do encode a zero-length signature, but strip afterwards the appended zero-length value
+    const userOpType = {
+        components: [
+            { type: 'address', name: 'sender' },
+            { type: 'uint256', name: 'nonce' },
+            { type: 'bytes', name: 'initCode' },
+            { type: 'bytes', name: 'callData' },
+            { type: 'uint256', name: 'callGas' },
+            { type: 'uint256', name: 'verificationGas' },
+            { type: 'uint256', name: 'preVerificationGas' },
+            { type: 'uint256', name: 'maxFeePerGas' },
+            { type: 'uint256', name: 'maxPriorityFeePerGas' },
+            { type: 'address', name: 'paymaster' },
+            { type: 'bytes', name: 'paymasterData' },
+            { type: 'bytes', name: 'signature' }
+        ],
+        name: 'userOp',
+        type: 'tuple'
+    }
+    let encoded = defaultAbiCoder.encode([userOpType], [{ ...op, signature: '0x' }])
+    // remove leading word (total length) and trailing word (zero-length signature)
+    encoded = '0x' + encoded.slice(66, encoded.length - 64)
+    return encoded
+}
+
+export const getRequestId = (op, chainId) => {
+    const entryPoint = "0xDd6c867f9267977FeA8D33e375190f2044cB346E";
+    const userOpHash = keccak256(packUserOp(op, true))
+    const enc = defaultAbiCoder.encode(
+        ['bytes32', 'address', 'uint256'],
+        [userOpHash, entryPoint, chainId])
+    return keccak256(enc)
 }
