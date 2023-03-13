@@ -24,9 +24,7 @@ import ic_card_bsc_alpha from "../assets/ic_card_bsc_alpha.png";
 
 export default (props)=>{
     const { t } = useTranslation();
-
-    const EnableChainTypes = [ChainType.All, ChainType.Ethereum, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];
-
+    
     const ChainDisplayNames = {
         [ChainType.All]: {
             displayName: t('all_network'),
@@ -46,7 +44,7 @@ export default (props)=>{
     };
 
     return(
-        <ConfigContext.Provider value={{...props.config, ChainDisplayNames, EnableChainTypes}}>
+        <ConfigContext.Provider value={{...props.config, ChainDisplayNames}}>
             { props.children }
         </ConfigContext.Provider>
     )

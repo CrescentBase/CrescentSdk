@@ -19,6 +19,7 @@ import ic_card_bsc from "../assets/ic_card_bsc.png";
 import ic_card_bsc_alpha from "../assets/ic_card_bsc_alpha.png";
 
 export const HOST = "https://controller.crescentbase.com";//"http://192.168.2.117:7017"
+export const RPCHOST = "https://wallet.crescentbase.com";//"http://192.168.2.117:7017"
 
 export const ChainType = {
     All: 0,
@@ -27,6 +28,8 @@ export const ChainType = {
     Arbitrum: 0x04,
     Bsc: 0x08
 }
+
+export const EnableChainTypes = [ChainType.All, ChainType.Ethereum, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];
 
 export const NetworkConfig = {
     [ChainType.All]: {

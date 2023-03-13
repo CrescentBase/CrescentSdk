@@ -1,4 +1,4 @@
-import {ChainType, NetworkConfig} from "./Config";
+import {ChainType, NetworkConfig, RPCHOST} from "./Config";
 import {ethers} from "ethers";
 import {renderFromWei, weiToFiat} from "./number";
 import {CURRENCIES} from "./currencies";
@@ -221,7 +221,8 @@ export async function estimateGas(transaction) {
 
 export async function getBasicGasEstimates(chainType, asset, tx, toAddress, value) {
 	const chainId = NetworkConfig[chainType].MainChainId;
-	const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
+	const url = RPCHOST + "/api/v1/rpc/" + chainId;
+	const provider = new ethers.providers.JsonRpcProvider(url);
 	let uo, averageGasPrice, gasLimit, basicGasEstimates;
 	if (asset) {
 		try {

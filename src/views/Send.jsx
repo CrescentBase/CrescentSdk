@@ -33,6 +33,7 @@ import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee} from "../helpers/
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
 import {getRequestId, sendUserOperation} from "../helpers/UserOp";
+import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
@@ -536,7 +537,6 @@ export default (props)=>{
         }
         if (suggestedGasFees.isEIP1559) {
             maxPriorityFeePerGas = maxFeePerGas.sub(suggestedGasFees.estimatedBaseFee);
-            const a = maxPriorityFeePerGas.toHexString();
             uo.maxPriorityFeePerGas = maxPriorityFeePerGas.toHexString();
         }
         uo.maxFeePerGas = maxFeePerGas.toHexString();
@@ -546,9 +546,28 @@ export default (props)=>{
         const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
         const wallet = new ethers.Wallet(privateKey, provider);
-        wallet.signMessage(txId).then(signedTx => {
-            uo.signature = signedTx;
-            sendUserOperation(provider, uo);
+
+        wallet.signMessage(txId).then(async signedTx => {
+            try {
+                uo.signature = signedTx;
+                const txHash = await sendUserOperation(provider, uo);
+                const ongoingAsset =  {
+                    ...asset,
+                    txHash,
+                    txAmount: balanceInput,
+                    txTime: new Date().getTime()
+                };
+                const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || {};
+                if (ongoingInfos) {
+                    ongoingInfos.push(ongoingAsset);
+                }
+                localStorage.setItem(LOCAL_STORAGE_ONGOING_INFO, JSON.stringify(ongoingInfos));
+                showOngoing(true);
+            } catch (error) {
+                console.log('===error sendUserOperation = ', error);
+                setTransactionErrorPop(true);
+            }
+            setReady(true);
         });
     }
 
@@ -639,7 +658,6 @@ export default (props)=>{
                                 <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
                                     //setInvalidAddressPop(true);
                                     setStep(2);
-                                    showOngoing(true);
                                     handleFetchBasicEstimates();
                                 }}/>
                             </div>
@@ -696,6 +714,7 @@ export default (props)=>{
 
                             <Button text={t('confirm')} style={{marginLeft: 0, marginRight: 0}} onClick={() => {//disable={!addressInput || !dollerInput || !balanceInput}
                                 // setTransactionErrorPop(true);
+                                setReady(false);
                                 sendTransaction();
                             }}/>
                         </div>

@@ -73,6 +73,7 @@ export default () => {
         .ongoingtx-item-row-layout {
             display: flex;
             align-items: center;
+            overflow: hidden;
         }
         
         .ongoingtx-item-icon-layout {
@@ -109,6 +110,10 @@ export default () => {
             color: var(--system-color-4);
             line-height: 22px;
             text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
         }
         
         .ongoingtx-item-to-address {

@@ -24,7 +24,7 @@ import img_transak from "../assets/img_transak.png"
 import ic_token_default from "../assets/ic_token_default.png"
 
 import {useTranslation} from "react-i18next";
-import {ChainType, HOST, NetworkConfig} from "../helpers/Config";
+import {ChainType, HOST, NetworkConfig, EnableChainTypes, RPCHOST} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
@@ -33,10 +33,10 @@ import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} fro
 import {ethers} from "ethers";
 import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
 import BigNumber from 'bignumber.js';
+import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
+import {entryPoint} from "../helpers/UserOp";
 const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
 const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
-export const LOCAL_STORAGE_ONGOING_INFO = "storage_ongoin_info";
-
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -55,8 +55,8 @@ export default (props)=>{
     const [emailAccount, setEmailAccount] = useState('test@gmail.com');
     const [account, setAccount] = useState('0x6c3f14da26556585706c02af737a44e67dc6954d');
     const [swipeKey, setSwipeKey] = useState('');
-    const { platform, ChainDisplayNames, EnableChainTypes } = useContext(ConfigContext);
-    const { navigate, navigator, ongoing } = useContext(NavigateContext);
+    const { platform, ChainDisplayNames } = useContext(ConfigContext);
+    const { navigate, navigator, ongoing, showOngoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
     const [hiddenIds, setHiddenIds] = useState([]);
@@ -134,10 +134,17 @@ export default (props)=>{
                 const storedTokens = JSON.parse(localStorage.getItem(LOCAL_STORAGE_OTHER_TOKENS));
                 fetchData(storedIds);
             }
+
+            const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
+            if (ongoingInfos.length > 0) {
+                setTransationLoading(true);
+            }
+            setOngoingNum(ongoingInfos.length);
             if (ongoing) {
                 toggleSubbmitLoading();
+                showOngoing(false);
             }
-            // fetchOnGoing();
+            fetchOnGoings();
             //fetch ongoing 数据
             // localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO);
             // setTransationLoading(true);
@@ -315,25 +322,58 @@ export default (props)=>{
         });
     }
 
-    const fetchOnGoing = () => {
-        fetch('http://192.168.2.117:3000/rpc', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            // body: JSON.stringify({
-            //     data: 'example data'
-            // })
-            body: JSON.stringify({
-                "jsonrpc":"2.0",
-                "id":1,
-                "method":"eth_getUserOperationReceipt",
-                "params":["0x534988b2dd27af8d95343f57e758db5afe79dd826c64e85b422fc78ce1bde954"]
-            })
-        })
-            .then(response => response.json())
-            .then(data => console.log(data))
-            .catch(error => console.error(error));
+    const fetchOnGoingItem = async token => {
+        const url = RPCHOST + '/api/v1/rpc/' + NetworkConfig[token.chainType].MainChainId;
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // body: JSON.stringify({
+                //     data: 'example data'
+                // })
+                body: JSON.stringify({
+                    "jsonrpc":"2.0",
+                    "id":1,
+                    "method":"eth_getUserOperationReceipt",
+                    "params":[token.txHash]
+                })
+            });
+            const json = await response.json();
+            const result = json.result;
+            // 以上逻辑等于以下这个
+            // const provider = new ethers.providers.JsonRpcProvider(url);
+            // const result = await provider.send("eth_getUserOperationReceipt", [token.txHash]);
+            return result;
+        } catch (error) {
+            console.error('===fetchOnGoingItem', error);
+        }
+        return null;
+    }
+
+    const fetchOnGoings = async () => {
+        const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
+        if (ongoingInfos.length === 0) {
+            return;
+        }
+        const spliceIndexs = [];
+        for (let i = 0; i < ongoingInfos.length; i++) {
+            const token = await fetchOnGoingItem(ongoingInfos[i]);
+            if (token && token.success === true) {
+                spliceIndexs.push(i);
+            }
+        }
+        if (spliceIndexs.length > 0) {
+            for (let i = spliceIndexs.length - 1; i >= 0; i--) {
+                ongoingInfos.splice(spliceIndexs[i], 1);
+            }
+            localStorage.setItem(LOCAL_STORAGE_ONGOING_INFO, JSON.stringify(ongoingInfos));
+            setOngoingNum(ongoingInfos.length);
+            if (ongoingInfos.length === 0) {
+                setTransationLoading(false);
+            }
+        }
     }
 
     const toastWalletCreated = () => {
