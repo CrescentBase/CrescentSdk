@@ -18,7 +18,6 @@ export default (props)=>{
         const wallet = new ethers.Wallet(privateKey);
         const address = await wallet.getAddress();
         setAddress(address);
-
         localStorage.setItem('privateKey', privateKey);
         localStorage.setItem('address', address);
 

@@ -15,8 +15,8 @@ export const UserOperationDefault = {
     callGas: 0,
     verificationGas: '0x186A0',
     preVerificationGas: '0x5208',
-    maxFeePerGas: 0,
-    maxPriorityFeePerGas: '0x3B9ACA00',
+    maxFeePerGas: '0x0',
+    maxPriorityFeePerGas: '0x0',
     paymaster: ethers.constants.AddressZero,
     paymasterData: '0x',
     signature: '0x'
@@ -63,7 +63,7 @@ export const getUserOperationByToken = async (provider, sender, contractAddress,
     if (!amount) {
         throw new Error("amount is empty");
     }
-    const data = getWalletTransferCallData(contractAddress, toAddress, '0x', amount);
+    const data = getWalletTransferCallData(contractAddress, toAddress, '0x0', amount);
     return getUserOperation(provider, sender, data);
 }
 

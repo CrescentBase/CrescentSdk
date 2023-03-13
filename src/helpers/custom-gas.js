@@ -2,14 +2,33 @@ import {ChainType, NetworkConfig} from "./Config";
 import {ethers} from "ethers";
 import {renderFromWei, weiToFiat} from "./number";
 import {CURRENCIES} from "./currencies";
+import {getGasLimit, getRequestId, getUserOperationByNativeCurrency, getUserOperationByToken} from "./UserOp";
 
 const AVERAGE_GAS = 20;
 const LOW_GAS = 20;
 const FAST_GAS = 40;
 const DEFAULT_GAS_LIMIT = '0x5208';
+const testUo = {
+	"sender": "0x6c3f14da26556585706c02af737a44e67dc6954d",
+	"nonce": "0x0",
+	"initCode": "0x",
+	"callData": "0x",
+	"callGas": "0x0",
+	"verificationGas": "0x186A0",
+	"preVerificationGas": "0x5208",
+	"maxFeePerGas": "0x0",
+	"maxPriorityFeePerGas": "0x0",
+	"paymaster": "0x0000000000000000000000000000000000000000",
+	"paymasterData": "0x",
+	"signature": "0x"
+};
 
-export async function getSuggestedGasEstimates(chainType) {
-	const gasEstimates = await getBasicGasEstimates(chainType);
+export async function getSuggestedGasEstimates(asset, tx, toAddress, value) {
+	let chainType = ChainType.Ethereum;
+	if (asset) {
+		chainType = asset.chainType;
+	}
+	const gasEstimates = await getBasicGasEstimates(chainType, asset, tx, toAddress, value);
 	if (chainType !== ChainType.Bsc) {
 		let suggestedGasFees = await getSuggestedGasFees(chainType);
 		if (!suggestedGasFees) {
@@ -199,35 +218,32 @@ export async function estimateGas(transaction) {
 	console.log("Estimated gas: " + estimatedGas.toString());
 }
 
-export async function getBasicGasEstimates(chainType) {
-	// const { TransactionController } = Engine.context;
-	// const chainId = transaction.chainId;
 
-	let averageGasPrice, gasLimit, basicGasEstimates;
-
-	// try {
-	// 	const estimation = await TransactionController.estimateGas({
-	// 		from: transaction.from,
-	// 		data: transaction.data,
-	// 		to: transaction.to,
-	// 		value: transaction.value,
-	// 		gas: transaction.gas,
-	// 		chainId
-	// 	});
-	// 	averageGasPrice = hexToBN(estimation.gasPrice);
-	// 	gasLimit = hexToBN(estimation.gas);
-	// } catch (error) {
-	// 	averageGasPrice = apiEstimateModifiedToWEI(TransactionTypes.CUSTOM_GAS.AVERAGE_GAS);
-	// 	gasLimit = hexToBN(TransactionTypes.CUSTOM_GAS.DEFAULT_GAS_LIMIT);
-	// 	util.logInfo(
-	// 		'Error while trying to get gas price from the network',
-	// 		error,
-	// 		' transaction:',
-	// 		transaction
-	// 	);
-	// }
-	averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
-	gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+export async function getBasicGasEstimates(chainType, asset, tx, toAddress, value) {
+	const chainId = NetworkConfig[chainType].MainChainId;
+	const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
+	let uo, averageGasPrice, gasLimit, basicGasEstimates;
+	if (asset) {
+		try {
+			const sender = asset.account;
+			let uo;
+			if (asset.nativeCurrency) {
+				uo = await getUserOperationByNativeCurrency(provider, sender, toAddress, value);
+			} else {
+				uo = await getUserOperationByToken(provider, sender, asset.tokenAddress, toAddress, value);
+			}
+			gasLimit = ethers.BigNumber.from(getGasLimit(uo));
+			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
+		} catch (error) {
+			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
+			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+			uo = testUo;
+		}
+	} else {
+		averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
+		gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+		uo = testUo;
+	}
 
 	try {
 		let fetchGas;
@@ -252,21 +268,6 @@ export async function getBasicGasEstimates(chainType) {
 		console.log('===Error while trying to get gas limit estimates', error);
 	}
 
-	// let l1Fee;
-	// if (isMainnetByChainType(ChainType.Optimism, chainId) && gasLimit && averageGasPrice) {
-	// 	try {
-	// 		l1Fee = await getOptimismL1Fee({
-	// 			...transaction,
-	// 			gas: '0x' + gasLimit.toString(16),
-	// 			gasPrice: '0x' + averageGasPrice.toString(16)
-	// 		});
-	// 		l1Fee = hexToBN(l1Fee.toHexString());
-	// 	} catch (e) {
-	// 		console.log('getOptimismL1Fee e:', e);
-	// 		l1Fee = undefined;
-	// 	}
-	// }
-
 	if (!basicGasEstimates) {
 		let safeLow;
 		if (averageGasPrice.isZero()) {
@@ -283,7 +284,7 @@ export async function getBasicGasEstimates(chainType) {
 	} else {
 		averageGasPrice = basicGasEstimates.averageGwei;
 	}
-	basicGasEstimates = { gas: gasLimit, gasPrice: averageGasPrice, ...basicGasEstimates };
+	basicGasEstimates = { uo, gas: gasLimit, gasPrice: averageGasPrice, ...basicGasEstimates };
 	return basicGasEstimates;
 }
 
@@ -336,7 +337,7 @@ function hexToBN(inputHex) {
 }
 
 export function getEthGasFee(weiGas, gasLimitBN, moreGasFee = undefined) {
-	if (!weiGas) {
+	if (!weiGas || !gasLimitBN) {
 		return '0';
 	}
 	let gasFee = weiGas.mul(gasLimitBN);

@@ -32,6 +32,7 @@ import {
 import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee} from "../helpers/custom-gas";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
+import {getRequestId, sendUserOperation} from "../helpers/UserOp";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
@@ -45,7 +46,7 @@ export default (props)=>{
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
     const asset = props.params.asset;
-    // console.log('===asset = ', asset);
+    const tx = props.params.tx;
     const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
     const middleSpeed = asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2;
     const [suggestedGasFees, setSuggestedGasFees] = useState(null);
@@ -71,11 +72,6 @@ export default (props)=>{
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        console.log('=====useEffect')
-        handleFetchBasicEstimates();
-    }, [])
-
     const getGweiText = () => {
         let baseText = 'Gwei';
         // if (asset.chainType === ChainType.Avax) {
@@ -100,7 +96,8 @@ export default (props)=>{
         setReady(false);
         const nativeAsset = await fetchNaitveAsset();
         setNativeAsset(nativeAsset);
-        let suggestedGasFees = await getSuggestedGasEstimates(asset.chainType);
+        const value = ethers.utils.parseUnits(balanceInput, asset.decimals);
+        let suggestedGasFees = await getSuggestedGasEstimates(asset, tx, addressInput, value.toHexString());
         suggestedGasFees = fixGas(suggestedGasFees);
         setSuggestedGasFees(suggestedGasFees);
         const customGasPrice = renderShortValue(
@@ -118,7 +115,8 @@ export default (props)=>{
 
     const reloadBasicEstimates = async () => {
         setReloadGas(true);
-        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(asset.chainType);
+        const value = ethers.utils.parseUnits(balanceInput, asset.decimals);
+        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(asset, tx, addressInput, value.toHexString());
         setReloadGas(false);
         if (!selectGas) {
             return;
@@ -464,7 +462,7 @@ export default (props)=>{
                 </div>
                 <span className={'send-step2-gas-equal-dollor'}>
                     {renderSplitAmount(
-                        getEthGasFee(customTotalGas, ethers.BigNumber.from(customGasLimit), suggestedGasFees?.l1Fee)
+                        getEthGasFee(customTotalGas, ethers.BigNumber.from(customGasLimit || 0), suggestedGasFees?.l1Fee)
                     ) +
                     ' ' +
                     nativeAsset.symbol +
@@ -473,7 +471,7 @@ export default (props)=>{
                         customTotalGas,
                         nativeAsset.price_usd,
                         "USD",
-                        ethers.BigNumber.from(customGasLimit),
+                        ethers.BigNumber.from(customGasLimit || 0),
                         suggestedGasFees?.l1Fee
                     )}
                 </span>
@@ -528,6 +526,32 @@ export default (props)=>{
         return suggestedGasFees;
     };
 
+    const sendTransaction = () => {
+        const uo = suggestedGasFees.uo;
+        let maxFeePerGas, maxPriorityFeePerGas;
+        if (selectGas) {
+            maxFeePerGas = selectTotalGas;
+        } else {
+            maxFeePerGas = customTotalGas;
+        }
+        if (suggestedGasFees.isEIP1559) {
+            maxPriorityFeePerGas = maxFeePerGas.sub(suggestedGasFees.estimatedBaseFee);
+            const a = maxPriorityFeePerGas.toHexString();
+            uo.maxPriorityFeePerGas = maxPriorityFeePerGas.toHexString();
+        }
+        uo.maxFeePerGas = maxFeePerGas.toHexString();
+        const chainId = NetworkConfig[asset.chainType].MainChainId;
+        const txId = getRequestId(uo, chainId);
+        const privateKey = '0x81beea7a31489439120267006588dc4f8c58b7b20f4ddcc0711d37989fe0ed72';
+        const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
+        // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
+        const wallet = new ethers.Wallet(privateKey, provider);
+        wallet.signMessage(txId).then(signedTx => {
+            uo.signature = signedTx;
+            sendUserOperation(provider, uo);
+        });
+    }
+
     return (
         <div className={'send'}>
             <div className={'send-base'}>
@@ -540,21 +564,7 @@ export default (props)=>{
 
                 <div className={'send-tilte-line'}/>
                 <div className={'send-content-layout'}>
-                    {!ready ? (
-                        <div className={'send-load-wrap'}>
-                            <Lottie style={{marginTop: 17}} options={{
-                                loop: true,
-                                autoplay: true,
-                                animationData: loadig_index,
-                                rendererSettings: {
-                                    preserveAspectRatio: 'xMidYMid slice'
-                                }
-                            }}
-                                    height={48}
-                                    width={48}
-                            />
-                        </div>
-                    ) : step === 1 ? (
+                    {step === 1 ? (
                         <div className={'send-content-step-layout'}>
                             <span className={'send-recipient-text'}>
                                 {t('recipient')}
@@ -626,12 +636,27 @@ export default (props)=>{
                             </div>
                             <div className={'send-line'}/>
                             <div className={'flex-width-full'}>
-                                <Button text={t('next')} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0}
+                                <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
                                     //setInvalidAddressPop(true);
                                     setStep(2);
                                     showOngoing(true);
+                                    handleFetchBasicEstimates();
                                 }}/>
                             </div>
+                        </div>
+                    ) : !ready ? (
+                        <div className={'send-load-wrap'}>
+                            <Lottie style={{marginTop: 17}} options={{
+                                loop: true,
+                                autoplay: true,
+                                animationData: loadig_index,
+                                rendererSettings: {
+                                    preserveAspectRatio: 'xMidYMid slice'
+                                }
+                            }}
+                                    height={48}
+                                    width={48}
+                            />
                         </div>
                     ) : (
                         <div className={'send-content-step-layout'}>
@@ -670,7 +695,8 @@ export default (props)=>{
                             </div>
 
                             <Button text={t('confirm')} style={{marginLeft: 0, marginRight: 0}} onClick={() => {//disable={!addressInput || !dollerInput || !balanceInput}
-                                setTransactionErrorPop(true);
+                                // setTransactionErrorPop(true);
+                                sendTransaction();
                             }}/>
                         </div>
                     )}
