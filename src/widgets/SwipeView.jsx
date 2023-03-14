@@ -9,7 +9,6 @@ const SwipeView = (props) => {
 
     useEffect(() => {
         if (props.swipeKey !== props.id && swipeDistance != 0) {
-            console.log('====swipeDistance = ', swipeDistance);
             setSwipeDistance(0);
         }
     }, [props.swipeKey]);
@@ -65,7 +64,6 @@ const SwipeView = (props) => {
                 {props.actionBtn}
             </div>
             <animated.div onTouchStart={handleTouchStart} style={{...animatedProps}} onClick={() => {
-                console.log('==swipeDistance = ', swipeDistance);
                 if (props.swipeKey === props.id) {
                     setSwipeDistance(0);
                     props.swipe('');

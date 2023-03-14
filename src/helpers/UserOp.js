@@ -155,12 +155,11 @@ export const hasSender = async (rpcUrl, sender) => {
     return code.length > 300;
 }
 
-export const getCreateOP = async (sender, pk) => {
-    const url = `https://wallet.crescentbase.com/api/v1/getCreateOP/${sender}/${pk}`;
+export const getCreateOP = async (sender, pk, chainId) => {
+    const url = `https://wallet.crescentbase.com/api/v1/getCreateOP?sender=${sender}&pk=${pk}&chain_id=${chainId}`;
     const result = await fetch(url);
-    console.log('===result = ',result);
     if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
-        throw new Error("getCreateOP fail!");
+        return null;
     }
     return result.data;
 }
@@ -175,21 +174,19 @@ export const sendOp = async (rpcUrl, op) => {
 }
 
 
-export const checkAndSendOp = async (op, sender) => {
-    const chainIds = [1, 56, 137, 42161];
+export const checkAndSendOp = async (op, sender, chainId) => {
     const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
-    for (const chainId of chainIds) {
-        const targetUrl = `${url}${chainId}`;
-        try {
-            const hasSender = await hasSender(targetUrl, sender);
-            if (hasSender) {
-                continue;
-            }
-            await sendOp(targetUrl, op);
-        } catch (e) {
-            console.error("checkAndSendOp sendOp", e);
+    const targetUrl = `${url}${chainId}`;
+    try {
+        const hasSender = await hasSender(targetUrl, sender);
+        if (hasSender) {
+            return true;
         }
+        await sendOp(targetUrl, op);
+    } catch (e) {
+        console.error("checkAndSendOp sendOp", e);
     }
+    return false;
 }
 
 export const getSender = async (email) => {

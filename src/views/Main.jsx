@@ -37,11 +37,11 @@ import {
     LOCAL_STORAGE_EMAIL,
     LOCAL_STORAGE_GET_OP_DATE,
     LOCAL_STORAGE_ONGOING_INFO,
-    LOCAL_STORAGE_PUBLIC_ADDRESS
+    LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
 import {checkAndSendOp, entryPoint, getCreateOP, getOp} from "../helpers/UserOp";
-const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
-const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
+// const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
+// const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -64,7 +64,6 @@ export default (props)=>{
     const { navigate, navigator, ongoing, showOngoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
-    const [hiddenIds, setHiddenIds] = useState([]);
     const [ongoingNum, setOngoingNum] = useState(1);
 
     const goAsset = (item) => {
@@ -74,28 +73,51 @@ export default (props)=>{
     useEffect(() => {
         const interval = setInterval(async () => {
             if (wallet) {
+                const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
+                if (sendOps.length === EnableChainTypes.length - 1) {
+                    clearInterval(interval);
+                    return;
+                }
                 const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const pk = await wallet.getAddress();
-                let op;
-                const preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
+                let preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
+                if (!preDate) {
+                    preDate = String(new Date().getTime());
+                    localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                }
                 try {
                     if (preDate === "fail") {
                         callToNativeMsg("error;create", platform);
+                        clearInterval(interval);
                         return;
                     }
-                    op = await getCreateOP(sender, pk);
-                    console.log('==op = ', op)
-                    if (op) {
-                        checkAndSendOp(op, sender);
+                    for (const chainId of EnableChainTypes) {
+                        if (chainId !== ChainType.All) {
+                            let op = await getCreateOP(sender, pk, chainId);
+                            if (op !== null && preDate !== 'success') {
+                                preDate = 'success';
+                                localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                            }
+                            if (op) {
+                                const hasSend = await checkAndSendOp(op, sender, chainId);
+                                if (hasSend) {
+                                    sendOps.push(chainId);
+                                }
+                            }
+                        }
+                    }
+                    if (sendOps.length > 0) {
+                        localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
                     }
                 } catch (error) {
                     console.log('===getCreateOP = ', error);
                 }
-                if (!op) {
+                if (preDate !== 'success') {
                     const nowDate = new Date().getTime();
-                    if (nowDate - preDate > 1 * 60 * 1000) {
+                    if (nowDate - Number(preDate) > 1 * 60 * 1000) {
                         callToNativeMsg("error;create", platform);
                         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
+                        clearInterval(interval);
                     }
                 }
             }
@@ -115,12 +137,7 @@ export default (props)=>{
                 const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
                 setAccount(address);
                 emailAccount && setEmailAccount(emailAccount);
-                const storedIds = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HIDDEN_ID));
-                if (storedIds) {
-                    setHiddenIds(storedIds);
-                }
-                const storedTokens = JSON.parse(localStorage.getItem(LOCAL_STORAGE_OTHER_TOKENS));
-                fetchData(account);
+                fetchData(address);
             }
 
             const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
@@ -133,31 +150,8 @@ export default (props)=>{
                 showOngoing(false);
             }
             fetchOnGoings();
-            //fetch ongoing 数据
-            // localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO);
-            // setTransationLoading(true);
         }
     }, [navigator]);
-
-    const handleAddHiddenId = (id) => {
-        let storageId = [];
-        if (hiddenIds.includes(id)) {
-            storageId = hiddenIds.filter((hiddenId) => hiddenId !== id);
-            setHiddenIds(storageId);
-        } else {
-            storageId = [...hiddenIds, id];
-            setHiddenIds(storageId);
-        }
-        localStorage.setItem(LOCAL_STORAGE_HIDDEN_ID, JSON.stringify(storageId));
-    };
-
-    const handleRemoveHiddenId = (id) => {
-        let storageId = hiddenIds.filter((selectedId) => selectedId !== id);
-        setHiddenIds(storageId);
-        localStorage.setItem(LOCAL_STORAGE_HIDDEN_ID, JSON.stringify(storageId));
-    };
-
-    const isHiddenId = (id) => hiddenIds.includes(id);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -212,9 +206,6 @@ export default (props)=>{
                 }
                 const assets = [];
                 tokens.map((item, index) => {
-                    // if (hiddenId.includes(item.id)) {
-                    //     return null;
-                    // }
                     const amount = renderAmount(item.balances, item.decimals);
                     const fullAmount = renderFullAmount(item.balances, item.decimals);
                     const balanceFiat = Number(renderBalanceFiat(item.balances, item.decimals, item.price));
@@ -270,9 +261,6 @@ export default (props)=>{
                 const assets = [];
 
                 tokens.map((item, index) => {
-                    if (isHiddenId(item.id)) {
-                        item.isHidden = true;
-                    }
                     item.tokenAddress = item.address;
                     item.chainId = item.chain_id;
                     const amount = renderAmount(item.balances, item.decimals);
@@ -299,13 +287,42 @@ export default (props)=>{
     };
 
     const addToken = (asset) => {
-        const url = HOST + '/api/v1/addToken?chain_id=' + asset.chain_id + '&account=' + account + '&address=' + asset.address + '&balances=' + (asset.balances || 0);
+        const url = HOST + '/api/v1/addToken?chain_id=' + asset.chainId + '&account=' + account + '&address=' + asset.tokenAddress + '&balances=' + (asset.balances || 0);
         fetch(url)
             .then(response => response.json())
-            .then(data => {
-                const tokens = data.data;
+            .then(result => {
                 asset.searchType = 0;
+                if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
+                    return;
+                }
+                const newData = [asset, ...data];
+                setData(newData);
+                if (!isSearch) {
+                    let newDisplayData = [asset, ...displayData];
+                    setDisplayData(newDisplayData);
+                }
+            }).catch(error => {
+            console.log(error)
+        });
+    }
 
+    const removeToken = (asset) => {
+        const url = HOST + '/api/v1/removeToken?chain_id=' + asset.chainId + '&account=' + account + '&address=' + asset.tokenAddress;
+        fetch(url)
+            .then(response => response.json())
+            .then(result => {
+                asset.searchType = 1;
+                if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
+                    return;
+                }
+                let newData = [...data];
+                newData = newData.filter(item => item.id !== asset.id);
+                setData(newData);
+                if (!isSearch) {
+                    let newDisplayData = [...displayData];
+                    newDisplayData = newDisplayData.filter(item => item.id !== asset.id);
+                    setDisplayData(newDisplayData);
+                }
             }).catch(error => {
             console.log(error)
         });
@@ -427,7 +444,7 @@ export default (props)=>{
     }
 
     const renderItemAction = (item) => {
-        const isAdd = isSearch && item.searchType === 1 && !item.isHidden;
+        const isAdd = isSearch && item.searchType === 1;
         const isDisable = item.nativeCurrency;
         return (
             <div className={'main-asset-item-action-base-layout'}>
@@ -558,10 +575,9 @@ export default (props)=>{
                                 const isDisable = item.nativeCurrency;
                                 if (!isDisable) {
                                     if (isAdd) {
-                                        handleRemoveHiddenId(item.id);
                                         addToken(item);
                                     } else {
-                                        handleAddHiddenId(item.id);
+                                        removeToken(item);
                                     }
                                 }
                             }}

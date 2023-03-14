@@ -20,7 +20,7 @@ export default (props)=>{
         const address = await wallet.getAddress();
         setAddress(address);
         localStorage.setItem('privateKey', privateKey);
-        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, null);
+        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, '');
 
         // const options = {scrypt: {N: 16384}};
         // wallet.encrypt('test123', options).then((keystoreKey) => {
