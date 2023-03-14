@@ -8,6 +8,7 @@ import {initReactI18next} from "react-i18next";
 import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
 import Loading from "./views/Loading";
+import {LOCAL_STORAGE_LANGUAGE} from "./helpers/StorageUtils";
 
 const EmailEntry = (props) => {
     const document = ensureDocument(props.document)
@@ -20,7 +21,7 @@ const EmailEntry = (props) => {
         console.log('account = ', account);
     }
 
-    const language = localStorage.getItem('language');
+    const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
     if (!i18n.use(initReactI18next).isInitialized) {
         i18n.use(initReactI18next).init({
             lng: language || props.language || 'en', // 默认语言

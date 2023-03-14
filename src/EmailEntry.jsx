@@ -9,6 +9,7 @@ import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
 import CreateLoading from "./views/CreateLoading";
 import SelectEmail from "./views/SelectEmail";
+import {LOCAL_STORAGE_LANGUAGE} from "./helpers/StorageUtils";
 
 const LoadingEntry = (props) => {
     const document = ensureDocument(props.document)
@@ -21,7 +22,7 @@ const LoadingEntry = (props) => {
         console.log('account = ', account);
     }
 
-    const language = localStorage.getItem('language');
+    const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
 
     if (!i18n.use(initReactI18next).isInitialized) {
         i18n.use(initReactI18next).init({

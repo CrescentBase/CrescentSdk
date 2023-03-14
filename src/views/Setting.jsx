@@ -6,6 +6,7 @@ import ic_back_white from "../assets/ic_back_white.png"
 import ic_setting_enter from "../assets/ic_setting_enter.png"
 import ic_setting_switch from "../assets/ic_setting_switch.png"
 import { useTranslation } from 'react-i18next';
+import {LOCAL_STORAGE_LANGUAGE} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
@@ -33,7 +34,7 @@ export default (props)=>{
 
                 <div className={'setting-item-wrap'} onClick={() => {
                     const nextLng = i18n.language == 'en' ? 'zh' : 'en';
-                    localStorage.setItem('language', 'nextLng');
+                    localStorage.setItem(LOCAL_STORAGE_LANGUAGE, nextLng);
                     i18n.changeLanguage(nextLng);
 
                 }}>

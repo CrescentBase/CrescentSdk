@@ -6,6 +6,7 @@ import Button from "../widgets/Button";
 import {ethers} from "ethers";
 import {callToNativeMsg} from "../helpers/Utils";
 import ConfigContext from "../contexts/ConfigContext";
+import {LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
@@ -57,13 +58,13 @@ export default (props)=>{
                 } else if (password !== password2) {
                     setIsWrongPw2(true);
                 } else {
-                    const privateKey = localStorage.getItem('privateKey');
+                    const privateKey = localStorage.getItem(LOCAL_STORAGE_TEMP_PV);
                     const wallet = new ethers.Wallet(privateKey);
                     setWallet(wallet);
                     const options = {scrypt: {N: 256}};
                     wallet.encrypt(password, options).then((keystoreKey) => {
-                        localStorage.setItem('walletKeystore', keystoreKey);
-                        localStorage.removeItem("privateKey")
+                        localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
+                        localStorage.removeItem(LOCAL_STORAGE_TEMP_PV)
                         navigate("Main");
                         callToNativeMsg(keystoreKey, platform)
                     });

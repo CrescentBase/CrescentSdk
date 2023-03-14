@@ -6,6 +6,7 @@ import Button from "../widgets/Button";
 import TextInput from "../widgets/TextInput";
 import {ethers} from "ethers";
 import ConfigContext from "../contexts/ConfigContext";
+import {LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
@@ -36,7 +37,7 @@ export default (props)=>{
                 } else {
 
 
-                    const walletKeystore = localStorage.getItem('walletKeystore');
+                    const walletKeystore = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE);
                     try {
                         let wallet = await ethers.Wallet.fromEncryptedJson(walletKeystore, password);
                         setWallet(wallet);

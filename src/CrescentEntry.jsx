@@ -10,6 +10,7 @@ import i18n from "i18next";
 import {initReactI18next} from "react-i18next";
 import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
+import {LOCAL_STORAGE_LANGUAGE} from "./helpers/StorageUtils";
 
 const CrescentEntry = (props) => {
     const document = ensureDocument(props.document)
@@ -22,7 +23,7 @@ const CrescentEntry = (props) => {
         console.log('account = ', account);
     }
 
-    const language = localStorage.getItem('language');
+    const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
 
     if (!i18n.use(initReactI18next).isInitialized) {
         i18n.use(initReactI18next).init({

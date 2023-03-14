@@ -6,7 +6,7 @@ import {ILocal } from '../locales/i18n'
 import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg, isPcPlatform} from "../helpers/Utils";
 import {ethers} from "ethers";
-import {LOCAL_STORAGE_GET_OP_DATE} from "../helpers/StorageUtils";
+import {LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_TEMP_PV} from "../helpers/StorageUtils";
 
 export default (props)=>{
 
@@ -19,7 +19,7 @@ export default (props)=>{
         const wallet = new ethers.Wallet(privateKey);
         const address = await wallet.getAddress();
         setAddress(address);
-        localStorage.setItem('privateKey', privateKey);
+        localStorage.setItem(LOCAL_STORAGE_TEMP_PV, privateKey);
         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, '');
 
         // const options = {scrypt: {N: 16384}};
