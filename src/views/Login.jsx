@@ -5,9 +5,11 @@ import {ILocal } from '../locales/i18n'
 import Button from "../widgets/Button";
 import TextInput from "../widgets/TextInput";
 import {ethers} from "ethers";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const { setWallet } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
 
@@ -37,6 +39,7 @@ export default (props)=>{
                     const walletKeystore = localStorage.getItem('walletKeystore');
                     try {
                         let wallet = await ethers.Wallet.fromEncryptedJson(walletKeystore, password);
+                        setWallet(wallet);
                         //0x0C1620C75447208E5EfF987Ab20Fb52Aa3Fcf348
                         //0x04aaacbe95e3cddc7e6dad42a6bf8c291f1fbec92890b4b40874aa1cac17bc9ccc03ae38d5114f21b79b1935be15361cd2f2257ce2f33523269b863410d6f2fede
                         navigate("Main");

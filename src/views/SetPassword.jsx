@@ -9,7 +9,7 @@ import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
-    const { platform } = useContext(ConfigContext);
+    const { platform, setWallet } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
     const [password2, setPassword2] = useState("");
@@ -59,6 +59,7 @@ export default (props)=>{
                 } else {
                     const privateKey = localStorage.getItem('privateKey');
                     const wallet = new ethers.Wallet(privateKey);
+                    setWallet(wallet);
                     const options = {scrypt: {N: 256}};
                     wallet.encrypt(password, options).then((keystoreKey) => {
                         localStorage.setItem('walletKeystore', keystoreKey);

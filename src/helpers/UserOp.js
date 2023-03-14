@@ -1,6 +1,7 @@
 import {ethers} from "ethers";
 import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils.js';
-import {rpcFetch} from "./FatchUtils.js";
+import {handleFetch, rpcFetch} from "./FatchUtils.js";
+import {HOST, RPCHOST} from "./Config";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -157,6 +158,7 @@ export const hasSender = async (rpcUrl, sender) => {
 export const getCreateOP = async (sender, pk) => {
     const url = `https://wallet.crescentbase.com/api/v1/getCreateOP/${sender}/${pk}`;
     const result = await fetch(url);
+    console.log('===result = ',result);
     if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
         throw new Error("getCreateOP fail!");
     }
@@ -173,18 +175,9 @@ export const sendOp = async (rpcUrl, op) => {
 }
 
 
-export const checkAndSendOp = async (sender, pk) => {
+export const checkAndSendOp = async (op, sender) => {
     const chainIds = [1, 56, 137, 42161];
     const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
-    let op;
-    try {
-        op = await getCreateOP(sender, pk);
-    } catch (e) {
-        console.error("checkAndSendOp getCreateOP", e);
-    }
-    if (!op) {
-        return;
-    }
     for (const chainId of chainIds) {
         const targetUrl = `${url}${chainId}`;
         try {
@@ -197,4 +190,16 @@ export const checkAndSendOp = async (sender, pk) => {
             console.error("checkAndSendOp sendOp", e);
         }
     }
+}
+
+export const getSender = async (email) => {
+    const url = RPCHOST + "/api/v1/getAAddress?email=" + email;
+    try {
+        const json = await handleFetch(url);
+        const data = json.data;
+        return data;
+    } catch (error) {
+        console.log("==getSender = ", error);
+    }
+    return null;
 }

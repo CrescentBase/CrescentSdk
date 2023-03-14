@@ -38,7 +38,7 @@ import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate, showOngoing } = useContext(NavigateContext);
-    const { ChainDisplayNames } = useContext(ConfigContext);
+    const { ChainDisplayNames, wallet } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
     const [addressCorrect, setAddressCorrect] = useState(false);
     const [addressInput, setAddressInput] = useState('');
@@ -542,12 +542,11 @@ export default (props)=>{
         uo.maxFeePerGas = maxFeePerGas.toHexString();
         const chainId = NetworkConfig[asset.chainType].MainChainId;
         const txId = getRequestId(uo, chainId);
-        const privateKey = '0x81beea7a31489439120267006588dc4f8c58b7b20f4ddcc0711d37989fe0ed72';
+
         const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
-        const wallet = new ethers.Wallet(privateKey, provider);
-
-        wallet.signMessage(txId).then(async signedTx => {
+        const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
+        walletNew.signMessage(txId).then(async signedTx => {
             try {
                 uo.signature = signedTx;
                 const txHash = await sendUserOperation(provider, uo);

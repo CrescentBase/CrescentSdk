@@ -6,6 +6,7 @@ import {ILocal } from '../locales/i18n'
 import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg, isPcPlatform} from "../helpers/Utils";
 import {ethers} from "ethers";
+import {LOCAL_STORAGE_GET_OP_DATE} from "../helpers/StorageUtils";
 
 export default (props)=>{
 
@@ -19,7 +20,7 @@ export default (props)=>{
         const address = await wallet.getAddress();
         setAddress(address);
         localStorage.setItem('privateKey', privateKey);
-        localStorage.setItem('address', address);
+        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, null);
 
         // const options = {scrypt: {N: 16384}};
         // wallet.encrypt('test123', options).then((keystoreKey) => {

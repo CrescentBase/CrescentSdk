@@ -28,13 +28,18 @@ import {ChainType, HOST, NetworkConfig, EnableChainTypes, RPCHOST} from "../help
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
-import {callUrlToNative} from "../helpers/Utils";
+import {callToNativeMsg, callUrlToNative} from "../helpers/Utils";
 import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
 import {ethers} from "ethers";
 import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
 import BigNumber from 'bignumber.js';
-import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
-import {entryPoint} from "../helpers/UserOp";
+import {
+    LOCAL_STORAGE_EMAIL,
+    LOCAL_STORAGE_GET_OP_DATE,
+    LOCAL_STORAGE_ONGOING_INFO,
+    LOCAL_STORAGE_PUBLIC_ADDRESS
+} from "../helpers/StorageUtils";
+import {checkAndSendOp, entryPoint, getCreateOP, getOp} from "../helpers/UserOp";
 const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
 const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
 
@@ -55,7 +60,7 @@ export default (props)=>{
     const [emailAccount, setEmailAccount] = useState('test@gmail.com');
     const [account, setAccount] = useState('0x6c3f14da26556585706c02af737a44e67dc6954d');
     const [swipeKey, setSwipeKey] = useState('');
-    const { platform, ChainDisplayNames } = useContext(ConfigContext);
+    const { platform, ChainDisplayNames, wallet } = useContext(ConfigContext);
     const { navigate, navigator, ongoing, showOngoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
@@ -66,53 +71,37 @@ export default (props)=>{
         navigate('Asset', { asset: item });
     }
 
-    const goHistory = async () => {
-        navigate('History');
-    }
-
-    // decGWEI =  0.3
-    // index.bundle.js:58 ===wei =  BigNumber$1 {_hex: '0x11e1a300', _isBigNumber: true}
-    useEffect(async () => {
-        // const gwei = ethers.utils.parseEther(String(0.3)).div(1000000000); //decGWEI有小数点的时候奔溃
-        // console.log('==gwei = ', gwei);
-        // const wei = ethers.BigNumber.from(gwei);
-        // console.log('===wei = ', wei.toString());
-        //
-        // const a = ethers.BigNumber.from('100');
-        // console.log('===a = ', a);
-        // const d = a.mul(2);
-        // console.log('===d= ', d.toString());
-
-        // const Ethereum = await getSuggestedGasEstimates(ChainType.Ethereum);
-        // console.log('==Ethereum = ', Ethereum);
-        //
-        // const Polygon = await getSuggestedGasEstimates(ChainType.Polygon);
-        // console.log('==Polygon = ', Polygon);
-        //
-        // const Bsc = await getSuggestedGasEstimates(ChainType.Bsc);
-        // console.log('==Bsc = ', Bsc);
-        //
-        // const Arbitrum = await getSuggestedGasEstimates(ChainType.Arbitrum);
-        // console.log('==Arbitrum = ', Arbitrum);
-
-        //x
-        // const { rpcTarget, chainId, ticker, nickname } = NetworkConfig[ChainType.Bsc].Networks['BSC Mainnet'].provider;
-        // let provider;
-        // console.log(rpcTarget, nickname);
-        // if (rpcTarget) {
-        //     provider = new ethers.providers.JsonRpcProvider(rpcTarget, { chainId: 56, name: 'bsc' });
-        // }
-        // const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await provider.getFeeData();
-        // console.log(maxPriorityFeePerGas, baseFeePerGas, gasPrice);
-        //
-        // const block = await provider.send('eth_getBlockByNumber', ['latest', false]);
-        // const maxPriorityFeePerGas1 = block.maxPriorityFeePerGas;
-        // console.log('=maxPriorityFeePerGas1 = ', maxPriorityFeePerGas1);
-
-        // const ethQuery = new ethers.providers.EtherscanProvider('bsc');
-        // const { maxPriorityFeePerGas, baseFeePerGas, gasPrice } = await ethQuery.getFeeData();
-
-    }, [])
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (wallet) {
+                const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+                const pk = await wallet.getAddress();
+                let op;
+                const preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
+                try {
+                    if (preDate === "fail") {
+                        callToNativeMsg("error;create", platform);
+                        return;
+                    }
+                    op = await getCreateOP(sender, pk);
+                    console.log('==op = ', op)
+                    if (op) {
+                        checkAndSendOp(op, sender);
+                    }
+                } catch (error) {
+                    console.log('===getCreateOP = ', error);
+                }
+                if (!op) {
+                    const nowDate = new Date().getTime();
+                    if (nowDate - preDate > 1 * 60 * 1000) {
+                        callToNativeMsg("error;create", platform);
+                        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
+                    }
+                }
+            }
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [wallet]);
 
     useEffect(() => {
         if (navigator === "Main") {
@@ -122,9 +111,8 @@ export default (props)=>{
                 var width = element.clientWidth;
                 const cardHeight = (width - 40) * 1.0 /319.0 * 100;
                 setCardHeight(cardHeight);
-                const address = localStorage.getItem("address") || account;
-                const emailAccount = localStorage.getItem('emailAccount');
-                console.log('==address = ', address);
+                const address = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS) || account;
+                const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
                 setAccount(address);
                 emailAccount && setEmailAccount(emailAccount);
                 const storedIds = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HIDDEN_ID));
@@ -132,7 +120,7 @@ export default (props)=>{
                     setHiddenIds(storedIds);
                 }
                 const storedTokens = JSON.parse(localStorage.getItem(LOCAL_STORAGE_OTHER_TOKENS));
-                fetchData(storedIds);
+                fetchData(account);
             }
 
             const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
@@ -203,7 +191,7 @@ export default (props)=>{
         }
     }
 
-    const fetchData = async () => {
+    const fetchData = async (account) => {
         setDataLoading(true);
         let chainIds = "[";
         EnableChainTypes.map((item, index) => {
@@ -219,6 +207,7 @@ export default (props)=>{
                 const tokens = data.data;
                 if (!tokens || tokens.length === 0) {
                     setData([]);
+                    setDataLoading(false);
                     return;
                 }
                 const assets = [];
