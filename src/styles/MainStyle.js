@@ -331,6 +331,14 @@ export default () => {
             padding-top: 20px;
             align-items: center;
         }
+        
+        .main-search-lottie-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
        
         .main-search-empty-icon {
             width: 84px;

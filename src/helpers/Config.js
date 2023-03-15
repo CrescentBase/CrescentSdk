@@ -29,7 +29,7 @@ export const ChainType = {
     Bsc: 0x08
 }
 
-export const EnableChainTypes = [ChainType.All, ChainType.Ethereum, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];
+export const EnableChainTypes = [ChainType.All, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];//[ChainType.All, ChainType.Ethereum, ChainType.Polygon, ChainType.Arbitrum, ChainType.Bsc];
 
 export const NetworkConfig = {
     [ChainType.All]: {

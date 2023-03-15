@@ -2,7 +2,13 @@ import {ChainType, NetworkConfig, RPCHOST} from "./Config";
 import {ethers} from "ethers";
 import {renderFromWei, weiToFiat} from "./number";
 import {CURRENCIES} from "./currencies";
-import {getGasLimit, getRequestId, getUserOperationByNativeCurrency, getUserOperationByToken} from "./UserOp";
+import {
+	getGasLimit,
+	getRequestId,
+	getUserOperationByNativeCurrency,
+	getUserOperationByToken,
+	UserOperationDefault
+} from "./UserOp";
 
 const AVERAGE_GAS = 20;
 const LOW_GAS = 20;
@@ -23,12 +29,12 @@ const testUo = {
 	"signature": "0x"
 };
 
-export async function getSuggestedGasEstimates(asset, tx, toAddress, value) {
+export async function getSuggestedGasEstimates(wallet, asset, tx, toAddress, value) {
 	let chainType = ChainType.Ethereum;
 	if (asset) {
 		chainType = asset.chainType;
 	}
-	const gasEstimates = await getBasicGasEstimates(chainType, asset, tx, toAddress, value);
+	const gasEstimates = await getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value);
 	if (chainType !== ChainType.Bsc) {
 		let suggestedGasFees = await getSuggestedGasFees(chainType);
 		if (!suggestedGasFees) {
@@ -219,31 +225,36 @@ export async function estimateGas(transaction) {
 }
 
 
-export async function getBasicGasEstimates(chainType, asset, tx, toAddress, value) {
+export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value) {
 	const chainId = NetworkConfig[chainType].MainChainId;
-	const url = RPCHOST + "/api/v1/rpc/" + chainId;
+	const url = `https://bundler-${chainId}.crescentbase.com/rpc`;//RPCHOST + "/api/v1/rpc/" + chainId;
 	const provider = new ethers.providers.JsonRpcProvider(url);
 	let uo, averageGasPrice, gasLimit, basicGasEstimates;
 	if (asset) {
 		try {
 			const sender = asset.account;
-			let uo;
 			if (asset.nativeCurrency) {
-				uo = await getUserOperationByNativeCurrency(provider, sender, toAddress, value);
+				uo = await getUserOperationByNativeCurrency(wallet, provider, chainId, sender, toAddress, value);
 			} else {
-				uo = await getUserOperationByToken(provider, sender, asset.tokenAddress, toAddress, value);
+				uo = await getUserOperationByToken(wallet, provider, sender, chainId, asset.tokenAddress, toAddress, value);
 			}
-			gasLimit = ethers.BigNumber.from(getGasLimit(uo));
+			console.log('===uo = ', uo);
+			if (uo) {
+				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
+			} else {
+				gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+			}
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
+			console.log('==getBasicGasEstimates error = ', error);
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
-			uo = testUo;
+			uo = { ...UserOperationDefault };
 		}
 	} else {
 		averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
-		uo = testUo;
+		uo = { ...UserOperationDefault };
 	}
 
 	try {

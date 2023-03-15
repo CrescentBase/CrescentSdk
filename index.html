@@ -21,8 +21,10 @@
 </div>
 
 <script>
+  // localStorage.setItem('storage_wallet_keystore', '{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}')
   function initLoad(params) {
-    const keystoreKey = localStorage.getItem('walletKeystore');
+    const keystoreKey = localStorage.getItem('storage_wallet_keystore');
+    console.log('===keystoreKey = ', keystoreKey);
     if (keystoreKey) {
       loadMain(params)
     } else {
@@ -103,9 +105,11 @@
     let destroy = CrescentSDK.CrescentEntry(allParams);
   }
 
-  // initLoad();
+  // loadSelectEmail();
+  //initLoad({platform: 3});
   // loadMain({initView: "SetPassword"});
-  //loadMain({initView: "Main"});
+  // loadMain({initView: "Main"});
+  // loadMain({initView: "CreateLoading", emailAccount: 'test2023abc@outlook.com', platform: 3})
 
   // initParams();
   // button.addEventListener("click", func);

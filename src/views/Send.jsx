@@ -32,8 +32,8 @@ import {
 import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee} from "../helpers/custom-gas";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
-import {getRequestId, sendUserOperation} from "../helpers/UserOp";
-import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
+import {getNonce, getRequestId, sendUserOperation} from "../helpers/UserOp";
+import {LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PUBLIC_ADDRESS} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
@@ -46,6 +46,7 @@ export default (props)=>{
     const [dollerInput, setDollerInput] = useState('');
     const [invalidAddressPop, setInvalidAddressPop] = useState(false);
     const [transactionErrorPop, setTransactionErrorPop] = useState(false);
+    const [transactionErrorText, setTransactionErrorText] = useState('');
     const asset = props.params.asset;
     const tx = props.params.tx;
     const [gasSpeedSelected, setGasSpeedSelected] =  useState(asset.chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2)
@@ -98,7 +99,7 @@ export default (props)=>{
         const nativeAsset = await fetchNaitveAsset();
         setNativeAsset(nativeAsset);
         const value = ethers.utils.parseUnits(balanceInput, asset.decimals);
-        let suggestedGasFees = await getSuggestedGasEstimates(asset, tx, addressInput, value.toHexString());
+        let suggestedGasFees = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value.toHexString());
         suggestedGasFees = fixGas(suggestedGasFees);
         setSuggestedGasFees(suggestedGasFees);
         const customGasPrice = renderShortValue(
@@ -117,7 +118,7 @@ export default (props)=>{
     const reloadBasicEstimates = async () => {
         setReloadGas(true);
         const value = ethers.utils.parseUnits(balanceInput, asset.decimals);
-        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(asset, tx, addressInput, value.toHexString());
+        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value.toHexString());
         setReloadGas(false);
         if (!selectGas) {
             return;
@@ -527,7 +528,7 @@ export default (props)=>{
         return suggestedGasFees;
     };
 
-    const sendTransaction = () => {
+    const sendTransaction = async () => {
         const uo = suggestedGasFees.uo;
         let maxFeePerGas, maxPriorityFeePerGas;
         if (selectGas) {
@@ -535,35 +536,61 @@ export default (props)=>{
         } else {
             maxFeePerGas = customTotalGas;
         }
+        console.log('===uo = ', uo);
+        console.log('====maxFeePerGas = ', maxFeePerGas);
+        console.log('====maxFeePerGas.toHexString() = ', maxFeePerGas.toHexString());
+        uo.maxFeePerGas = maxFeePerGas.toHexString();
         if (suggestedGasFees.isEIP1559) {
             maxPriorityFeePerGas = maxFeePerGas.sub(suggestedGasFees.estimatedBaseFee);
             uo.maxPriorityFeePerGas = maxPriorityFeePerGas.toHexString();
+        } else {
+            uo.maxPriorityFeePerGas = uo.maxFeePerGas;
         }
-        uo.maxFeePerGas = maxFeePerGas.toHexString();
         const chainId = NetworkConfig[asset.chainType].MainChainId;
+        const account = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS)
+        const nonce = await getNonce(account, chainId);
+        console.log('====nonce = ', nonce);
+        const bb = nonce.toHexString();
+        console.log('===bb = ', bb);
+        uo.nonce = bb;
         const txId = getRequestId(uo, chainId);
 
-        const provider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId);
+        const provider = new ethers.providers.JsonRpcProvider(`https://bundler-${chainId}.crescentbase.com/rpc`);
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
         const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
-        walletNew.signMessage(txId).then(async signedTx => {
+        walletNew.signMessage(ethers.utils.arrayify(txId)).then(async signedTx => {
             try {
                 uo.signature = signedTx;
+                console.log('===sendTransaction = uo = ', uo);
                 const txHash = await sendUserOperation(provider, uo);
+                console.log('===txHash = ', txHash);
                 const ongoingAsset =  {
                     ...asset,
                     txHash,
                     txAmount: balanceInput,
-                    txTime: new Date().getTime()
+                    txTime: new Date().getTime(),
+                    toAddress: addressInput
                 };
-                const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || {};
+                const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
                 if (ongoingInfos) {
                     ongoingInfos.push(ongoingAsset);
                 }
                 localStorage.setItem(LOCAL_STORAGE_ONGOING_INFO, JSON.stringify(ongoingInfos));
                 showOngoing(true);
+                if (tx) {
+                    navigate('Main');
+                } else {
+                    navigate('Asset', { asset });
+                }
             } catch (error) {
-                console.log('===error sendUserOperation = ', error);
+                const message = String(error.message);
+
+                const regex = `"message\\\\":\\\\"(.*?)\\\\"`
+                const match = message.match(regex);
+                const errorMessage = match ? match[1] : null;
+                if (errorMessage) {
+                    setTransactionErrorText(errorMessage);
+                }
                 setTransactionErrorPop(true);
             }
             setReady(true);
@@ -737,7 +764,7 @@ export default (props)=>{
                         {t('transaction_error')}
                     </span>
                     <span className={'send-pop-title-desc'}>
-                        {t('not_enough_gas')}
+                        {transactionErrorText || t('try_again')}
                     </span>
                     <Button text={t('ok')} style={{marginTop: 24, width: 205, height: 36, marginLeft: 0, marginRight: 0}} onClick={() => {
                         setTransactionErrorPop(false);

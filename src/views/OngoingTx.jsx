@@ -11,7 +11,7 @@ import loading_ongoing from "../assets/loading_ongoing.json";
 import Lottie from "react-lottie";
 import ConfigContext from "../contexts/ConfigContext";
 import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
-import {isSameDay} from "../helpers/DateUtils";
+import {formatTimestamp, isSameDay} from "../helpers/DateUtils";
 import {renderShortValue} from "../helpers/number";
 export default (props)=>{
     const { t } = useTranslation();
@@ -80,7 +80,7 @@ export default (props)=>{
                     <img className={'ongoingtx-item-copy-icon'} src={ic_copy} onClick={() => showTxHashCopied(item.txHash)}/>
                     <div className={'flex-full'}/>
                     <span className={'ongoingtx-item-txhash-text'}>
-                        {item.time}
+                        {formatTimestamp(item.txTime)}
                     </span>
                 </div>
             </div>

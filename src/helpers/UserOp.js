@@ -1,7 +1,8 @@
 import {ethers} from "ethers";
 import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils.js';
 import {handleFetch, rpcFetch} from "./FatchUtils.js";
-import {HOST, RPCHOST} from "./Config";
+import {HOST, NetworkConfig, RPCHOST} from "./Config";
+import BigNumber from "bignumber.js";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -14,13 +15,13 @@ export const UserOperationDefault = {
     initCode: '0x',
     callData: '0x',
     callGas: 0,
-    verificationGas: '0x186A0',
-    preVerificationGas: '0x5208',
-    maxFeePerGas: '0x0',
-    maxPriorityFeePerGas: '0x0',
     paymaster: ethers.constants.AddressZero,
     paymasterData: '0x',
-    signature: '0x'
+    signature: '0x',
+    maxFeePerGas: 0,
+    maxPriorityFeePerGas: 0,
+    preVerificationGas: 0,
+    verificationGas: 10e6
 };
 
 export const getExecFromEntryPointCallData = (to, value, data) => {
@@ -43,7 +44,7 @@ export const getWalletTransferCallData = (contractAddress, toAddress, value, amo
     return getExecFromEntryPointCallData(contractAddress, value, data);
 }
 
-export const getUserOperationByNativeCurrency = async (provider, sender, toAddress, value) => {
+export const getUserOperationByNativeCurrency = async (wallet, provider, chainId, sender, toAddress, value) => {
     if (!toAddress) {
         throw new Error("to address is empty");
     }
@@ -51,10 +52,10 @@ export const getUserOperationByNativeCurrency = async (provider, sender, toAddre
         throw new Error("value is empty");
     }
     const data = getTransferCallData(toAddress, value);
-    return getUserOperation(provider, sender, data);
+    return getUserOperation(wallet, provider, chainId, sender, data);
 }
 
-export const getUserOperationByToken = async (provider, sender, contractAddress, toAddress, amount) => {
+export const getUserOperationByToken = async (wallet, provider, chainId, sender, contractAddress, toAddress, amount) => {
     if (!contractAddress) {
         throw new Error("contract address is empty");
     }
@@ -65,10 +66,10 @@ export const getUserOperationByToken = async (provider, sender, contractAddress,
         throw new Error("amount is empty");
     }
     const data = getWalletTransferCallData(contractAddress, toAddress, '0x0', amount);
-    return getUserOperation(provider, sender, data);
+    return getUserOperation(wallet, provider, chainId, sender, data);
 }
 
-export const getUserOperationByTx = async (provider, sender, tx) => {
+export const getUserOperationByTx = async (wallet, provider, chainId, sender, tx) => {
     if (!tx || !tx.to || !(tx.data || tx.value)) {
         throw new Error("Tx missing parameter");
     }
@@ -79,20 +80,48 @@ export const getUserOperationByTx = async (provider, sender, tx) => {
     } else {
         data = getTransferCallData(tx.to, value);
     }
-    return getUserOperation(provider, sender, data);
+    return getUserOperation(wallet, provider, chainId, sender, data);
 }
 
-export const getUserOperation = async (provider, sender, callData) => {
+export const getUserOperation = async (wallet, provider, chainId, sender, callData) => {
+    console.log('===UserOperationDefault = ', UserOperationDefault);
+    console.log('===chianId = ', chainId);
     const uo = {
         ...UserOperationDefault,
         sender,
         callData
     }
-    const result = await provider.send("eth_estimateUserOperationGas", [uo]);
-    uo.verificationGas = result.verificationGas;
-    uo.preVerificationGas = result.preVerificationGas;
-    uo.callGas = result.callGas;
-    return uo;
+    const kk = {
+        ...uo
+    }
+    console.log('====uo = ', kk);
+    console.log('====callData = ', callData);
+    const txId = getRequestId(uo, Number(chainId));
+    console.log('===txId= ', txId);
+
+    const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
+    const privateKey = walletNew.privateKey;
+    const publicKey = await walletNew.getAddress();
+    console.log('===privateKey = ', privateKey, ' ; publicKey = ', publicKey);
+    try {
+        const signedTx = await walletNew.signMessage(ethers.utils.arrayify(txId));
+        console.log('====signedTx = ', signedTx);
+        uo.signature = signedTx;
+        console.log('====uo 222= ', uo);
+        const result = await provider.send("eth_estimateUserOperationGas", [uo, entryPoint]);
+        console.log('====result = ', result);
+        console.log('====result.verificationGas = ', result.verificationGas);
+        console.log('===new BigNumber(result.verificationGas) = ', new BigNumber(result.verificationGas));
+        console.log('===new BigNumber(result.verificationGas).multipliedBy(1.5) = ', new BigNumber(result.verificationGas).multipliedBy(1.5));
+        uo.verificationGas = '0x' + new BigNumber(result.verificationGas).multipliedBy(3).toString(16);
+        console.log('===uo.verificationGas = ', uo.verificationGas);
+        uo.preVerificationGas = result.preVerificationGas;
+        uo.callGas = result.callGas;
+        return uo;
+    } catch (error) {
+        console.log('===getUserOperation = ', error)
+    }
+    return null;
 }
 
 
@@ -157,16 +186,18 @@ export const hasSender = async (rpcUrl, sender) => {
 
 export const getCreateOP = async (sender, pk, chainId) => {
     const url = `https://wallet.crescentbase.com/api/v1/getCreateOP?sender=${sender}&pk=${pk}&chain_id=${chainId}`;
-    const result = await fetch(url);
+    console.log('===url = ', url);
+    const result = await handleFetch(url);
     if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
         return null;
     }
     return result.data;
 }
 
-export const sendOp = async (rpcUrl, op) => {
+export const sendOp = async (rpcUrl, op, chainId) => {
     const body = {jsonrpc:"2.0",method:"eth_sendUserOperation",params:[op, entryPoint],id:8};
     const result = await rpcFetch(rpcUrl, body);
+    console.log('===result = ', chainId, result);
     if (!result || !result.result) {
         throw new Error(`sendOp error ${result}`);
     }
@@ -176,13 +207,14 @@ export const sendOp = async (rpcUrl, op) => {
 
 export const checkAndSendOp = async (op, sender, chainId) => {
     const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
-    const targetUrl = `${url}${chainId}`;
+    const hasSendUrl = `${url}${chainId}`;
+    const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`//`${url}${chainId}`;
     try {
-        const hasSender = await hasSender(targetUrl, sender);
-        if (hasSender) {
+        const hasSenderResult = await hasSender(hasSendUrl, sender);
+        if (hasSenderResult) {
             return true;
         }
-        await sendOp(targetUrl, op);
+        sendOp(targetUrl, op, chainId);
     } catch (e) {
         console.error("checkAndSendOp sendOp", e);
     }
@@ -196,7 +228,32 @@ export const getSender = async (email) => {
         const data = json.data;
         return data;
     } catch (error) {
+
         console.log("==getSender = ", error);
     }
     return null;
+}
+
+
+export const getNonce = async (sender, chainId) => {
+    const abi = [
+        {
+            "inputs": [],
+            "name": "nonce",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+    const contractAddress = sender;
+    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v1/rpc/' + chainId);
+    const contract = new ethers.Contract(contractAddress, abi, provider);
+    const nonce = await contract.nonce();
+    return nonce;
 }

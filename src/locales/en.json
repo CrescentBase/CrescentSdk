@@ -60,7 +60,7 @@
   "usd": "USD",
   "invalid_address": "Invalid address",
   "transaction_error": "Transaction error",
-  "not_enough_gas": "Not enough gas",
+  "try_again": "Try again",
   "ok": "OK",
   "confirm": "Confirm",
   "to": "To",

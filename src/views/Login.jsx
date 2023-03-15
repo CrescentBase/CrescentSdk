@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
 import img_logo from '../assets/img_logo.png';
 import {ILocal } from '../locales/i18n'

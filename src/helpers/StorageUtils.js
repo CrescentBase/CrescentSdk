@@ -6,3 +6,5 @@ export const LOCAL_STORAGE_TEMP_PV = "storage_temp_pv"
 export const LOCAL_STORAGE_SEND_OP_SUCCESS = "storage_sendop_success";
 export const LOCAL_STORAGE_LANGUAGE = 'storage_language';
 export const LOCAL_STORAGE_WALLET_KEYSTORE = 'storage_wallet_keystore';
+export const LOCAL_STORAGE_HAS_SEND_TEMP = "storage_has_send_temp";
+export const LOCAL_STORAGE_HAS_SEND_TEMP_DATE = "storage_has_send_temp_date"

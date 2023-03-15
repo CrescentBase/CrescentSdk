@@ -33,6 +33,16 @@ export default () => {
             overflow: hidden;
         }
         
+        .select-email-email-lottie-layout {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .select-email-email-layout-inter {
             width: 100%;
             flex: 1;

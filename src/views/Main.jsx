@@ -35,7 +35,7 @@ import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
 import BigNumber from 'bignumber.js';
 import {
     LOCAL_STORAGE_EMAIL,
-    LOCAL_STORAGE_GET_OP_DATE,
+    LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
     LOCAL_STORAGE_ONGOING_INFO,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
@@ -74,34 +74,54 @@ export default (props)=>{
         const interval = setInterval(async () => {
             if (wallet) {
                 const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
-                if (sendOps.length === EnableChainTypes.length - 1) {
+                console.log('===sendOps = ', sendOps);
+                if (sendOps.length >= EnableChainTypes.length - 1) {
+                    clearInterval(interval);
+                    return;
+                }
+                const hasSendTemps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP)) || [];
+                console.log('===hasSendTemps = ', hasSendTemps);
+                if (hasSendTemps.length >= EnableChainTypes.length - 1) {
                     clearInterval(interval);
                     return;
                 }
                 const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
-                const pk = await wallet.getAddress();
+                const pksync = await wallet.getAddress();
+                const pk = pksync.toLowerCase();
                 let preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
                 if (!preDate) {
                     preDate = String(new Date().getTime());
                     localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
                 }
+                console.log('===sendOps = ', sendOps);
                 try {
                     if (preDate === "fail") {
                         callToNativeMsg("error;create", platform);
                         clearInterval(interval);
                         return;
                     }
-                    for (const chainId of EnableChainTypes) {
-                        if (chainId !== ChainType.All) {
-                            let op = await getCreateOP(sender, pk, chainId);
-                            if (op !== null && preDate !== 'success') {
-                                preDate = 'success';
-                                localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
-                            }
-                            if (op) {
-                                const hasSend = await checkAndSendOp(op, sender, chainId);
-                                if (hasSend) {
-                                    sendOps.push(chainId);
+                    for (const chainType of EnableChainTypes) {
+                        if (chainType !== ChainType.All) {
+                            const chainId = NetworkConfig[chainType].MainChainId;
+                            if (!sendOps.includes(chainId)) {
+                                let op = await getCreateOP(sender, pk, chainId);
+                                if (op !== null && preDate !== 'success') {
+                                    preDate = 'success';
+                                    localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                                }
+                                console.log('===chainId = ', chainId, ' ; op = ', op);
+                                if (op) {
+                                    if (!hasSendTemps.includes(chainId)) {
+                                        console.log('====hasSendTemps no include');
+                                        const hasSend = await checkAndSendOp(op, sender, chainId);
+                                        if (hasSend) {
+                                            sendOps.push(chainId);
+                                        }
+                                        hasSendTemps.push(chainId);
+                                        localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE, String(new Date().getTime()));
+                                    } else {
+                                        console.log('====hasSendTemps.includes(chainId)');
+                                    }
                                 }
                             }
                         }
@@ -109,25 +129,35 @@ export default (props)=>{
                     if (sendOps.length > 0) {
                         localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
                     }
+                    if (hasSendTemps.length > 0) {
+                        localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
+                    }
                 } catch (error) {
                     console.log('===getCreateOP = ', error);
                 }
                 if (preDate !== 'success') {
                     const nowDate = new Date().getTime();
-                    if (nowDate - Number(preDate) > 1 * 60 * 1000) {
+                    if (nowDate - Number(preDate) > 1 * 60 * 60 * 1000) {
                         callToNativeMsg("error;create", platform);
                         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
                         clearInterval(interval);
                     }
                 }
+
+                // clearInterval(interval);
             }
-        }, 10000);
+        }, 10 * 1000);
         return () => clearInterval(interval);
     }, [wallet]);
 
     useEffect(() => {
         if (navigator === "Main") {
             if (!initLoaded) {
+                const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
+                const nowDate = new Date().getTime();
+                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 20 * 60 * 1000) {
+                    localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify([]));
+                }
                 setInitLoaded(true);
                 var element = document.getElementById("crescent-content");
                 var width = element.clientWidth;
@@ -199,6 +229,7 @@ export default (props)=>{
             .then(response => response.json())
             .then(data => {
                 const tokens = data.data;
+                console.log('===token = ', tokens);
                 if (!tokens || tokens.length === 0) {
                     setData([]);
                     setDataLoading(false);
@@ -329,7 +360,9 @@ export default (props)=>{
     }
 
     const fetchOnGoingItem = async token => {
-        const url = RPCHOST + '/api/v1/rpc/' + NetworkConfig[token.chainType].MainChainId;
+        const chainId = NetworkConfig[token.chainType].MainChainId;
+        const url = `https://bundler-${chainId}.crescentbase.com/rpc`
+            // RPCHOST + '/api/v1/rpc/' + NetworkConfig[token.chainType].MainChainId;
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -548,17 +581,19 @@ export default (props)=>{
                 )}
 
                 {dataLoading ? (
-                    <Lottie style={{marginTop: 32}} options={{
-                        loop: true,
-                        autoplay: true,
-                        animationData: loadig_index,
-                        rendererSettings: {
-                            preserveAspectRatio: 'xMidYMid slice'
-                        }
-                    }}
-                            height={48}
-                            width={48}
-                    />
+                    <div className={'main-search-lottie-layout'}>
+                        <Lottie style={{marginTop: 32}} options={{
+                            loop: true,
+                            autoplay: true,
+                            animationData: loadig_index,
+                            rendererSettings: {
+                                preserveAspectRatio: 'xMidYMid slice'
+                            }
+                        }}
+                                height={48}
+                                width={48}
+                        />
+                    </div>
                 ) : displayData.length > 0 ? (
                     displayData.map((item, index) => (
                         <SwipeView
