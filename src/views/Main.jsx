@@ -146,7 +146,7 @@ export default (props)=>{
 
                 // clearInterval(interval);
             }
-        }, 10 * 1000);
+        }, 30 * 1000);
         return () => clearInterval(interval);
     }, [wallet]);
 
@@ -155,7 +155,7 @@ export default (props)=>{
             if (!initLoaded) {
                 const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 const nowDate = new Date().getTime();
-                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 20 * 60 * 1000) {
+                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 15 * 60 * 1000) {
                     localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify([]));
                 }
                 setInitLoaded(true);
@@ -597,6 +597,7 @@ export default (props)=>{
                 ) : displayData.length > 0 ? (
                     displayData.map((item, index) => (
                         <SwipeView
+                            expand={isSearch}
                             btnWidth={42}
                             rowRenderer={renderItem(item)}
                             actionBtn={renderItemAction(item)}

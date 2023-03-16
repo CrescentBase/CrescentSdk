@@ -8,12 +8,15 @@ const SwipeView = (props) => {
     let deltaX = 0;
 
     useEffect(() => {
-        if (props.swipeKey !== props.id && swipeDistance != 0) {
+        if (!props.expand && props.swipeKey !== props.id && swipeDistance != 0) {
             setSwipeDistance(0);
         }
     }, [props.swipeKey]);
 
     const handleTouchStart = (event) => {
+        if (props.expand) {
+            return;
+        }
         deltaX = 0;
         setSwipeDistance(0);
         const touch = event.touches[0];
@@ -58,13 +61,16 @@ const SwipeView = (props) => {
     return (
         <div style={{position: 'relative', width: '100%'}}>
             <div style={{position: 'absolute', right: 0, width: props.btnWidth}} onClick={() => {
-                setSwipeDistance(0);
+                if (!props.expand) {
+                    setSwipeDistance(0);
+                }
+
                 props.onClickAction();
             }}>
                 {props.actionBtn}
             </div>
-            <animated.div onTouchStart={handleTouchStart} style={{...animatedProps}} onClick={() => {
-                if (props.swipeKey === props.id) {
+            <animated.div onTouchStart={handleTouchStart} style={props.expand ? {transform: 'translateX(' + -props.btnWidth +'px)'} : {...animatedProps}} onClick={() => {
+                if (!props.expand && props.swipeKey === props.id) {
                     setSwipeDistance(0);
                     props.swipe('');
                 } else {

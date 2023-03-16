@@ -268,6 +268,7 @@ export default () => {
             color: var(--system-color-1);
             line-height: 12px;
             margin-top: 2px;
+            width: 30px;
         }
         
         .main-search-base-layout {
