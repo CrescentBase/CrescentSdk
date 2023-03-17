@@ -86,7 +86,14 @@ export const getUserOperationByTx = async (wallet, provider, chainId, sender, tx
     if (tx.data && tx.data.length > 2) {
         data = getExecFromEntryPointCallData(tx.to, value, tx.data);
     } else {
-        data = getTransferCallData(tx.to, value);
+        const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
+        const rpcUrl = `${url}${chainId}`;
+        const code = await getCode(rpcUrl, sender);
+        if (code > 30) {
+            data = getExecFromEntryPointCallData(tx.to, value, '0x');
+        } else {
+            data = getTransferCallData(tx.to, value);
+        }
     }
     return getUserOperation(wallet, provider, chainId, sender, data);
 }
