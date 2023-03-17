@@ -3,12 +3,14 @@ import {ethers} from "ethers";
 import {renderFromWei, weiToFiat} from "./number";
 import {CURRENCIES} from "./currencies";
 import {
+	getCode,
 	getGasLimit,
 	getRequestId,
 	getUserOperationByNativeCurrency,
-	getUserOperationByToken,
+	getUserOperationByToken, getUserOperationByTx,
 	UserOperationDefault
 } from "./UserOp";
+import {LOCAL_STORAGE_PUBLIC_ADDRESS} from "./StorageUtils";
 
 const AVERAGE_GAS = 20;
 const LOW_GAS = 20;
@@ -35,6 +37,9 @@ export async function getSuggestedGasEstimates(wallet, asset, tx, toAddress, val
 		chainType = asset.chainType;
 	}
 	const gasEstimates = await getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value);
+	if (gasEstimates.errorMessage) {
+		return gasEstimates;
+	}
 	if (chainType !== ChainType.Bsc) {
 		let suggestedGasFees = await getSuggestedGasFees(chainType);
 		if (!suggestedGasFees) {
@@ -230,15 +235,46 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 	const url = `https://bundler-${chainId}.crescentbase.com/rpc`;//RPCHOST + "/api/v1/rpc/" + chainId;
 	const provider = new ethers.providers.JsonRpcProvider(url);
 	let uo, averageGasPrice, gasLimit, basicGasEstimates;
-	if (asset) {
+	if (tx) {
+		try {
+			const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+			uo = await getUserOperationByTx(wallet, provider, tx.chainId, sender, tx);
+			if (uo.errorMessage) {
+				return uo;
+			}
+			console.log('===getUserOperationByTx uo = ', uo);
+			if (uo) {
+				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
+			} else {
+				gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+			}
+			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
+		} catch (error) {
+			console.log('===error = ', error);
+			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
+			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+			uo = { ...UserOperationDefault };
+		}
+	} else {
 		try {
 			const sender = asset.account;
 			if (asset.nativeCurrency) {
-				uo = await getUserOperationByNativeCurrency(wallet, provider, chainId, sender, toAddress, value);
+				const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
+				const rpcUrl = `${url}${chainId}`;
+				const code = await getCode(rpcUrl, toAddress);
+				console.log('=====code = ', code);
+				if (code > 30) {
+					uo = await getUserOperationByToken(wallet, provider, chainId, sender, toAddress, null, null, value);
+				} else {
+					uo = await getUserOperationByNativeCurrency(wallet, provider, chainId, sender, toAddress, value);
+				}
 			} else {
-				uo = await getUserOperationByToken(wallet, provider, sender, chainId, asset.tokenAddress, toAddress, value);
+				uo = await getUserOperationByToken(wallet, provider, chainId, sender, asset.tokenAddress, toAddress, value);
 			}
 			console.log('===uo = ', uo);
+			if (uo.errorMessage) {
+				return uo;
+			}
 			if (uo) {
 				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
 			} else {
@@ -251,10 +287,6 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
 			uo = { ...UserOperationDefault };
 		}
-	} else {
-		averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
-		gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
-		uo = { ...UserOperationDefault };
 	}
 
 	try {

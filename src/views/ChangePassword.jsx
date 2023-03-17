@@ -4,9 +4,14 @@ import {ILocal } from '../locales/i18n'
 import TextInput from "../widgets/TextInput";
 import Button from "../widgets/Button";
 import ic_back_white from "../assets/ic_back_white.png"
+import {LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
+import {callToNativeMsg} from "../helpers/Utils";
+import ConfigContext from "../contexts/ConfigContext";
+import {ethers} from "ethers";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const { wallet, platform } = useContext(ConfigContext);
     const [comfirmPw, setComfirmPw] = useState("");
     const [isComfirmPwWrong, setIsComfirmPwWrong] = useState(false);
     const [password, setPassword] = useState("");
@@ -67,7 +72,16 @@ export default (props)=>{
                     />
 
                     <Button style={{marginTop: 24}} text={change_password} disable={password === '' || password2 === ''} onClick={() => {
-                        setIsWrongPw2(true);
+                        if (password !== password2) {
+                            setIsWrongPw2(true);
+                        } else {
+                            const options = {scrypt: {N: 256}};
+                            wallet.encrypt(password, options).then((keystoreKey) => {
+                                localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
+                                callToNativeMsg("walletKeystore;" + keystoreKey, platform)
+                            });
+                            navigate("Setting")
+                        }
                     }}/>
                 </div>
             ) : (
@@ -86,15 +100,17 @@ export default (props)=>{
                                showWrong={isComfirmPwWrong}
                                onTextChange={(text) => {
                                    setComfirmPw(text);
-                                   if (isComfirmPwWrong) {
-                                       setIsComfirmPwWrong(false);
-                                   }
                                }}
                     />
 
-                    <Button style={{marginTop: 24}} text={confirm} disable={comfirmPw === ''} onClick={() => {
-                        // setIsComfirmPwWrong(true);
-                        setHasConfirmed(true);
+                    <Button style={{marginTop: 24}} text={confirm} disable={comfirmPw === ''} onClick={async () => {
+                        try {
+                            const walletKeystore = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE);
+                            await ethers.Wallet.fromEncryptedJson(walletKeystore, comfirmPw);
+                            setHasConfirmed(true);
+                        } catch (error) {
+                            setIsComfirmPwWrong(true);
+                        }
                     }}/>
                 </div>
             )}

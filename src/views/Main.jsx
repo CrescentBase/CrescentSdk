@@ -39,7 +39,7 @@ import {
     LOCAL_STORAGE_ONGOING_INFO,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
-import {checkAndSendOp, entryPoint, getCreateOP, getOp} from "../helpers/UserOp";
+import {checkAndSendOp, entryPoint, getCreateOP, getOp, getTransferCallData} from "../helpers/UserOp";
 // const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
 // const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
 
@@ -71,6 +71,30 @@ export default (props)=>{
     }
 
     useEffect(() => {
+        // //0000000000000000000000006de6b8b22241a753495ed1c3289abc9bf61f5d2e0000000000000000000000000000000000000000000000000000000000002710
+        // //0x0000000000000000000000006de6b8b22241a753495ed1c3289abc9bf61f5d2e0000000000000000000000000000000000000000000000000000000000002710
+        // const txData = {
+        //     to: "0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e",
+        //     value: ethers.utils.parseUnits("0.01", 6)
+        // };
+        //
+        // const contractAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
+        // const contractAbi = [
+        //     "function transfer(address to, uint256 value) public returns (bool)"
+        // ];
+        // const contract = new ethers.Contract(contractAddress, contractAbi, wallet);
+        // const data11 = contract.interface.encodeFunctionData("transfer", ["0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e", ethers.utils.parseUnits("0.01", 6)])
+        // console.log('======data11 = ', data11);
+        //
+        // const encodedData = ethers.utils.defaultAbiCoder.encode(
+        //     ["address", "uint256"],
+        //     [txData.to, txData.value]
+        // );
+        //
+        // console.log('====encodedData = ', encodedData);
+        //
+        // const ak = getTransferCallData("0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e", ethers.utils.parseUnits("0.01", 6));
+        // console.log("====ak = ", ak);
         const interval = setInterval(async () => {
             if (wallet) {
                 const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
@@ -113,7 +137,7 @@ export default (props)=>{
                                 if (op) {
                                     if (!hasSendTemps.includes(chainId)) {
                                         console.log('====hasSendTemps no include');
-                                        const hasSend = await checkAndSendOp(op, sender, chainId);
+                                        const hasSend = await checkAndSendOp(op, sender, pk, chainId);
                                         if (hasSend) {
                                             sendOps.push(chainId);
                                         }
@@ -151,8 +175,21 @@ export default (props)=>{
     }, [wallet]);
 
     useEffect(() => {
+        const interval = setInterval(async () => {
+            if (wallet) {
+                fetchData(account, true, currentChainType, isSearch)
+                fetchOnGoings();
+            }
+        }, 2 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, [wallet, account, currentChainType, isSearch]);
+
+    useEffect(() => {
         if (navigator === "Main") {
             if (!initLoaded) {
+                // localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, null);
+                // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE, null);
+                // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, null);
                 const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 const nowDate = new Date().getTime();
                 if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 15 * 60 * 1000) {
@@ -215,8 +252,11 @@ export default (props)=>{
         }
     }
 
-    const fetchData = async (account) => {
-        setDataLoading(true);
+    const fetchData = async (account, interval = false, currentChainType = ChainType.All, isSearch = false) => {
+        console.log('====fetchdata interval = ', interval);
+        if (!interval) {
+            setDataLoading(true);
+        }
         let chainIds = "[";
         EnableChainTypes.map((item, index) => {
             if (item != ChainType.All) {
@@ -232,7 +272,9 @@ export default (props)=>{
                 console.log('===token = ', tokens);
                 if (!tokens || tokens.length === 0) {
                     setData([]);
-                    setDataLoading(false);
+                    if (!interval) {
+                        setDataLoading(false);
+                    }
                     return;
                 }
                 const assets = [];
@@ -243,6 +285,7 @@ export default (props)=>{
                     const balanceFiatUsd = "$" + renderBalanceFiat(item.balances, item.decimals, item.price);
                     const nativeCurrency = item.tokenAddress === "0x0";
                     item.image = item.image || ic_token_default;
+                    item.decimals = item.decimals ? item.decimals : 18;
                     let chainType = ChainType.Ethereum;
                     EnableChainTypes.map((type, index) => {
                         if (type != ChainType.All) {
@@ -253,12 +296,18 @@ export default (props)=>{
                     })
                     assets.push({...item, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
-                setDataLoading(false);
-                loadDisplayData(assets, ChainType.All);
+                if (!interval) {
+                    setDataLoading(false);
+                }
+                if (!isSearch) {
+                    loadDisplayData(assets, currentChainType);
+                }
                 setData(assets);
             }).catch(error => {
                 console.log(error)
-                setDataLoading(false);
+                if (!interval) {
+                    setDataLoading(false);
+                }
             });
     };
 
@@ -289,6 +338,7 @@ export default (props)=>{
                     loadDisplayData([], currentChainType);
                     return;
                 }
+                console.log('====tokens = ', tokens);
                 const assets = [];
 
                 tokens.map((item, index) => {
@@ -310,6 +360,7 @@ export default (props)=>{
                     })
                     assets.push({...item, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
+                console.log('===search tokens = ', tokens);
                 loadDisplayData(assets, currentChainType);
                 // setData(assets);
             }).catch(error => {
@@ -319,13 +370,14 @@ export default (props)=>{
 
     const addToken = (asset) => {
         const url = HOST + '/api/v1/addToken?chain_id=' + asset.chainId + '&account=' + account + '&address=' + asset.tokenAddress + '&balances=' + (asset.balances || 0);
+        console.log('====url = ', url)
         fetch(url)
             .then(response => response.json())
             .then(result => {
-                asset.searchType = 0;
-                if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
+                if (!result || result.ret !== 200 || result.errmsg !== 'ok') {
                     return;
                 }
+                asset.searchType = 0;
                 const newData = [asset, ...data];
                 setData(newData);
                 if (!isSearch) {
@@ -342,10 +394,10 @@ export default (props)=>{
         fetch(url)
             .then(response => response.json())
             .then(result => {
-                asset.searchType = 1;
-                if (!result || result.ret !== 200 || result.errmsg !== 'ok' || !result.data) {
+                if (!result || result.ret !== 200 || result.errmsg !== 'ok') {
                     return;
                 }
+                asset.searchType = 1;
                 let newData = [...data];
                 newData = newData.filter(item => item.id !== asset.id);
                 setData(newData);
@@ -394,6 +446,7 @@ export default (props)=>{
     const fetchOnGoings = async () => {
         const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
         if (ongoingInfos.length === 0) {
+            setTransationLoading(false);
             return;
         }
         const spliceIndexs = [];

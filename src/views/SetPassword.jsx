@@ -66,7 +66,7 @@ export default (props)=>{
                         localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
                         localStorage.removeItem(LOCAL_STORAGE_TEMP_PV)
                         navigate("Main");
-                        callToNativeMsg(keystoreKey, platform)
+                        callToNativeMsg("walletKeystore;" + keystoreKey, platform)
                     });
                 }
             }}/>

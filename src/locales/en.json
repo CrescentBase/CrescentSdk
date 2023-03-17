@@ -80,5 +80,8 @@
   "no_transaction_history": "No transaction history",
   "loading": "Loading...",
   "contract_address": "Contract Address:",
-  "tip": "tip"
+  "tip": "tip",
+  "create_not_success": "The current wallet has not been created successfully. Please try again later",
+  "paramter_incorrectly": "The \"{{paramter}}\" parameter is incorrectly filled",
+  "value_data_cannot_both": "The value and data parameters cannot both be filled in"
 }

@@ -50,13 +50,13 @@ export default (props)=>{
                             {item.symbol}
                         </span>
                         <span className={'ongoingtx-item-to-address'} onClick={() => showAddressCopied(item.toAddress)}>
-                            {t('to') + ' ' + item.toAddress?.substring(0, 4) + '...' + item.toAddress?.substring(item.toAddress?.length - 4)}
+                            {item.toAddress && t('to') + ' ' + item.toAddress?.substring(0, 4) + '...' + item.toAddress?.substring(item.toAddress?.length - 4)}
                         </span>
                     </div>
 
                     <div className={'flex-full'}/>
                     <span className={'ongoingtx-item-amount-reduce'}>
-                        -{renderShortValue(item.txAmount)}
+                        {item.txAmount && '-' + renderShortValue(item.txAmount)}
                     </span>
                 </div>
                 <div className={'ongoingtx-item-row-layout'} style={{ marginTop: 16}}>
