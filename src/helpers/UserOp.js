@@ -4,7 +4,7 @@ import {handleFetch, rpcFetch} from "./FatchUtils.js";
 import {HOST, NetworkConfig, RPCHOST} from "./Config";
 import BigNumber from "bignumber.js";
 import {LOCAL_STORAGE_PUBLIC_ADDRESS} from "./StorageUtils";
-import {printError} from "./Utils";
+import {printToNative} from "./Utils";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -130,6 +130,7 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         const signedTx = await walletNew.signMessage(ethers.utils.arrayify(txId));
         console.log('====signedTx = ', signedTx);
         uo.signature = signedTx;
+        printToNative(uo.toString());
         console.log('====uo 222= ', uo);
         const result = await provider.send("eth_estimateUserOperationGas", [uo, entryPoint]);
         console.log('====result = ', result);
@@ -142,7 +143,7 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         uo.callGas = result.callGas;
         return uo;
     } catch (error) {
-        printError(error);
+        printToNative(error);
         console.log('===getUserOperation = ', error)
         const message = String(error.message);
         return { errorMessage: message }
@@ -232,6 +233,16 @@ export const sendOp = async (rpcUrl, op, chainId) => {
     return result.result;
 }
 
+export const getPaymasterData = async (paymasterUrl, op, email, pk, chainId) => {
+    const body = { op, email: email, public_key: pk, chain_id: chainId };
+    const result = await rpcFetch(paymasterUrl, body);
+    console.log('===getPaymaster result = ', chainId, result);
+    if (!result || !result.data) {
+        throw new Error(`getPaymaster error ${result}`);
+    }
+    return result.data;
+}
+
 export const checkAndSendOp = async (op, sender, owner, chainId) => {
     const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
     const hasSendUrl = `${url}${chainId}`;
@@ -246,7 +257,7 @@ export const checkAndSendOp = async (op, sender, owner, chainId) => {
         }
         sendOp(targetUrl, op, chainId);
     } catch (e) {
-        printError(e);
+        printToNative(e);
         console.error("checkAndSendOp sendOp", e);
     }
     return false;
@@ -255,11 +266,12 @@ export const checkAndSendOp = async (op, sender, owner, chainId) => {
 export const getSender = async (email) => {
     const url = RPCHOST + "/api/v1/getAAddress?email=" + email;
     try {
+        printToNative(url)
         const json = await handleFetch(url);
         const data = json.data;
         return data;
     } catch (error) {
-        printError(error);
+        printToNative(error);
         console.log("==getSender = ", error);
     }
     return null;

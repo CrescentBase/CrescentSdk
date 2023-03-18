@@ -4,15 +4,21 @@ import ic_login_google from '../assets/ic_login_google.png';
 import ic_login_outlook from '../assets/ic_login_outlook.png';
 import {ILocal } from '../locales/i18n'
 import ConfigContext from "../contexts/ConfigContext";
-import {callToNativeMsg, isPcPlatform} from "../helpers/Utils";
+import {callToNativeMsg} from "../helpers/Utils";
 import {ethers} from "ethers";
-import {LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_TEMP_PV} from "../helpers/StorageUtils";
+import {
+    LOCAL_STORAGE_EMAIL,
+    LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
+    LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
+    LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS,
+    LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE
+} from "../helpers/StorageUtils";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
 
 export default (props)=>{
 
-    const { platform } = useContext(ConfigContext);
+    const { platform, paymasterUrl } = useContext(ConfigContext);
     const [address, setAddress] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -23,7 +29,15 @@ export default (props)=>{
         console.log('===address = ', address);
         setAddress(address.toLowerCase());
         localStorage.setItem(LOCAL_STORAGE_TEMP_PV, privateKey);
-        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, '');
+        localStorage.removeItem(LOCAL_STORAGE_ONGOING_INFO);
+        localStorage.removeItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+        localStorage.removeItem(LOCAL_STORAGE_EMAIL);
+        localStorage.removeItem(LOCAL_STORAGE_GET_OP_DATE);
+        localStorage.removeItem(LOCAL_STORAGE_SEND_OP_SUCCESS);
+        localStorage.removeItem(LOCAL_STORAGE_WALLET_KEYSTORE);
+        localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
+        localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
+        localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
 
         // const options = {scrypt: {N: 16384}};
         // wallet.encrypt('test123', options).then((keystoreKey) => {

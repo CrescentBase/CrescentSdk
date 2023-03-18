@@ -97,7 +97,7 @@ export default (props)=>{
                             const json = {
                                 email: storageEmail,
                                 address: publicAddress,
-                                walletEncrypted: walletKeystore
+                                // walletEncrypted: walletKeystore
                             }
                             callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
                             navigate("Main");

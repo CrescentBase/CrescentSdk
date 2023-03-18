@@ -28,7 +28,7 @@ import {ChainType, HOST, NetworkConfig, EnableChainTypes, RPCHOST} from "../help
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
-import {callToNativeMsg, callUrlToNative} from "../helpers/Utils";
+import {callToNativeMsg, callUrlToNative, printToNative} from "../helpers/Utils";
 import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
 import {ethers} from "ethers";
 import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
@@ -36,10 +36,11 @@ import BigNumber from 'bignumber.js';
 import {
     LOCAL_STORAGE_EMAIL,
     LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
-    LOCAL_STORAGE_ONGOING_INFO,
+    LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
-import {checkAndSendOp, entryPoint, getCreateOP, getOp, getTransferCallData} from "../helpers/UserOp";
+import {checkAndSendOp, entryPoint, getCreateOP, getOp, getPaymasterData, getTransferCallData} from "../helpers/UserOp";
+import {handleFetch, timeoutFetch} from "../helpers/FatchUtils";
 // const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
 // const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
 
@@ -57,10 +58,10 @@ export default (props)=>{
     const [showTransak, setShowTransak] = useState(false);
     const [transationLoading, setTransationLoading] = useState(false);
     const [transationStyle, setTransationStyle] = useSpring(() => ({ width: 0 }));
-    const [emailAccount, setEmailAccount] = useState('test@gmail.com');
-    const [account, setAccount] = useState('0x6c3f14da26556585706c02af737a44e67dc6954d');
+    const [emailAccount, setEmailAccount] = useState('');
+    const [account, setAccount] = useState('');
     const [swipeKey, setSwipeKey] = useState('');
-    const { platform, ChainDisplayNames, wallet } = useContext(ConfigContext);
+    const { platform, ChainDisplayNames, wallet, paymasterUrl } = useContext(ConfigContext);
     const { navigate, navigator, ongoing, showOngoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
@@ -109,6 +110,8 @@ export default (props)=>{
                     clearInterval(interval);
                     return;
                 }
+
+                const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
                 const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const pksync = await wallet.getAddress();
                 const pk = pksync.toLowerCase();
@@ -128,13 +131,33 @@ export default (props)=>{
                         if (chainType !== ChainType.All) {
                             const chainId = NetworkConfig[chainType].MainChainId;
                             if (!sendOps.includes(chainId)) {
-                                let op = await getCreateOP(sender, pk, chainId);
-                                if (op !== null && preDate !== 'success') {
-                                    preDate = 'success';
-                                    localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                                const paymasterOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PAYSTER_OP)) || [];
+                                const payOp = paymasterOps[chainId]
+                                let op;
+                                if (payOp) {
+                                    console.log('====hasPayOp = ', payOp);
+                                    op = payOp;
+                                } else {
+                                    op = await getCreateOP(sender, pk, chainId);
+                                    if (op !== null && preDate !== 'success') {
+                                        preDate = 'success';
+                                        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                                    }
+                                    if (op != null) {
+                                        console.log('====pre = ', op);
+                                        if (!op.paymasterData || op.paymasterData === '0x') {
+                                            console.log('===emailAccount = ', emailAccount);
+                                            console.log('===paymasterUrl url = ', paymasterUrl)
+                                            const paymasterData = await getPaymasterData(paymasterUrl, op, emailAccount, pk, chainId)
+                                            op = paymasterData;
+                                            paymasterOps[chainId] = paymasterData;
+                                            localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
+                                            console.log('====paymasterData = ', op);
+                                        }
+                                    }
                                 }
                                 console.log('===chainId = ', chainId, ' ; op = ', op);
-                                if (op) {
+                                if (op && op.paymasterData && op.paymasterData !== '0x') {
                                     if (!hasSendTemps.includes(chainId)) {
                                         console.log('====hasSendTemps no include');
                                         const hasSend = await checkAndSendOp(op, sender, pk, chainId);
@@ -157,6 +180,7 @@ export default (props)=>{
                         localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
                     }
                 } catch (error) {
+                    printToNative(error)
                     console.log('===getCreateOP = ', error);
                 }
                 if (preDate !== 'success') {
@@ -187,9 +211,11 @@ export default (props)=>{
     useEffect(() => {
         if (navigator === "Main") {
             if (!initLoaded) {
-                // localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, null);
-                // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE, null);
-                // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, null);
+                // localStorage.removeItem(LOCAL_STORAGE_SEND_OP_SUCCESS);
+                // localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
+                // localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
+                // localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
+
                 const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 const nowDate = new Date().getTime();
                 if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 15 * 60 * 1000) {
@@ -200,7 +226,7 @@ export default (props)=>{
                 var width = element.clientWidth;
                 const cardHeight = (width - 40) * 1.0 /319.0 * 100;
                 setCardHeight(cardHeight);
-                const address = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS) || account;
+                const address = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
                 setAccount(address);
                 emailAccount && setEmailAccount(emailAccount);
@@ -256,6 +282,10 @@ export default (props)=>{
         console.log('====fetchdata interval = ', interval);
         if (!interval) {
             setDataLoading(true);
+        }
+        let preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
+        if (!preDate) {
+            await handleFetch(HOST + '/api/v1/addAccount?address=' + account)
         }
         let chainIds = "[";
         EnableChainTypes.map((item, index) => {

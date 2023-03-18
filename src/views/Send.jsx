@@ -11,7 +11,7 @@ import NavigateContext from "../contexts/NavigateContext";
 import {useTranslation} from "react-i18next";
 import Button from "../widgets/Button";
 import {ChainType, NetworkConfig, HOST} from "../helpers/Config";
-import {callToNativeMsg, isValidAddress, printError} from "../helpers/Utils";
+import {callToNativeMsg, isValidAddress, printToNative} from "../helpers/Utils";
 import {animated, useSpring} from 'react-spring';
 import ReactSlider from "../widgets/ReactSlider";
 import ConfigContext from "../contexts/ConfigContext";
@@ -106,7 +106,7 @@ export default (props)=>{
             console.log('====data = ', data);
             return data;
         } catch (error) {
-            printError(error)
+            printToNative(error)
             console.error(error);
         }
     }
@@ -183,7 +183,7 @@ export default (props)=>{
             setStep(2);
             handleFetchBasicEstimates(asset, addressInput, balanceInput);
         } catch (error) {
-            printError(error)
+            printToNative(error)
             console.error(error);
         }
     }
@@ -692,7 +692,9 @@ export default (props)=>{
             try {
                 uo.signature = signedTx;
                 console.log('===sendTransaction = uo = ', uo);
+                printToNative(uo.toString());
                 const txHash = await sendUserOperation(provider, uo);
+                callToNativeMsg("sendTx;" + txHash)
                 console.log('===txHash = ', txHash);
                 const ongoingAsset =  {
                     ...asset,
@@ -713,7 +715,7 @@ export default (props)=>{
                     navigate('Asset', { asset });
                 }
             } catch (error) {
-                printError(error)
+                printToNative(error)
                 console.log("===SendTransaction = ", error)
                 const message = String(error.message);
 

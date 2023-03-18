@@ -2,6 +2,7 @@ import React, { useState} from "react";
 import PopContext from "./PopContext";
 import ic_success_white from "../assets/ic_success_white.png";
 import {useTranslation} from "react-i18next";
+import {callToNativeMsg} from "../helpers/Utils";
 
 export default (props) => {
     const { t } = useTranslation();
@@ -10,6 +11,7 @@ export default (props) => {
 
     const showAddressCopied = (text) => {
         try {
+            callToNativeMsg("pasteboard;" + text);
             navigator.clipboard.writeText(text);
         } catch (err) {
         }
@@ -22,6 +24,7 @@ export default (props) => {
 
     const showTxHashCopied = (text) => {
         try {
+            callToNativeMsg("pasteboard;" + text);
             navigator.clipboard.writeText(text);
         } catch (err) {
         }

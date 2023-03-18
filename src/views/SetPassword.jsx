@@ -6,7 +6,12 @@ import Button from "../widgets/Button";
 import {ethers} from "ethers";
 import {callToNativeMsg} from "../helpers/Utils";
 import ConfigContext from "../contexts/ConfigContext";
-import {LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
+import {
+    LOCAL_STORAGE_EMAIL,
+    LOCAL_STORAGE_PUBLIC_ADDRESS,
+    LOCAL_STORAGE_TEMP_PV,
+    LOCAL_STORAGE_WALLET_KEYSTORE
+} from "../helpers/StorageUtils";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
@@ -65,7 +70,16 @@ export default (props)=>{
                     wallet.encrypt(password, options).then((keystoreKey) => {
                         localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
                         localStorage.removeItem(LOCAL_STORAGE_TEMP_PV)
+
                         navigate("Main");
+                        const storageEmail = localStorage.getItem(LOCAL_STORAGE_EMAIL);
+                        const publicAddress = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+                        const json = {
+                            email: storageEmail,
+                            address: publicAddress,
+                            // walletEncrypted: walletKeystore
+                        }
+                        callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
                         callToNativeMsg("walletKeystore;" + keystoreKey, platform)
                     });
                 }

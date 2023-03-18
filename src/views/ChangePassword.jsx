@@ -72,7 +72,9 @@ export default (props)=>{
                     />
 
                     <Button style={{marginTop: 24}} text={change_password} disable={password === '' || password2 === ''} onClick={() => {
-                        if (password !== password2) {
+                        if (password.length < 6) {
+                            setIsWrongPw2(true);
+                        } else if (password !== password2) {
                             setIsWrongPw2(true);
                         } else {
                             const options = {scrypt: {N: 256}};
