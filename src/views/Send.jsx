@@ -11,7 +11,7 @@ import NavigateContext from "../contexts/NavigateContext";
 import {useTranslation} from "react-i18next";
 import Button from "../widgets/Button";
 import {ChainType, NetworkConfig, HOST} from "../helpers/Config";
-import {callToNativeMsg, isValidAddress} from "../helpers/Utils";
+import {callToNativeMsg, isValidAddress, printError} from "../helpers/Utils";
 import {animated, useSpring} from 'react-spring';
 import ReactSlider from "../widgets/ReactSlider";
 import ConfigContext from "../contexts/ConfigContext";
@@ -106,6 +106,7 @@ export default (props)=>{
             console.log('====data = ', data);
             return data;
         } catch (error) {
+            printError(error)
             console.error(error);
         }
     }
@@ -182,6 +183,7 @@ export default (props)=>{
             setStep(2);
             handleFetchBasicEstimates(asset, addressInput, balanceInput);
         } catch (error) {
+            printError(error)
             console.error(error);
         }
     }
@@ -394,6 +396,9 @@ export default (props)=>{
         if (asset.price && text > 0) {
             setDollerInput(Number(text) * asset.price);
         }
+        if (!text) {
+            setDollerInput('');
+        }
     }
 
     const handleDollerInput = (event) => {
@@ -404,7 +409,10 @@ export default (props)=>{
     const changeDollerInput = (text) => {
         setDollerInput(text);
         if (asset.price && text > 0) {
-            setBalanceInput(Number(text) / asset.price);
+            setBalanceInput(String(Number(text) / asset.price));
+        }
+        if (!text) {
+            setBalanceInput('');
         }
     }
 
@@ -705,6 +713,7 @@ export default (props)=>{
                     navigate('Asset', { asset });
                 }
             } catch (error) {
+                printError(error)
                 console.log("===SendTransaction = ", error)
                 const message = String(error.message);
 
@@ -759,7 +768,7 @@ export default (props)=>{
                                     {!!addressInput && (
                                         <img className={'send-input-address-clear-icon'} src={ic_clear} onClick={() => {inputAddressChange('')}}/>
                                     )}
-                                    {!addressInput && (
+                                    {false && !addressInput && (
                                         <span className={'send-input-address-paste'} onClick={() => handleClipboardRead()}>
                                         {t('paste')}
                                     </span>

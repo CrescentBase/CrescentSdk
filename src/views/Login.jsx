@@ -18,7 +18,7 @@ import {callToNativeMsg} from "../helpers/Utils";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
-    const { setWallet, tx, emailAccount, walletJson } = useContext(ConfigContext);
+    const { setWallet, tx, emailAccount, walletJson, platform } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
     const [errorText, setErrorText] = useState('');
@@ -92,6 +92,14 @@ export default (props)=>{
                         } else {
                             let wallet = await ethers.Wallet.fromEncryptedJson(walletKeystore, password);
                             setWallet(wallet);
+                            const storageEmail = localStorage.getItem(LOCAL_STORAGE_EMAIL);
+                            const publicAddress = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+                            const json = {
+                                email: storageEmail,
+                                address: publicAddress,
+                                walletEncrypted: walletKeystore
+                            }
+                            callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
                             navigate("Main");
                         }
                     } catch (e) {

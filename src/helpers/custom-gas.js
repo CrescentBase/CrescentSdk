@@ -11,6 +11,7 @@ import {
 	UserOperationDefault
 } from "./UserOp";
 import {LOCAL_STORAGE_PUBLIC_ADDRESS} from "./StorageUtils";
+import {callToNativeMsg, printError} from "./Utils";
 
 const AVERAGE_GAS = 20;
 const LOW_GAS = 20;
@@ -85,6 +86,7 @@ async function getRpcSuggestedGasFees(chainType) {
 			};
 		}
 	} catch (e) {
+		printError(e);
 		console.log('===getRpcSuggestedGasFees error:', e);
 	}
 	return undefined;
@@ -146,6 +148,7 @@ export async function getOtherSuggestedGasFees(chainType) {
 		getSuggestedGasFees_timestamp = Date.now();
 		return suggestedGasFees;
 	} catch (e) {
+		printError(e);
 		console.log('===getOtherSuggestedGasFees error:', e);
 	}
 	return null;
@@ -182,6 +185,7 @@ export async function getPolygonSuggestedGasFees() {
 		};
 		return suggestedGasFees;
 	} catch (e) {
+		printError(e);
 		console.log('===getPolygonSuggestedGasFees error:', e);
 	}
 	return null;
@@ -250,6 +254,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			}
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
+			printError(error);
 			console.log('===error = ', error);
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
@@ -282,6 +287,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			}
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
+			printError(error);
 			console.log('==getBasicGasEstimates error = ', error);
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
@@ -309,6 +315,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			};
 		}
 	} catch (error) {
+		printError(error)
 		console.log('===Error while trying to get gas limit estimates', error);
 	}
 

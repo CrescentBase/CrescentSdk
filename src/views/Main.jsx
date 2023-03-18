@@ -506,7 +506,7 @@ export default (props)=>{
     const renderItem = (item) => {
         return (
             <div className={'flex-col'}>
-                <div className={'main-asset-item-layout'}>
+                <div className={'main-asset-item-layout'} style={isSearch ? {marginLeft: 42} : {}}>
                     <div className={'main-asset-item-icon-layout'}>
                         <img className={'main-asset-item-icon'} src={item.image}/>
                         <img className={'main-asset-item-chain-tag'} src={NetworkConfig[item.chainType].tag}/>

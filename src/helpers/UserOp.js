@@ -4,6 +4,7 @@ import {handleFetch, rpcFetch} from "./FatchUtils.js";
 import {HOST, NetworkConfig, RPCHOST} from "./Config";
 import BigNumber from "bignumber.js";
 import {LOCAL_STORAGE_PUBLIC_ADDRESS} from "./StorageUtils";
+import {printError} from "./Utils";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -141,6 +142,7 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         uo.callGas = result.callGas;
         return uo;
     } catch (error) {
+        printError(error);
         console.log('===getUserOperation = ', error)
         const message = String(error.message);
         return { errorMessage: message }
@@ -244,6 +246,7 @@ export const checkAndSendOp = async (op, sender, owner, chainId) => {
         }
         sendOp(targetUrl, op, chainId);
     } catch (e) {
+        printError(e);
         console.error("checkAndSendOp sendOp", e);
     }
     return false;
@@ -256,6 +259,7 @@ export const getSender = async (email) => {
         const data = json.data;
         return data;
     } catch (error) {
+        printError(error);
         console.log("==getSender = ", error);
     }
     return null;

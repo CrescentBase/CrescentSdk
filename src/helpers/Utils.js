@@ -71,3 +71,7 @@ export const callUrlToNative = (url, paramPlatform) => {
         newTab.location.href = "https://global.transak.com/?apiKey=2bd8015d-d8e6-4972-bcca-22770dcbe595";
     }
 }
+
+export const printError = (error) => {
+    callToNativeMsg("print;" + String(error))
+}

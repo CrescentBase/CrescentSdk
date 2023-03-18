@@ -78,7 +78,6 @@ export default (props)=>{
                             const options = {scrypt: {N: 256}};
                             wallet.encrypt(password, options).then((keystoreKey) => {
                                 localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
-                                callToNativeMsg("walletKeystore;" + keystoreKey, platform)
                             });
                             navigate("Setting")
                         }
