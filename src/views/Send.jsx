@@ -29,7 +29,7 @@ import {
     apiEstimateModifiedToWEI,
     renderGwei
 } from "../helpers/number";
-import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee} from "../helpers/custom-gas";
+import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee, getEthGasFeeBignumber} from "../helpers/custom-gas";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
 import {containOwner, getNonce, getRequestId, METHOD_ID_TRANSFER, sendUserOperation} from "../helpers/UserOp";
@@ -91,10 +91,26 @@ export default (props)=>{
 
     const getGweiText = () => {
         let baseText = 'Gwei';
-        // if (asset.chainType === ChainType.Avax) {
-        //     baseText = 'nAVAX';
-        // }
         return `${renderGwei(selectTotalGas)} ${baseText}`;
+    }
+
+    const fetchBalanceInfo = async (asset) => {
+        let assetAddress = asset.tokenAddress;
+        if (!asset.nativeCurrency) {
+            assetAddress = '0x0,' + assetAddress;
+        }
+        const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+        const url = HOST + `/api/v1//getBalanceInfo?address=${assetAddress}&chain_id=${NetworkConfig[asset.chainType].MainChainId}&account=${sender}`;
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            const data = json.data;
+            console.log('====fetchBalanceInfo data = ', data);
+            return data;
+        } catch (error) {
+            printToNative(error)
+            console.error(error);
+        }
     }
 
     const fetchNaitveAsset = async () => {
@@ -176,12 +192,17 @@ export default (props)=>{
             } else {
                 addressInput = tx.to;
                 balanceInput = ethers.utils.formatUnits(tx.value, asset.decimals);
+                console.log('===balanceInput = ', balanceInput, tx.value, asset.decimals);
             }
             setAddressInput(addressInput);
             setBalanceInput(balanceInput);
             setAsset(asset);
             setStep(2);
-            handleFetchBasicEstimates(asset, addressInput, balanceInput);
+            const checkSuc = await checkBalanceWei(asset, balanceInput, false);
+            if (checkSuc) {
+                handleFetchBasicEstimates(asset, addressInput, balanceInput);
+            }
+
         } catch (error) {
             printToNative(error)
             console.error(error);
@@ -657,7 +678,61 @@ export default (props)=>{
         return suggestedGasFees;
     };
 
+    const checkBalanceWei = async (asset, balanceInput, readyValue = true) => {
+        const balanceInfo = await fetchBalanceInfo(asset);
+        if (!balanceInfo || balanceInfo.length === 0 || (!asset.nativeCurrency && balanceInfo.length === 1)) {
+            setTransactionErrorText(t('insufficient_gas_token'));
+            setTransactionErrorPop(true);
+            setReady(readyValue);
+            return;
+        }
+
+        let gasfeesBignumber;
+        if (selectGas) {
+            gasfeesBignumber = getEthGasFeeBignumber(selectTotalGas, suggestedGasFees?.gas, suggestedGasFees?.l1Fee)
+        } else {
+            gasfeesBignumber = getEthGasFeeBignumber(customTotalGas, ethers.BigNumber.from(customGasLimit || 0), suggestedGasFees?.l1Fee)
+        }
+        console.log('===gasfeesBignumber = ', gasfeesBignumber);
+        const nativeBalanceWei = balanceInfo[0].tokenAddress === '0x0' ? ethers.BigNumber.from(balanceInfo[0].balances) : ethers.BigNumber.from(balanceInfo[1].balances)
+        if (asset.nativeCurrency) {
+            let tokeInputnWei = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals) : 0;
+            console.log('====tokeInputnWei = ', tokeInputnWei.toString());
+            const allWei = gasfeesBignumber.add(tokeInputnWei.toString());
+            console.log('====allWei = ', allWei.toString());
+            console.log('====nativeBalanceWei = ', nativeBalanceWei.toString());
+            if (nativeBalanceWei.lt(allWei)) {
+                setTransactionErrorText(t('insufficient_gas_token'));
+                setTransactionErrorPop(true);
+                setReady(readyValue);
+                return false;
+            }
+        } else {
+            if (nativeBalanceWei.lt(gasfeesBignumber)) {
+                setTransactionErrorText(t('insufficient_gas_token'));
+                setTransactionErrorPop(true);
+                setReady(readyValue);
+                return false;
+            }
+            if (balanceInput) {
+                const tokenBalanceWei = balanceInfo[0].tokenAddress === '0x0' ? ethers.BigNumber.from(balanceInfo[1].balances) : ethers.BigNumber.from(balanceInfo[0].balances)
+                let tokeInputnWei = ethers.utils.parseUnits(balanceInput, asset.decimals)
+                if (tokenBalanceWei.lt(tokeInputnWei)) {
+                    setTransactionErrorText(t('insufficient_gas_token'));
+                    setTransactionErrorPop(true);
+                    setReady(readyValue);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     const sendTransaction = async () => {
+        const checkSuc = await checkBalanceWei(asset, balanceInput);
+        if (!checkSuc) {
+            return;
+        }
         const uo = suggestedGasFees.uo;
         let maxFeePerGas, maxPriorityFeePerGas;
         if (selectGas) {
@@ -804,11 +879,13 @@ export default (props)=>{
                             <div className={'send-input-token-layout'}>
                                 <img className={'send-input-token-icon'} src={asset.image}/>
                                 <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
-                                <span className={'send-input-token-max'} onClick={() => {
-                                    changeBalanceInput(asset.fullAmount);
-                                }}>
+                                {false && (
+                                    <span className={'send-input-token-max'} onClick={() => {
+                                        changeBalanceInput(asset.fullAmount);
+                                    }}>
                                     {t('max')}
                                 </span>
+                                )}
                             </div>
                             <div className={'send-line'}/>
                             <span className={'send-equal'}>≈</span>

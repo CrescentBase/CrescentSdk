@@ -83,5 +83,6 @@
   "tip": "tip",
   "create_not_success": "The current wallet has not been created successfully. Please try again later",
   "paramter_incorrectly": "The \"{{paramter}}\" parameter is incorrectly filled",
-  "value_data_cannot_both": "The value and data parameters cannot both be filled in"
+  "value_data_cannot_both": "The value and data parameters cannot both be filled in",
+  "insufficient_gas_token": "Insufficient gas or token assets for trading"
 }

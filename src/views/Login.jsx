@@ -75,6 +75,9 @@ export default (props)=>{
                             } else if (!tx.value && !tx.data) {
                                 errorText = t('paramter_incorrectly', {paramter: 'value or data'});
                             }
+                            if (tx.value) {
+                                tx.value = '0x' + Number(tx.value || 0).toString(16);
+                            }
                             if (errorText) {
                                 console.log('====errorText = ', errorText);
                                 setErrorText(errorText)

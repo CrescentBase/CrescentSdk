@@ -262,7 +262,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 		}
 	} else {
 		try {
-			const sender = asset.account;
+			const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
 			if (asset.nativeCurrency) {
 				const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
 				const rpcUrl = `${url}${chainId}`;
@@ -385,6 +385,17 @@ function hexToBN(inputHex) {
 	return ethers.BigNumber.from(inputHex);
 	// const hexString = ethers.utils.stripHexString(inputHex);
 	// return ethers.BigNumber.from(hexString);
+}
+
+export function getEthGasFeeBignumber(weiGas, gasLimitBN, moreGasFee = undefined) {
+	if (!weiGas || !gasLimitBN) {
+		return ethers.BigNumber.from(0);
+	}
+	let gasFee = weiGas.mul(gasLimitBN);
+	if (moreGasFee) {
+		gasFee = gasFee.add(moreGasFee);
+	}
+	return gasFee;
 }
 
 export function getEthGasFee(weiGas, gasLimitBN, moreGasFee = undefined) {

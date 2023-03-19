@@ -482,8 +482,10 @@ export default (props)=>{
         const spliceIndexs = [];
         for (let i = 0; i < ongoingInfos.length; i++) {
             const token = await fetchOnGoingItem(ongoingInfos[i]);
-            if (token && token.success === true) {
+            if (token) {
                 spliceIndexs.push(i);
+            } else {
+                //token.success === true  成功， token.success === false； 失败
             }
         }
         if (spliceIndexs.length > 0) {
