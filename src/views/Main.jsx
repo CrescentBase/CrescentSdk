@@ -388,7 +388,7 @@ export default (props)=>{
                             }
                         }
                     })
-                    assets.push({...item, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
+                    assets.push({...item, account, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
                 console.log('===search tokens = ', tokens);
                 loadDisplayData(assets, currentChainType);
@@ -587,7 +587,7 @@ export default (props)=>{
                         </div>
                         <div className={'main-title-address-layout'} onClick={() => showAddressCopied(account)}>
                             <div className={'main-title-address'}>
-                                {account.substring(0, 13) + "..." + account.substring(30)}
+                                {account?.substring(0, 13) + "..." + account?.substring(30)}
                             </div>
                             <img className={'main-title-address-copy-icon'} src={ic_copy}/>
                         </div>
