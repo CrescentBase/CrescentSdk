@@ -29,7 +29,7 @@ export default () => {
             width: 100%;
             flex: 1;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             overflow: hidden;
         }
         
@@ -44,7 +44,6 @@ export default () => {
         }
         
         .select-email-email-layout-inter {
-            width: 100%;
             flex: 1;
             display: flex;
             flex-direction: row;

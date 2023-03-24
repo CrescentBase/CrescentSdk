@@ -194,6 +194,7 @@ export default () => {
         .main-asset-item-icon {
             width: 36px;
             height: 36px;
+            border-radius: 6px;
         }
         
         .main-asset-item-chain-tag {

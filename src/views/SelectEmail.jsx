@@ -2,6 +2,9 @@ import React, {useContext, useEffect, useState} from "react";
 import img_logo from '../assets/img_logo.png';
 import ic_login_google from '../assets/ic_login_google.png';
 import ic_login_outlook from '../assets/ic_login_outlook.png';
+import ic_login_163 from '../assets/ic_login_163.png';
+import ic_login_yahoo from '../assets/ic_login_yahoo.png';
+import ic_login_aol from '../assets/ic_login_aol.png';
 import {ILocal } from '../locales/i18n'
 import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg} from "../helpers/Utils";
@@ -92,6 +95,28 @@ export default (props)=>{
                                 Outlook
                             </div>
                         </div>
+                        <div className={'select-email-email-wrap'} onClick={() => choose('yahoo')}>
+                            <img className={'select-email-email-logo'} src={ic_login_yahoo} />
+                            <div className={'select-email-email-name'}>
+                                Yahoo
+                            </div>
+                        </div>
+                        <div className={'select-email-email-wrap'} onClick={() => choose('mail163')}>
+                            <img className={'select-email-email-logo'} src={ic_login_163} />
+                            <div className={'select-email-email-name'}>
+                                163
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={'select-email-email-layout-inter'}>
+                        <div className={'select-email-email-wrap'} onClick={() => choose('aol')}>
+                            <img className={'select-email-email-logo'} src={ic_login_aol} />
+                            <div className={'select-email-email-name'}>
+                                Aol
+                            </div>
+                        </div>
+                        <div className={'select-email-email-wrap-empty'} />
                         <div className={'select-email-email-wrap-empty'} />
                         <div className={'select-email-email-wrap-empty'} />
                     </div>
