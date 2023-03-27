@@ -82,5 +82,6 @@
   "create_not_success": "钱包创建失败，请稍后再试。",
   "paramter_incorrectly": "参数\"{{paramter}}\"填写错误",
   "value_data_cannot_both": "value和data参数不能同时填写",
-  "insufficient_gas_token": "gas不足或代币资产不足。"
+  "insufficient_gas_token": "gas不足或代币资产不足。",
+  "network_error": "网络异常"
 }

@@ -227,7 +227,7 @@ export default (props)=>{
         console.log('===addressInput = ', addressInput);
         console.log('===handleFetchBasicEstimates balanceInput = ', balanceInput);
         const value = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals).toHexString() : null;
-        let suggestedGasFees = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value);
+        let suggestedGasFees = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value, t('network_error'));
         if (suggestedGasFees.errorMessage) {
             const regex = `"message\\\\":\\\\"(.*?)\\\\"`
             const match = suggestedGasFees.errorMessage.match(regex);
@@ -256,7 +256,7 @@ export default (props)=>{
         setReloadGas(true);
         console.log('==addressInput = ', addressInput);
         const value = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals).toHexString() : null;
-        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value);
+        let suggestedGasFeesInFunction = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value, t('network_error'));
         if (suggestedGasFees.errorMessage) {
             setTransactionErrorText(suggestedGasFees.errorMessage);
             setTransactionErrorPop(true);

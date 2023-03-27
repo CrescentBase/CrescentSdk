@@ -32,12 +32,12 @@ const testUo = {
 	"signature": "0x"
 };
 
-export async function getSuggestedGasEstimates(wallet, asset, tx, toAddress, value) {
+export async function getSuggestedGasEstimates(wallet, asset, tx, toAddress, value, netError) {
 	let chainType = ChainType.Ethereum;
 	if (asset) {
 		chainType = asset.chainType;
 	}
-	const gasEstimates = await getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value);
+	const gasEstimates = await getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value, netError);
 	if (gasEstimates.errorMessage) {
 		return gasEstimates;
 	}
@@ -233,8 +233,7 @@ export async function estimateGas(transaction) {
 	console.log("Estimated gas: " + estimatedGas.toString());
 }
 
-
-export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value) {
+export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value, netError) {
 	const chainId = NetworkConfig[chainType].MainChainId;
 	const url = `https://bundler-${chainId}.crescentbase.com/rpc`;//RPCHOST + "/api/v1/rpc/" + chainId;
 	const provider = new ethers.providers.JsonRpcProvider(url);
@@ -250,15 +249,13 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			if (uo) {
 				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
 			} else {
-				gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+				return { errorMessage: netError }
 			}
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
 			printToNative(error);
 			console.log('===error = ', error);
-			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
-			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
-			uo = { ...UserOperationDefault };
+			return { errorMessage: netError }
 		}
 	} else {
 		try {
@@ -283,15 +280,13 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			if (uo) {
 				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
 			} else {
-				gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
+				return { errorMessage: netError }
 			}
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
 			printToNative(error);
 			console.log('==getBasicGasEstimates error = ', error);
-			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
-			gasLimit = hexToBN(DEFAULT_GAS_LIMIT);
-			uo = { ...UserOperationDefault };
+			return { errorMessage: netError }
 		}
 	}
 
