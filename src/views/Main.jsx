@@ -481,11 +481,17 @@ export default (props)=>{
         }
         const spliceIndexs = [];
         for (let i = 0; i < ongoingInfos.length; i++) {
-            const token = await fetchOnGoingItem(ongoingInfos[i]);
-            if (token) {
+            const ongoingInfo = ongoingInfos[i];
+            const nowDate = new Date().getTime();
+            if (nowDate - ongoingInfo.txTime > 3 * 60 * 60 * 1000) {
                 spliceIndexs.push(i);
             } else {
-                //token.success === true  成功， token.success === false； 失败
+                const token = await fetchOnGoingItem(ongoingInfo);
+                if (token) {
+                    spliceIndexs.push(i);
+                } else {
+                    //token.success === true  成功， token.success === false； 失败
+                }
             }
         }
         if (spliceIndexs.length > 0) {
