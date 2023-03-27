@@ -458,7 +458,7 @@ export default (props)=>{
                     "jsonrpc":"2.0",
                     "id":1,
                     "method":"eth_getUserOperationReceipt",
-                    "params":[token.txHash]
+                    "params":[token.txHash, token.blockNumber]
                 })
             });
             const json = await response.json();

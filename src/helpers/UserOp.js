@@ -141,6 +141,11 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         console.log('===uo.verificationGas = ', uo.verificationGas);
         uo.preVerificationGas = result.preVerificationGas;
         uo.callGas = result.callGas;
+        if (String(chainId) === '42161') {
+            if (new BigNumber(uo.callGas).lt(new BigNumber(800000))) {
+                uo.callGas = '0x' + new BigNumber(800000).toString(16);
+            }
+        }
         return uo;
     } catch (error) {
         printToNative(error);

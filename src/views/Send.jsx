@@ -763,6 +763,8 @@ export default (props)=>{
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
         const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
 
+        const blockProvider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId)
+        const blockNumber = await blockProvider.getBlockNumber();
         walletNew.signMessage(ethers.utils.arrayify(txId)).then(async signedTx => {
             try {
                 uo.signature = signedTx;
@@ -776,7 +778,8 @@ export default (props)=>{
                     txHash,
                     txAmount: balanceInput,
                     txTime: new Date().getTime(),
-                    toAddress: addressInput || tx?.to
+                    toAddress: addressInput || tx?.to,
+                    blockNumber
                 };
                 const ongoingInfos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ONGOING_INFO)) || [];
                 if (ongoingInfos) {
