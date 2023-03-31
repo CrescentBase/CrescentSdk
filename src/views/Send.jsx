@@ -18,9 +18,6 @@ import ConfigContext from "../contexts/ConfigContext";
 import {ethers} from "ethers";
 import {
     getTokenName,
-    renderAmount,
-    renderBalanceFiat,
-    renderFullAmount,
     renderSplitAmount,
     renderShortValue,
     weiToGwei,
@@ -35,16 +32,15 @@ import Lottie from "react-lottie";
 import {containOwner, getNonce, getRequestId, METHOD_ID_TRANSFER, sendUserOperation} from "../helpers/UserOp";
 import {
     LOCAL_STORAGE_ONGOING_INFO,
-    LOCAL_STORAGE_PUBLIC_ADDRESS,
-    LOCAL_STORAGE_SEND_OP_SUCCESS
+    LOCAL_STORAGE_PUBLIC_ADDRESS
 } from "../helpers/StorageUtils";
 import ic_token_default from "../assets/ic_token_default.png";
-import BigNumber from "bignumber.js";
+import ImageWithFallback from "../widgets/ImageWithFallback";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate, showOngoing } = useContext(NavigateContext);
-    const { ChainDisplayNames, wallet } = useContext(ConfigContext);
+    const { ChainDisplayNames, wallet, isWeb, onSendSuccess } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
     const [addressCorrect, setAddressCorrect] = useState(false);
     const [addressInput, setAddressInput] = useState('');
@@ -84,7 +80,7 @@ export default (props)=>{
 
     useEffect(() => {
         if (tx) {
-            console.log('===tx = ', tx);
+            console.csLog('===tx = ', tx);
             fetchTxAsset(tx);
         }
     }, [tx])
@@ -105,7 +101,7 @@ export default (props)=>{
             const response = await fetch(url);
             const json = await response.json();
             const data = json.data;
-            console.log('====fetchBalanceInfo data = ', data);
+            console.csLog('====fetchBalanceInfo data = ', data);
             return data;
         } catch (error) {
             printToNative(error)
@@ -119,7 +115,7 @@ export default (props)=>{
             const response = await fetch(url);
             const json = await response.json();
             const data = json.data;
-            console.log('====data = ', data);
+            console.csLog('====data = ', data);
             return data;
         } catch (error) {
             printToNative(error)
@@ -133,7 +129,7 @@ export default (props)=>{
         if (!nativeCurrency) {
             url = `https://relayer.gopocket.finance/api/v1/getTargetTokens?chain_id=${tx.chainId}&addresses=${tx.tokenAddress}`;
         }
-        console.log('===url = ', url);
+        console.csLog('===url = ', url);
         try {
             //{
             //     "id": 121,
@@ -153,7 +149,7 @@ export default (props)=>{
             const response = await fetch(url);
             const json = await response.json();
             const jsonData = json.data;
-            console.log('====data = ', jsonData);
+            console.csLog('====data = ', jsonData);
             let asset = {};
             if (nativeCurrency) {
                 asset = { ...jsonData };
@@ -174,25 +170,25 @@ export default (props)=>{
                 let decodedData;
                 if (tx.data.startsWith(METHOD_ID_TRANSFER)) {
                     const suffix = '0x' + tx.data.substring(METHOD_ID_TRANSFER.length);
-                    console.log('==suffix = ', suffix);
+                    console.csLog('==suffix = ', suffix);
                     decodedData = ethers.utils.defaultAbiCoder.decode(
                         ["address", "uint256"],
                         suffix
                     );
                 }
 
-                console.log('===decodedData = ', decodedData);
+                console.csLog('===decodedData = ', decodedData);
                 if (decodedData) {
                     const to = decodedData[0];
                     const value = decodedData[1].toHexString();
-                    console.log('===decodedData = ', value);
+                    console.csLog('===decodedData = ', value);
                     addressInput = to;
                     balanceInput = ethers.utils.formatUnits(value, asset.decimals);
                 }
             } else {
                 addressInput = tx.to;
                 balanceInput = ethers.utils.formatUnits(tx.value, asset.decimals);
-                console.log('===balanceInput = ', balanceInput, tx.value, asset.decimals);
+                console.csLog('===balanceInput = ', balanceInput, tx.value, asset.decimals);
             }
             setAddressInput(addressInput);
             setBalanceInput(balanceInput);
@@ -215,7 +211,7 @@ export default (props)=>{
         const chainId = NetworkConfig[asset.chainType].MainChainId;
         const owner = await wallet.getAddress();
         const isOwner = await containOwner(sender, owner, chainId);
-        console.log('===isOwner = ', isOwner);
+        console.csLog('===isOwner = ', isOwner);
         if (!isOwner) {
             setTransactionErrorText(t('create_not_success'));
             setTransactionErrorPop(true);
@@ -224,8 +220,8 @@ export default (props)=>{
         }
         const nativeAsset = await fetchNaitveAsset();
         setNativeAsset(nativeAsset);
-        console.log('===addressInput = ', addressInput);
-        console.log('===handleFetchBasicEstimates balanceInput = ', balanceInput);
+        console.csLog('===addressInput = ', addressInput);
+        console.csLog('===handleFetchBasicEstimates balanceInput = ', balanceInput);
         const value = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals).toHexString() : null;
         let suggestedGasFees = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value, t('network_error'));
         if (suggestedGasFees.errorMessage) {
@@ -254,7 +250,7 @@ export default (props)=>{
 
     const reloadBasicEstimates = async () => {
         setReloadGas(true);
-        console.log('==addressInput = ', addressInput);
+        console.csLog('==addressInput = ', addressInput);
         const value = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals).toHexString() : null;
         let suggestedGasFeesInFunction = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value, t('network_error'));
         if (suggestedGasFees.errorMessage) {
@@ -693,14 +689,14 @@ export default (props)=>{
         } else {
             gasfeesBignumber = getEthGasFeeBignumber(customTotalGas, ethers.BigNumber.from(customGasLimit || 0), suggestedGasFees?.l1Fee)
         }
-        console.log('===gasfeesBignumber = ', gasfeesBignumber);
+        console.csLog('===gasfeesBignumber = ', gasfeesBignumber);
         const nativeBalanceWei = balanceInfo[0].tokenAddress === '0x0' ? ethers.BigNumber.from(balanceInfo[0].balances) : ethers.BigNumber.from(balanceInfo[1].balances)
         if (asset.nativeCurrency) {
             let tokeInputnWei = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals) : 0;
-            console.log('====tokeInputnWei = ', tokeInputnWei.toString());
+            console.csLog('====tokeInputnWei = ', tokeInputnWei.toString());
             const allWei = gasfeesBignumber.add(tokeInputnWei.toString());
-            console.log('====allWei = ', allWei.toString());
-            console.log('====nativeBalanceWei = ', nativeBalanceWei.toString());
+            console.csLog('====allWei = ', allWei.toString());
+            console.csLog('====nativeBalanceWei = ', nativeBalanceWei.toString());
             if (nativeBalanceWei.lt(allWei)) {
                 setTransactionErrorText(t('insufficient_gas_token'));
                 setTransactionErrorPop(true);
@@ -740,9 +736,9 @@ export default (props)=>{
         } else {
             maxFeePerGas = customTotalGas;
         }
-        console.log('===uo = ', uo);
-        console.log('====maxFeePerGas = ', maxFeePerGas);
-        console.log('====maxFeePerGas.toHexString() = ', maxFeePerGas.toHexString());
+        console.csLog('===uo = ', uo);
+        console.csLog('====maxFeePerGas = ', maxFeePerGas);
+        console.csLog('====maxFeePerGas.toHexString() = ', maxFeePerGas.toHexString());
         uo.maxFeePerGas = maxFeePerGas.toHexString();
         if (suggestedGasFees.isEIP1559) {
             maxPriorityFeePerGas = maxFeePerGas.sub(suggestedGasFees.estimatedBaseFee);
@@ -753,9 +749,9 @@ export default (props)=>{
         const chainId = NetworkConfig[asset.chainType].MainChainId;
         const account = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS)
         const nonce = await getNonce(account, chainId);
-        console.log('====nonce = ', nonce);
+        console.csLog('====nonce = ', nonce);
         const bb = nonce.toHexString();
-        console.log('===bb = ', bb);
+        console.csLog('===bb = ', bb);
         uo.nonce = bb;
         const txId = getRequestId(uo, chainId);
 
@@ -768,11 +764,15 @@ export default (props)=>{
         walletNew.signMessage(ethers.utils.arrayify(txId)).then(async signedTx => {
             try {
                 uo.signature = signedTx;
-                console.log('===sendTransaction = uo = ', uo);
+                console.csLog('===sendTransaction = uo = ', uo);
                 printToNative(uo.toString());
                 const txHash = await sendUserOperation(provider, uo);
-                callToNativeMsg("sendTx;" + txHash)
-                console.log('===txHash = ', txHash);
+                if (isWeb) {
+                    onSendSuccess && onSendSuccess(txHash);
+                } else {
+                    callToNativeMsg("sendTx;" + txHash)
+                }
+                console.csLog('===txHash = ', txHash);
                 const ongoingAsset =  {
                     ...asset,
                     txHash,
@@ -794,7 +794,7 @@ export default (props)=>{
                 }
             } catch (error) {
                 printToNative(error)
-                console.log("===SendTransaction = ", error)
+                console.csLog("===SendTransaction = ", error)
                 const message = String(error.message);
 
                 const regex = `"message\\\\":\\\\"(.*?)\\\\"`
@@ -812,7 +812,7 @@ export default (props)=>{
     return (
         <div className={'send'}>
             <div className={'send-base'}>
-                <div className={'send-tilte-layout'} onClick={() => {
+                <div className={'send-tilte-layout'} style={isWeb ? { paddingLeft: 25 } : {}} onClick={() => {
                     if (tx) {
                         navigate('Main');
                     } else {
@@ -826,7 +826,7 @@ export default (props)=>{
                 </div>
 
                 <div className={'send-tilte-line'}/>
-                <div className={'send-content-layout'}>
+                <div className={'send-content-layout'} style={isWeb ? { paddingLeft: 25, paddingRight: 25 } : {}}>
                     {!tx && step === 1 ? (
                         <div className={'send-content-step-layout'}>
                             <span className={'send-recipient-text'}>
@@ -880,7 +880,7 @@ export default (props)=>{
                                 </span>
                             </div>
                             <div className={'send-input-token-layout'}>
-                                <img className={'send-input-token-icon'} src={asset.image}/>
+                                <ImageWithFallback className={'send-input-token-icon'} src={asset.image} defaultSrc={ic_token_default}/>
                                 <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
                                 {false && (
                                     <span className={'send-input-token-max'} onClick={() => {

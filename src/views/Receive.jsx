@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext} from "react";
 import ic_back_white from "../assets/ic_back_white.png"
 import NavigateContext from "../contexts/NavigateContext";
 import Button from "../widgets/Button";
@@ -12,6 +12,7 @@ export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext)
+    const { isWeb } = useContext(ConfigContext)
     const asset = props.params.asset;
 
     const getAddrStr = () => {
@@ -26,7 +27,7 @@ export default (props)=>{
     return (
         <div className={'receive'}>
             <div className={'receive-base'}>
-                <div className={'receive-tilte-layout'} onClick={() => navigate('Asset', { asset })}>
+                <div className={'receive-tilte-layout'} style={isWeb ? { paddingLeft: 25 } : {}} onClick={() => navigate('Asset', { asset })}>
                     <img className={'receive-title-back-icon'} src={ic_back_white} />
                     <span className={'receive-title-text'}>
                         {t('receive')}
@@ -35,7 +36,7 @@ export default (props)=>{
 
                 <div className={'receive-tilte-line'}/>
                 <div className={'receive-content-layout'}>
-                    <span className={'receive-wallet-address-tip'}>
+                    <span className={'receive-wallet-address-tip'} style={isWeb ? {marginTop: 106} : {}}>
                         {t('my_wallet_address')}
                     </span>
 

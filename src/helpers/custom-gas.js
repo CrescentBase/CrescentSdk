@@ -87,7 +87,7 @@ async function getRpcSuggestedGasFees(chainType) {
 		}
 	} catch (e) {
 		printToNative(e);
-		console.log('===getRpcSuggestedGasFees error:', e);
+		console.csLog('===getRpcSuggestedGasFees error:', e);
 	}
 	return undefined;
 }
@@ -149,7 +149,7 @@ export async function getOtherSuggestedGasFees(chainType) {
 		return suggestedGasFees;
 	} catch (e) {
 		printToNative(e);
-		console.log('===getOtherSuggestedGasFees error:', e);
+		console.csLog('===getOtherSuggestedGasFees error:', e);
 	}
 	return null;
 }
@@ -186,7 +186,7 @@ export async function getPolygonSuggestedGasFees() {
 		return suggestedGasFees;
 	} catch (e) {
 		printToNative(e);
-		console.log('===getPolygonSuggestedGasFees error:', e);
+		console.csLog('===getPolygonSuggestedGasFees error:', e);
 	}
 	return null;
 }
@@ -221,16 +221,16 @@ export async function estimateGas(transaction) {
 	const estimatedGas = await provider.estimateGas(tx); //gas的值
 
 	const gasPrice = await provider.getGasPrice();
-	console.log('==gasPrice = ', gasPrice, gasPrice.toString());
+	console.csLog('==gasPrice = ', gasPrice, gasPrice.toString());
 
 	// const bigNumber = new ethers.BigNumber('0x065e5494cb');
 
-	console.log('====bigNumberify = ', gasPrice.toNumber());
+	console.csLog('====bigNumberify = ', gasPrice.toNumber());
 
 	const bigNumber = ethers.BigNumber.from(gasPrice.toNumber())
-	console.log('frome = ', bigNumber);
+	console.csLog('frome = ', bigNumber);
 
-	console.log("Estimated gas: " + estimatedGas.toString());
+	console.csLog("Estimated gas: " + estimatedGas.toString());
 }
 
 export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddress, value, netError) {
@@ -245,7 +245,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			if (uo.errorMessage) {
 				return uo;
 			}
-			console.log('===getUserOperationByTx uo = ', uo);
+			console.csLog('===getUserOperationByTx uo = ', uo);
 			if (uo) {
 				gasLimit = ethers.BigNumber.from(getGasLimit(uo));
 			} else {
@@ -254,7 +254,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
 			printToNative(error);
-			console.log('===error = ', error);
+			console.csLog('===error = ', error);
 			return { errorMessage: netError }
 		}
 	} else {
@@ -264,7 +264,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 				const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
 				const rpcUrl = `${url}${chainId}`;
 				const code = await getCode(rpcUrl, toAddress);
-				console.log('=====code = ', code);
+				console.csLog('=====code = ', code);
 				if (code > 30) {
 					uo = await getUserOperationByToken(wallet, provider, chainId, sender, toAddress, null, null, value);
 				} else {
@@ -273,7 +273,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			} else {
 				uo = await getUserOperationByToken(wallet, provider, chainId, sender, asset.tokenAddress, toAddress, value);
 			}
-			console.log('===uo = ', uo);
+			console.csLog('===uo = ', uo);
 			if (uo.errorMessage) {
 				return uo;
 			}
@@ -285,7 +285,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 			averageGasPrice = apiEstimateModifiedToWEI(AVERAGE_GAS);
 		} catch (error) {
 			printToNative(error);
-			console.log('==getBasicGasEstimates error = ', error);
+			console.csLog('==getBasicGasEstimates error = ', error);
 			return { errorMessage: netError }
 		}
 	}
@@ -311,7 +311,7 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 		}
 	} catch (error) {
 		printToNative(error)
-		console.log('===Error while trying to get gas limit estimates', error);
+		console.csLog('===Error while trying to get gas limit estimates', error);
 	}
 
 	if (!basicGasEstimates) {

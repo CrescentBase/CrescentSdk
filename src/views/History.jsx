@@ -9,11 +9,13 @@ import img_empty_box from "../assets/img_empty_box";
 import {useTranslation} from "react-i18next";
 import { ChainType, NetworkConfig } from "../helpers/Config";
 import PopContext from "../contexts/PopContext";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showTxHashCopied } = useContext(PopContext)
+    const { isWeb } = useContext(ConfigContext)
 
     const isEmpty = false;
     const asset = props.params.asset;
@@ -157,7 +159,7 @@ export default (props)=>{
     return (
         <div className={'history'}>
             <div className={'history-base'}>
-                <div className={'history-tilte-layout'} onClick={() => {
+                <div className={'history-tilte-layout'} style={isWeb ? { paddingLeft: 25 } : {}} onClick={() => {
                     if (props.params.fromAsset) {
                         navigate('Asset', { asset: asset })
                     } else {
@@ -171,7 +173,7 @@ export default (props)=>{
                 </div>
 
                 <div className={'history-tilte-line'}/>
-                <div className={'history-content-layout'}>
+                <div className={'history-content-layout'} style={isWeb ? { paddingLeft: 25, paddingRight: 25 } : {}} >
                     <div className={'flex-col'}>
                         {/*{renderTime(token1)}*/}
                         {/*{renderGasFee(token2)}*/}

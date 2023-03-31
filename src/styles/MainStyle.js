@@ -425,7 +425,8 @@ export default () => {
         
         .main-transak-click-here {
             color: var(--system-color-1);
-            text-decoration: none
+            text-decoration: none;
+            cursor: pointer;
         }
         
         .main-transation-loading-layout {

@@ -12,11 +12,13 @@ import {useTranslation} from "react-i18next";
 import PopContext from "../contexts/PopContext";
 import ConfigContext from "../contexts/ConfigContext";
 import { NetworkConfig } from "../helpers/Config";
+import ic_token_default from "../assets/ic_token_default.png";
+import ImageWithFallback from "../widgets/ImageWithFallback";
 
 export default (props)=>{
     const { showAddressCopied } = useContext(PopContext)
     const { navigate } = useContext(NavigateContext);
-    const { ChainDisplayNames } = useContext(ConfigContext);
+    const { ChainDisplayNames, isWeb } = useContext(ConfigContext);
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
@@ -28,11 +30,11 @@ export default (props)=>{
                     setShowAddressPop(false);
                 }
             }}>
-                <img className={'asset-title-back-icon'} src={ic_back_white} onClick={() => navigate('Main')}/>
+                <img className={'asset-title-back-icon'} style={isWeb ? { marginLeft: 25} : {}} src={ic_back_white} onClick={() => navigate('Main')}/>
                 <div className={'asset-tilte-line'}/>
-                <div className={'asset-content-layout'}>
+                <div className={'asset-content-layout'} style={isWeb ? { paddingLeft: 25, paddingRight: 25} : {}}>
                     <div className={'asset-top-layout'}>
-                        <img className={'asset-token-logo'} src={asset.image}/>
+                        <ImageWithFallback className={'asset-token-logo'} src={asset.image} defaultSrc={ic_token_default}/>
                         <div className={'asset-top-right-layout'}>
                             <div className={'asset-tokenname-and-price'}>
                             <span className={'asset-token-name'}>

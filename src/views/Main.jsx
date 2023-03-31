@@ -5,7 +5,6 @@ import { useSpring, animated } from 'react-spring';
 
 import ic_copy from '../assets/ic_copy.png';
 import ic_setting from '../assets/ic_setting.png'
-import ic_history_black from '../assets/ic_history_black.png'
 import ic_search from '../assets/ic_search.png'
 import ic_buy from '../assets/ic_buy.png'
 import ic_hide from '../assets/ic_hide.png'
@@ -17,8 +16,6 @@ import img_empty_search from "../assets/img_empty_search.png"
 import Lottie from 'react-lottie'
 import loadig_index from '../assets/loadig_index.json'
 import loading_ongoing from '../assets/loading_ongoing.json'
-import loading_ongoing_success from '../assets/loading_ongoing_success.json'
-import ic_success_white from "../assets/ic_success_white.png"
 import ic_close from "../assets/ic_close.png"
 import img_transak from "../assets/img_transak.png"
 import ic_token_default from "../assets/ic_token_default.png"
@@ -30,19 +27,15 @@ import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg, callUrlToNative, printToNative} from "../helpers/Utils";
 import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
-import {ethers} from "ethers";
-import {estimateGas, getSuggestedGasEstimates} from "../helpers/custom-gas";
-import BigNumber from 'bignumber.js';
 import {
     LOCAL_STORAGE_EMAIL,
     LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
     LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
-import {checkAndSendOp, entryPoint, getCreateOP, getOp, getPaymasterData, getTransferCallData} from "../helpers/UserOp";
-import {handleFetch, timeoutFetch} from "../helpers/FatchUtils";
-// const LOCAL_STORAGE_HIDDEN_ID = 'storage_hidden_ids';
-// const LOCAL_STORAGE_OTHER_TOKENS = 'storage_other_tokens';
+import {checkAndSendOp, getCreateOP, getPaymasterData} from "../helpers/UserOp";
+import {handleFetch} from "../helpers/FatchUtils";
+import ImageWithFallback from "../widgets/ImageWithFallback";
 
 export default (props)=>{
     const { t } = useTranslation();
@@ -61,7 +54,7 @@ export default (props)=>{
     const [emailAccount, setEmailAccount] = useState('');
     const [account, setAccount] = useState('');
     const [swipeKey, setSwipeKey] = useState('');
-    const { platform, ChainDisplayNames, wallet, paymasterUrl } = useContext(ConfigContext);
+    const { platform, ChainDisplayNames, wallet, paymasterUrl, isWeb } = useContext(ConfigContext);
     const { navigate, navigator, ongoing, showOngoing } = useContext(NavigateContext);
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
@@ -72,40 +65,16 @@ export default (props)=>{
     }
 
     useEffect(() => {
-        // //0000000000000000000000006de6b8b22241a753495ed1c3289abc9bf61f5d2e0000000000000000000000000000000000000000000000000000000000002710
-        // //0x0000000000000000000000006de6b8b22241a753495ed1c3289abc9bf61f5d2e0000000000000000000000000000000000000000000000000000000000002710
-        // const txData = {
-        //     to: "0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e",
-        //     value: ethers.utils.parseUnits("0.01", 6)
-        // };
-        //
-        // const contractAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
-        // const contractAbi = [
-        //     "function transfer(address to, uint256 value) public returns (bool)"
-        // ];
-        // const contract = new ethers.Contract(contractAddress, contractAbi, wallet);
-        // const data11 = contract.interface.encodeFunctionData("transfer", ["0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e", ethers.utils.parseUnits("0.01", 6)])
-        // console.log('======data11 = ', data11);
-        //
-        // const encodedData = ethers.utils.defaultAbiCoder.encode(
-        //     ["address", "uint256"],
-        //     [txData.to, txData.value]
-        // );
-        //
-        // console.log('====encodedData = ', encodedData);
-        //
-        // const ak = getTransferCallData("0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e", ethers.utils.parseUnits("0.01", 6));
-        // console.log("====ak = ", ak);
         const interval = setInterval(async () => {
             if (wallet) {
                 const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
-                console.log('===sendOps = ', sendOps);
+                console.csLog('===sendOps = ', sendOps);
                 if (sendOps.length >= EnableChainTypes.length - 1) {
                     clearInterval(interval);
                     return;
                 }
                 const hasSendTemps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP)) || [];
-                console.log('===hasSendTemps = ', hasSendTemps);
+                console.csLog('===hasSendTemps = ', hasSendTemps);
                 if (hasSendTemps.length >= EnableChainTypes.length - 1) {
                     clearInterval(interval);
                     return;
@@ -120,7 +89,7 @@ export default (props)=>{
                     preDate = String(new Date().getTime());
                     localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
                 }
-                console.log('===sendOps = ', sendOps);
+                console.csLog('===sendOps = ', sendOps);
                 try {
                     if (preDate === "fail") {
                         callToNativeMsg("error;create", platform);
@@ -135,7 +104,7 @@ export default (props)=>{
                                 const payOp = paymasterOps[chainId]
                                 let op;
                                 if (payOp) {
-                                    console.log('====hasPayOp = ', payOp);
+                                    console.csLog('====hasPayOp = ', payOp);
                                     op = payOp;
                                 } else {
                                     op = await getCreateOP(sender, pk, chainId);
@@ -144,22 +113,22 @@ export default (props)=>{
                                         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
                                     }
                                     if (op != null) {
-                                        console.log('====pre = ', op);
+                                        console.csLog('====pre = ', op);
                                         if (!op.paymasterData || op.paymasterData === '0x') {
-                                            console.log('===emailAccount = ', emailAccount);
-                                            console.log('===paymasterUrl url = ', paymasterUrl)
+                                            console.csLog('===emailAccount = ', emailAccount);
+                                            console.csLog('===paymasterUrl url = ', paymasterUrl)
                                             const paymasterData = await getPaymasterData(paymasterUrl, op, emailAccount, pk, chainId)
                                             op = paymasterData;
                                             paymasterOps[chainId] = paymasterData;
                                             localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
-                                            console.log('====paymasterData = ', op);
+                                            console.csLog('====paymasterData = ', op);
                                         }
                                     }
                                 }
-                                console.log('===chainId = ', chainId, ' ; op = ', op);
+                                console.csLog('===chainId = ', chainId, ' ; op = ', op);
                                 if (op && op.paymasterData && op.paymasterData !== '0x') {
                                     if (!hasSendTemps.includes(chainId)) {
-                                        console.log('====hasSendTemps no include');
+                                        console.csLog('====hasSendTemps no include');
                                         const hasSend = await checkAndSendOp(op, sender, pk, chainId);
                                         if (hasSend) {
                                             sendOps.push(chainId);
@@ -167,7 +136,7 @@ export default (props)=>{
                                         hasSendTemps.push(chainId);
                                         localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE, String(new Date().getTime()));
                                     } else {
-                                        console.log('====hasSendTemps.includes(chainId)');
+                                        console.csLog('====hasSendTemps.includes(chainId)');
                                     }
                                 }
                             }
@@ -181,7 +150,7 @@ export default (props)=>{
                     }
                 } catch (error) {
                     printToNative(error)
-                    console.log('===getCreateOP = ', error);
+                    console.csLog('===getCreateOP = ', error);
                 }
                 if (preDate !== 'success') {
                     const nowDate = new Date().getTime();
@@ -224,7 +193,7 @@ export default (props)=>{
                 setInitLoaded(true);
                 var element = document.getElementById("crescent-content");
                 var width = element.clientWidth;
-                const cardHeight = (width - 40) * 1.0 /319.0 * 100;
+                const cardHeight = (width - (isWeb ? 50 : 40)) * 1.0 /319.0 * 100;
                 setCardHeight(cardHeight);
                 const address = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
@@ -279,7 +248,7 @@ export default (props)=>{
     }
 
     const fetchData = async (account, interval = false, currentChainType = ChainType.All, isSearch = false) => {
-        console.log('====fetchdata interval = ', interval);
+        console.csLog('====fetchdata interval = ', interval);
         if (!interval) {
             setDataLoading(true);
         }
@@ -299,7 +268,7 @@ export default (props)=>{
             .then(response => response.json())
             .then(data => {
                 const tokens = data.data;
-                console.log('===token = ', tokens);
+                console.csLog('===token = ', tokens);
                 if (!tokens || tokens.length === 0) {
                     setData([]);
                     if (!interval) {
@@ -334,7 +303,7 @@ export default (props)=>{
                 }
                 setData(assets);
             }).catch(error => {
-                console.log(error)
+                console.csLog(error)
                 if (!interval) {
                     setDataLoading(false);
                 }
@@ -368,7 +337,7 @@ export default (props)=>{
                     loadDisplayData([], currentChainType);
                     return;
                 }
-                console.log('====tokens = ', tokens);
+                console.csLog('====tokens = ', tokens);
                 const assets = [];
 
                 tokens.map((item, index) => {
@@ -390,17 +359,17 @@ export default (props)=>{
                     })
                     assets.push({...item, account, amount, fullAmount, balanceFiat, balanceFiatUsd, nativeCurrency, chainType, change24h: Number(renderShortValue(item.change24h, 5))});
                 })
-                console.log('===search tokens = ', tokens);
+                console.csLog('===search tokens = ', tokens);
                 loadDisplayData(assets, currentChainType);
                 // setData(assets);
             }).catch(error => {
-            console.log(error)
+            console.csLog(error)
         });
     };
 
     const addToken = (asset) => {
         const url = HOST + '/api/v1/addToken?chain_id=' + asset.chainId + '&account=' + account + '&address=' + asset.tokenAddress + '&balances=' + (asset.balances || 0);
-        console.log('====url = ', url)
+        console.csLog('====url = ', url)
         fetch(url)
             .then(response => response.json())
             .then(result => {
@@ -415,7 +384,7 @@ export default (props)=>{
                     setDisplayData(newDisplayData);
                 }
             }).catch(error => {
-            console.log(error)
+            console.csLog(error)
         });
     }
 
@@ -437,7 +406,7 @@ export default (props)=>{
                     setDisplayData(newDisplayData);
                 }
             }).catch(error => {
-            console.log(error)
+            console.csLog(error)
         });
     }
 
@@ -546,7 +515,7 @@ export default (props)=>{
             <div className={'flex-col'}>
                 <div className={'main-asset-item-layout'} style={isSearch ? {marginLeft: 42} : {}}>
                     <div className={'main-asset-item-icon-layout'}>
-                        <img className={'main-asset-item-icon'} src={item.image}/>
+                        <ImageWithFallback className={'main-asset-item-icon'} src={item.image} defaultSrc={ic_token_default}/>
                         <img className={'main-asset-item-chain-tag'} src={NetworkConfig[item.chainType].tag}/>
                     </div>
                     <div className={'main-asset-item-token-left-layout'}>
@@ -585,7 +554,7 @@ export default (props)=>{
 
     return (
         <div className={'main'}>
-            <div className={'main-content'}>
+            <div className={'main-content'} style={isWeb ? { paddingTop: 20, paddingLeft: 25, paddingRight: 25 } : {}}>
                 <div className={'main-title-layout'}>
                     <div className={'main-title-email-and-adrress-layout'}>
                         <div className={'main-title-email'}>

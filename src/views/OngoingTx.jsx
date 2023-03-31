@@ -1,22 +1,24 @@
 import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
 import ic_back_white from "../assets/ic_back_white.png";
-import ic_attention from "../assets/ic_attention.png";
 import ic_copy from "../assets/ic_copy.png";
 import ic_success_green from "../assets/ic_success_green.png";
 import {useTranslation} from "react-i18next";
-import { ChainType, NetworkConfig } from "../helpers/Config";
+import {  NetworkConfig } from "../helpers/Config";
 import PopContext from "../contexts/PopContext";
 import loading_ongoing from "../assets/loading_ongoing.json";
 import Lottie from "react-lottie";
-import ConfigContext from "../contexts/ConfigContext";
 import {LOCAL_STORAGE_ONGOING_INFO} from "../helpers/StorageUtils";
 import {formatTimestamp, isSameDay} from "../helpers/DateUtils";
 import {renderShortValue} from "../helpers/number";
+import ConfigContext from "../contexts/ConfigContext";
+import ic_token_default from "../assets/ic_token_default.png";
+import ImageWithFallback from "../widgets/ImageWithFallback";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
     const { showTxHashCopied, showAddressCopied } = useContext(PopContext)
+    const { isWeb } = useContext(ConfigContext)
     const [tokens, setTokens] = useState([]);
 
     useEffect(() => {
@@ -42,7 +44,7 @@ export default (props)=>{
             <div className={'ongoingtx-item-layout'}>
                 <div className={'ongoingtx-item-row-layout'}>
                     <div className={'ongoingtx-item-icon-layout'}>
-                        <img className={'ongoingtx-item-icon'} src={item.image}/>
+                        <ImageWithFallback className={'ongoingtx-item-icon'} src={item.image} defaultSrc={ic_token_default}/>
                         <img className={'ongoingtx-item-chain-tag'} src={NetworkConfig[item.chainType].tag}/>
                     </div>
                     <div className={'ongoingtx-item-symbol-layout'}>
@@ -106,7 +108,7 @@ export default (props)=>{
     return (
         <div className={'ongoingtx'}>
             <div className={'ongoingtx-base'}>
-                <div className={'ongoingtx-tilte-layout'} onClick={() => navigate('Main')}>
+                <div className={'ongoingtx-tilte-layout'} style={isWeb ? { paddingLeft: 25 } : {}} onClick={() => navigate('Main')}>
                     <img className={'ongoingtx-title-back-icon'} src={ic_back_white} />
                     <span className={'ongoingtx-title-text'}>
                         {t('ongoing_tx')}
@@ -114,7 +116,7 @@ export default (props)=>{
                 </div>
 
                 <div className={'ongoingtx-tilte-line'}/>
-                <div className={'ongoingtx-content-layout'}>
+                <div className={'ongoingtx-content-layout'} style={isWeb ? { paddingLeft: 25, paddingRight: 25 } : {}}>
                     <div className={'flex-col'}>
                         {renderTokens(tokens)}
                         <span className={'ongoingtx-no-more-transactions'}>

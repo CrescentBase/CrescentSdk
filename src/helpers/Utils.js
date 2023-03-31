@@ -1,3 +1,9 @@
+export let isFromWeb = false;
+
+export const setIsFromWeb = (isWeb) => {
+    isFromWeb = isWeb;
+}
+
 export const isValidAddress = (hexAddress) => {
     if (!hexAddress) {
         return false;
@@ -30,6 +36,10 @@ export const isPcPlatform = (paramPlatform) => {
 }
 
 export const callToNativeMsg = (msg, paramPlatform) => {
+    if (isFromWeb) {
+        console.csLog(msg);
+        return;
+    }
     let platform = paramPlatform;
     if (!paramPlatform) {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -46,11 +56,15 @@ export const callToNativeMsg = (msg, paramPlatform) => {
     } else if (platform === 2) {
         window.webkit.messageHandlers.ReactCallBack.postMessage(msg);
     } else {
-        console.log(msg);
+        console.csLog(msg);
     }
 }
 
 export const callUrlToNative = (url, paramPlatform) => {
+    if (isFromWeb) {
+        window.open(url, "_blank");
+        return;
+    }
     let platform = paramPlatform;
     if (!paramPlatform) {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -67,8 +81,7 @@ export const callUrlToNative = (url, paramPlatform) => {
     } else if (platform === 2) {
         window.webkit.messageHandlers.ReactCallBack.postMessage("url;" + url);
     } else {
-        const newTab = window.open('about:blank');
-        newTab.location.href = "https://global.transak.com/?apiKey=2bd8015d-d8e6-4972-bcca-22770dcbe595";
+        window.open(url, "_blank");
     }
 }
 

@@ -4,14 +4,13 @@ import {ILocal } from '../locales/i18n'
 import TextInput from "../widgets/TextInput";
 import Button from "../widgets/Button";
 import ic_back_white from "../assets/ic_back_white.png"
-import {LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
-import {callToNativeMsg} from "../helpers/Utils";
+import { LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
 import ConfigContext from "../contexts/ConfigContext";
 import {ethers} from "ethers";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
-    const { wallet, platform } = useContext(ConfigContext);
+    const { wallet, isWeb } = useContext(ConfigContext);
     const [comfirmPw, setComfirmPw] = useState("");
     const [isComfirmPwWrong, setIsComfirmPwWrong] = useState(false);
     const [password, setPassword] = useState("");
@@ -33,13 +32,13 @@ export default (props)=>{
 
 
     return (
-        <div className={'changepw'}>
+        <div className={'changepw'} style={isWeb ? { paddingLeft: 25, paddingRight: 25} : {}}>
             <div className={'changepw-title-layout'} onClick={() => navigate("Setting")}>
                 <img src={ic_back_white} className={'changepw-title-back-icon'}/>
                 <div className={'changepw-title-text'}>{change_password}</div>
             </div>
 
-            <div className={'changepw-title-line'}/>
+            <div className={'changepw-title-line'} style={isWeb ? { paddingLeft: -25, paddingRight: -25} : {}}/>
 
             {hasConfirmed ? (
                 <div className={'changepw-comfirm-base'}>

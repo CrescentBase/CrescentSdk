@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
 import img_logo from '../assets/img_logo.png';
 import Button from "../widgets/Button";
@@ -18,16 +18,16 @@ import {callToNativeMsg} from "../helpers/Utils";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
-    const { setWallet, tx, emailAccount, walletJson, platform } = useContext(ConfigContext);
+    const { setWallet, tx, emailAccount, walletJson, platform, isWeb, onConnectSuccess } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
     const [errorText, setErrorText] = useState('');
 
     return (
-        <div className={'login'}>
-            <img className={'login-logo'} src={img_logo}/>
+        <div className={'login'} style={isWeb ? { paddingLeft: 25, paddingRight: 25 } : {}}>
+            <img className={'login-logo'} src={img_logo} style={isWeb ? { marginTop: 70 } : {}}/>
 
-            <TextInput style={{marginTop: 32}}
+            <TextInput style={isWeb ? { marginTop: 52 } : { marginTop: 32 }}
                tip={t('password')}
                placeholder={t('password')}
                type={'password'}
@@ -40,7 +40,7 @@ export default (props)=>{
                    }
                }}
             />
-            <Button style={{marginTop: 24}} text={t('login')} disable={password === ''} onClick={async () => {
+            <Button style={isWeb ? {marginTop: 44} : {marginTop: 24}} text={t('login')} disable={password === ''} onClick={async () => {
                 if (password.length < 6) {
                     setIsWrongPw(true);
                 } else {
@@ -79,7 +79,7 @@ export default (props)=>{
                                 tx.value = '0x' + Number(tx.value || 0).toString(16);
                             }
                             if (errorText) {
-                                console.log('====errorText = ', errorText);
+                                console.csLog('====errorText = ', errorText);
                                 setErrorText(errorText)
                                 setIsWrongPw(true);
                             } else {
@@ -102,11 +102,15 @@ export default (props)=>{
                                 address: publicAddress,
                                 // walletEncrypted: walletKeystore
                             }
-                            callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
+                            if (isWeb) {
+                                onConnectSuccess && onConnectSuccess(json);
+                            } else {
+                                callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
+                            }
                             navigate("Main");
                         }
                     } catch (e) {
-                        console.log('===e = ', e);
+                        console.csLog('===e = ', e);
                         setIsWrongPw(true);
                     }
                 }

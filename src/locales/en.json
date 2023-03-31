@@ -85,5 +85,18 @@
   "paramter_incorrectly": "The \"{{paramter}}\" parameter is incorrectly filled",
   "value_data_cannot_both": "The value and data parameters cannot both be filled in",
   "insufficient_gas_token": "Insufficient gas or token assets for trading",
-  "network_error": "Network Error"
+  "network_error": "Network Error",
+  "verification": "Verification",
+  "verification_need_verify_desc": "A new login has been detected. You need to verify account ownership via email.",
+  "verification_send_email_to_verify": "Send email to verify",
+  "verification_email_receiving": "Email receiving...",
+  "verification_send_fail_dec_1": "Verification failed? Try ",
+  "verification_send_fail_dec_2": "send",
+  "verification_send_fail_dec_3": " an email for \n manual verification.",
+  "verification_send_email_desc": "Please send the following email content for verification.",
+  "verification_send_to": "Send to:",
+  "verification_body": "Body:",
+  "verification_i_have_sent": "I have sent",
+  "verification_pop_title": "Why need to send email ?",
+  "verification_pop_desc": "Crescent implemented DKIM system on-chain to verify email and maintain privacy. So you have to send email to verify the ownership of email account first."
 }

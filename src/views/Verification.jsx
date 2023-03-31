@@ -1,0 +1,153 @@
+import React, {useContext, useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
+import Button from "../widgets/Button";
+import img_email from "../assets/img_email"
+import ic_question from "../assets/ic_question.png"
+import loadig_index from "../assets/loadig_index.json";
+import Lottie from "react-lottie";
+import ic_back_white from "../assets/ic_back_white.png";
+import ic_copy from "../assets/ic_copy.png";
+import NavigateContext from "../contexts/NavigateContext";
+import {RPCHOST} from "../helpers/Config";
+import {callToNativeMsg, isFromWeb, printToNative} from "../helpers/Utils";
+import {handleFetch} from "../helpers/FatchUtils";
+import {LOCAL_STORAGE_EMAIL, LOCAL_STORAGE_PUBLIC_ADDRESS} from "../helpers/StorageUtils";
+import {getSender} from "../helpers/UserOp";
+
+export default (props)=>{
+    const sendEmail = props.params?.sendEmail;
+    const publicKey = props.params?.publicKey;
+    const emailBrand = props.params?.emailBrand;
+    const [page, setPage] = useState(1);
+    const [popVisible, setPopVisible] = useState(false);
+    const { t } = useTranslation();
+    const { navigate } = useContext(NavigateContext);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (document.hidden || page != 2) {
+                return;
+            }
+            const url = RPCHOST + "/api/v1/getEmailInfo?publicKey=" + publicKey;
+            try {
+                printToNative(url)
+                const json = await handleFetch(url);
+                const data = json.data;
+                if (data) {
+                    clearInterval(interval);
+                    const email = data.email;
+                    const sender = data.sender;
+                    localStorage.setItem(LOCAL_STORAGE_EMAIL, email);
+                    localStorage.setItem(LOCAL_STORAGE_PUBLIC_ADDRESS, sender);
+                    navigate('SetPassword');
+                }
+            } catch (error) {
+            }
+        }, 3*1000);
+        return () => clearInterval(interval);
+    }, [page]);
+
+    return (
+        <div className={'verification'} onClick={() => {
+            if (popVisible) {
+                setPopVisible(false);
+            }
+        }}>
+            {page === 1 ? (
+                <div className={'verification-page'}>
+                    <div className={'verification-title-layout'}>
+                        <span className={'verification-title-text'}>
+                            {t('verification')}
+                        </span>
+                        <img className={'verification-info-icon'} src={ic_question} onClick={() => setPopVisible(true)}/>
+                    </div>
+                    <span className={'verification-need-verify-desc'}>
+                        {t('verification_need_verify_desc')}
+                    </span>
+                    <img className={'verification-email-img'} src={img_email}/>
+                    <Button style={{marginTop: 44}} text={t('verification_send_email_to_verify')} onClick={async () => {
+                        let link = '';
+                        if (emailBrand === 'gmail') {
+                            link = `https://mail.google.com/mail?view=cm&tf=0&to=${sendEmail}&su=Crescent&body=PK:${publicKey}`
+                        } else if (emailBrand === 'outlook') {
+                            link = `https://outlook.live.com/default.aspx?rru=compose&subject=Crescent&body=PK:${publicKey}&to=${sendEmail}#page=Compose`;
+                        } else {
+                            link = `https://login.yahoo.com/?.src=ym&lang=&done=https%3A%2F%2Fcompose.mail.yahoo.com%2F%3Fto%3DCrescentweb3%2540gmail.com%26subj%3DCrescent%26body%3DPK:${publicKey}`;
+                        }
+                        window.open(link, "_blank");
+                        setPage(2);
+                    }} />
+                </div>
+            ) : page === 2 ? (
+                <div className={'verification-page2'}>
+                    <Lottie options={{
+                        loop: true,
+                        autoplay: true,
+                        animationData: loadig_index,
+                        rendererSettings: {
+                            preserveAspectRatio: 'xMidYMid slice'
+                        }
+                    }}
+                            height={48}
+                            width={48}
+                    />
+                    <span className={'verification-page2-email-receiving'}>
+                        {t('verification_email_receiving')}
+                    </span>
+                    <div className={'verification-page2-send-fail-desc'}>
+                        {t('verification_send_fail_dec_1')}<span className={'verification-page2-send'} onClick={() => setPage(3)}>{t('verification_send_fail_dec_2')}</span>{t('verification_send_fail_dec_3')}
+                    </div>
+                </div>
+            ) :  (
+                <div className={'verification-page'}>
+                    <img className={'verification-page3-back-icon'} src={ic_back_white} onClick={() => setPage(2)}/>
+                    <span className={'verification-page3-verification-text'}>
+                        {t('verification')}
+                    </span>
+                    <span className={'verification-page3-verification-desc'}>
+                        {t('verification_send_email_desc')}
+                    </span>
+                    <div className={'verification-page3-content-layout'}>
+                        <span className={'verification-page3-send-to-text'}>
+                            {t('verification_send_to')}
+                        </span>
+                        <div className={'verification-page3-send-to-email-wrapper'}>
+                            <span className={'verification-page3-send-to-email'}>
+                                {sendEmail}
+                            </span>
+                            <img className={'verification-page3-send-to-email-copy-icon'} src={ic_copy} onClick={() => {
+                                navigator.clipboard.writeText(sendEmail);
+                            }}/>
+                        </div>
+                        <span className={'verification-page3-body-text'}>
+                            {t('verification_body')}
+                        </span>
+                        <div className={'verification-page3-pk-wrapper'}>
+                            <span className={'verification-page3-pk'}>
+                                {'PK:' +  publicKey}
+                            </span>
+                            <img className={'verification-page3-pk-copy-icon'} src={ic_copy} onClick={() => {
+                                navigator.clipboard.writeText('PK:' + publicKey);
+                            }}/>
+                        </div>
+                        <img className={'verification-page3-email-img'} src={img_email}/>
+                    </div>
+                    <Button style={{marginTop: 24}} text={t('verification_i_have_sent')} onClick={async () => {
+                        setPage(2);
+                    }} />
+                </div>
+            )}
+            {popVisible && (
+                <div className={'verification-pop-layout'} onClick={() => {}}>
+                    <span className={'verification-pop-title'}>
+                        {t('verification_pop_title')}
+                    </span>
+                    <span className={'verification-pop-desc'}>
+                        {t('verification_pop_desc')}
+                    </span>
+                </div>
+            )}
+        </div>
+    );
+}
+

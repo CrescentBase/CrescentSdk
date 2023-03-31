@@ -7,19 +7,21 @@ import ic_setting_enter from "../assets/ic_setting_enter.png"
 import ic_setting_switch from "../assets/ic_setting_switch.png"
 import { useTranslation } from 'react-i18next';
 import {LOCAL_STORAGE_LANGUAGE} from "../helpers/StorageUtils";
+import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const { isWeb } = useContext(ConfigContext);
     const { t, i18n } = useTranslation();
 
     return (
-        <div className={'setting'}>
+        <div className={'setting'} style={isWeb ? { paddingLeft: 25, paddingRight: 25} : {}}>
             <div className={'setting-title-layout'} onClick={() => navigate("Main")}>
                 <img src={ic_back_white} className={'setting-title-back-icon'}/>
                 <div className={'setting-title-text'}>{t('settings')}</div>
             </div>
 
-            <div className={'setting-title-line'} />
+            <div className={'setting-title-line'} style={isWeb ? { paddingLeft: -25, paddingRight: -25} : {}}/>
             <div className={'setting-content-layout'}>
                 <div className={'setting-item-wrap'} onClick={() => navigate("ChangePassword")}>
                     <img className={'setting-item-icon'} src={ic_set_safe_solid}/>

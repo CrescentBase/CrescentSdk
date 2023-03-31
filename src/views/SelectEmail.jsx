@@ -18,19 +18,20 @@ import {
 } from "../helpers/StorageUtils";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
+import NavigateContext from "../contexts/NavigateContext";
 
 export default (props)=>{
-
-    const { platform, paymasterUrl } = useContext(ConfigContext);
+    const { navigate } = useContext(NavigateContext);
+    const { platform, isWeb } = useContext(ConfigContext);
     const [address, setAddress] = useState('');
     const [loading, setLoading] = useState(false);
 
-    useEffect(async () => {
+    useEffect(() => {
         const privateKey = ethers.Wallet.createRandom().privateKey;
         const wallet = new ethers.Wallet(privateKey);
-        const address = await wallet.getAddress();
-        console.log('===address = ', address);
-        setAddress(address.toLowerCase());
+        wallet.getAddress().then((address) => {
+            setAddress(address.toLowerCase());
+        });
         localStorage.setItem(LOCAL_STORAGE_TEMP_PV, privateKey);
         localStorage.removeItem(LOCAL_STORAGE_ONGOING_INFO);
         localStorage.removeItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
@@ -41,14 +42,6 @@ export default (props)=>{
         localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
         localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
         localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
-
-        // const options = {scrypt: {N: 16384}};
-        // wallet.encrypt('test123', options).then((keystoreKey) => {
-        //     console.log('====walletKeystore = ', keystoreKey);
-        //     localStorage.setItem('walletKeystore', keystoreKey);
-        // });
-        //
-        // console.log('===privateKey = ', privateKey.length, " ; wpublicKey = ", publicKey.length);
     }, [])
 
     const choose = (email) => {
@@ -58,10 +51,18 @@ export default (props)=>{
         setLoading(true);
     }
 
+    const chooseWeb = (emailBrand) => {
+        if (address) {
+            const sendEmail = emailBrand === 'gmail' ? 'crescentweb3@zohomail.cn' : 'crescentweb3@gmail.com';
+            const publicKey = address;
+            navigate('Verification', { sendEmail, publicKey, emailBrand });
+        }
+    }
+
     return (
         <div className={'select-email'}>
-            <img className={'select-email-logo'} src={img_logo}/>
-            <div className={'select-email-with-email'}>
+            <img className={'select-email-logo'} style={isWeb ? { marginTop: 60 } : {}} src={img_logo}/>
+            <div className={'select-email-with-email'} style={isWeb ? { marginTop: 48, marginBottom: 16 } : {}}>
                 {ILocal('login_with')}
             </div>
 
@@ -78,6 +79,29 @@ export default (props)=>{
                             height={48}
                             width={48}
                     />
+                </div>
+            ) : isWeb ? (
+                <div className={'flex-width-full flex-full'}>
+                    <div className={'select-email-email-layout-inter'} style={isWeb ? { paddingLeft: 47, paddingRight: 47 } : {}}>
+                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('gmail')}>
+                            <img className={'select-email-email-logo'} src={ic_login_google} />
+                            <div className={'select-email-email-name'}>
+                                Google
+                            </div>
+                        </div>
+                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('outlook')}>
+                            <img className={'select-email-email-logo'} src={ic_login_outlook} />
+                            <div className={'select-email-email-name'}>
+                                Outlook
+                            </div>
+                        </div>
+                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('yahoo')}>
+                            <img className={'select-email-email-logo'} src={ic_login_yahoo} />
+                            <div className={'select-email-email-name'}>
+                                Yahoo
+                            </div>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className={'select-email-email-layout'}>

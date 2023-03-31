@@ -15,6 +15,7 @@ import ReceiveStyles from "../styles/ReceiveStyles"
 import SendStyles from "../styles/SendStyles"
 import OngoingTxStyles from "../styles/OngoingTxStyles";
 import CreateLoadingStyles from "../styles/CreateLoadingStyles";
+import VerificationStyles from "../styles/VerificationStyles";
 
 function getStyle(style = '') {
     const allStyle = [
@@ -35,6 +36,7 @@ function getStyle(style = '') {
         SendStyles(),
         OngoingTxStyles(),
         CreateLoadingStyles(),
+        VerificationStyles(),
         style
     ].join('');
     return trimStyle(allStyle);

@@ -12,6 +12,7 @@ import Send from "./Send";
 import Receive from "./Receive";
 import OngoingTx from "./OngoingTx";
 import CreateLoading from "./CreateLoading";
+import Verification from "./Verification";
 
 export default (props) => {
 
@@ -29,7 +30,8 @@ export default (props) => {
         Send: <Send params={params} />,
         Receive: <Receive params={params} />,
         OngoingTx: <OngoingTx params={params} />,
-        CreateLoading: <CreateLoading params={params} />
+        CreateLoading: <CreateLoading params={params} />,
+        Verification: <Verification params={params} />
     }
 
     return (

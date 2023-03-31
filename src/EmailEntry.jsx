@@ -18,10 +18,6 @@ const LoadingEntry = (props) => {
 
     const container = createContainer(element, document, style);
 
-    const connectAccount = (account) => {
-        console.log('account = ', account);
-    }
-
     const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
 
     if (!i18n.use(initReactI18next).isInitialized) {

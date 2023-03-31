@@ -15,6 +15,7 @@ import {
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const { isWeb, onConnectSuccess } = useContext(ConfigContext);
     const { platform, setWallet } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
     const [isWrongPw, setIsWrongPw] = useState(false);
@@ -22,7 +23,7 @@ export default (props)=>{
     const [isWrongPw2, setIsWrongPw2] = useState(false);
 
     return (
-        <div className={'setpw'}>
+        <div className={'setpw'} style={isWeb ? { paddingLeft: 25, paddingRight: 25 } : {}} >
             <div className={'setpw-password'}>
                 {ILocal('set_your_password')}
             </div>
@@ -79,7 +80,11 @@ export default (props)=>{
                             address: publicAddress,
                             // walletEncrypted: walletKeystore
                         }
-                        callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
+                        if (isWeb) {
+                            onConnectSuccess && onConnectSuccess(json);
+                        } else {
+                            callToNativeMsg( "userInfo;" + JSON.stringify(json), platform);
+                        }
                         callToNativeMsg("walletKeystore;" + keystoreKey, platform)
                     });
                 }

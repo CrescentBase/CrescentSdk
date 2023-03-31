@@ -3,117 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-
   <title>Development</title>
-
-<!--  <script src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js" type="application/javascript"></script>-->
-
-<!--  <script src="./dist/umd/index.js"></script>-->
   <script src="./dist/umd/index.bundle.js"></script>
 
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+      background-color: transparent;
+      overflow: hidden;
+    }
+
+    .base {
+      display: flex;
+      position: relative;
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 150px;
+      height: 40px;
+      margin-top: 50px;
+    }
+
+    .btn-wrap {
+      display: flex;
+      position: relative;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .pop-parent {
+      display: none;
+      position: fixed;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4)
+    }
+
+  </style>
 </head>
-<body style="text-align: center; margin: 0px; background-color: transparent; overflow: hidden;">
+<body>
+  <div class="base">
+    <span id="user_id"></span>
+    <div class="btn-wrap">
+      <button class="btn" onclick="connect()">Connect</button>
+      <button class="btn" onclick="sendTransaction()">SendTransaction</button>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
 
-<div id="parent-id" style="display: flex; position: relative">
-  <div style="display: flex; position: absolute; justify-content: center" id="parent-div1"></div>
-  <div style="display: flex; position: absolute; justify-content: center" id="parent-div2"></div>
-<!--  <button id="btnPay" type="button" style="display: none">Buy</button>-->
-</div>
+    <div class="pop-parent" id="parent_div" onclick="closePop()"></div>
+  </div>
 
-<script>
-  // localStorage.setItem('storage_wallet_keystore', '{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}')
-  function initLoad(params) {
-    const keystoreKey = localStorage.getItem('storage_wallet_keystore');
-    console.log('===keystoreKey = ', keystoreKey);
-    if (keystoreKey) {
-      loadMain(params)
-    } else {
-      loadSelectEmail(params);
-    }
-  }
+  <script>
 
-  function loadSelectEmail(params) {
-    const element = document.getElementById('parent-div2');
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-    function onComplete(obj) {
-      destroy();
-    }
-
-    let paramMap  = !!params ? params : {};
-    const allParams = {
-      container: element,
-      width: 360,
-      height: 360,
-      // style: '.MainSize {width: 350px; height: 350px} :root {--base-bg-color: #220000;  }',
-      language: 'zh',
-      onComplete,
-      ...paramMap
-    }
-    let destroy = CrescentSDK.EmailEntry(allParams);
-  }
-
-  function loadLoading(params) {
-    const element = document.getElementById('parent-div2');
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-    function onComplete(obj) {
-      destroy();
+    function connect() {
+      const element = document.getElementById('parent_div');
+      element.style.display = "flex";
+      const params = {
+        container: element,
+        language: 'zh',
+        paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp",
+        onConnectSuccess: (info) => {
+          const email = info.email;
+          const address = info.address;
+          console.log('email:', email);
+          console.log('address:', address);
+          const spanElement = document.getElementById('user_id');
+          spanElement.innerText = `Email: ${email} \n Address: ${address}`;
+        },
+        // emailAccount: 'xlu4337@outlook.com',
+        // walletJson: '{"address":"e55df1714bdd343e5b1fd85ceb4197d8a16bbdcd","id":"e765dca0-8bbd-4623-a333-fe4c9e7bad54","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ab48bf64c4d6ffa63c66e0234d967e66"},"ciphertext":"9cdc7c936ba6341ec4f55fda02293a751d00ac899a517777bed4eb545d688e03","kdf":"scrypt","kdfparams":{"salt":"11eb1a988ae0fa56dcdcd709eacd0dddc412c4b461c6118202155a9c2ae77638","n":256,"dklen":32,"p":1,"r":8},"mac":"90b5a203e73d0ed1156abd5228d38ac535540af1a04e772616eda3df4fdb4b15"}}'
+        // emailAccount: 'test2023abc@outlook.com',
+        // walletJson:'{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}'
+        // tx: {to: '0x0648ceA573a37aD78738c9ED861dD8Ad9Ca53beC', chainId: 137, value: '0x2386f26fc10000'}
+      }
+      CrescentSDK.connect(params);
     }
 
-    let paramMap  = !!params ? params : {};
-    const allParams = {
-      container: element,
-      width: 360,
-      height: 360,
-      language: 'zh',
-      onComplete,
-      ...paramMap
+    function sendTransaction() {
+      const element = document.getElementById('parent_div');
+      element.style.display = "flex";
+      const params = {
+        container: element,
+        language: 'zh',
+        paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp",
+        onSendSuccess: (txHash) => {
+          console.log('txHash: ', txHash)
+          const spanElement = document.getElementById('user_id');
+          spanElement.innerText = txHash;
+        },
+        // emailAccount: 'xlu4337@outlook.com',
+        // walletJson: '{"address":"e55df1714bdd343e5b1fd85ceb4197d8a16bbdcd","id":"e765dca0-8bbd-4623-a333-fe4c9e7bad54","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ab48bf64c4d6ffa63c66e0234d967e66"},"ciphertext":"9cdc7c936ba6341ec4f55fda02293a751d00ac899a517777bed4eb545d688e03","kdf":"scrypt","kdfparams":{"salt":"11eb1a988ae0fa56dcdcd709eacd0dddc412c4b461c6118202155a9c2ae77638","n":256,"dklen":32,"p":1,"r":8},"mac":"90b5a203e73d0ed1156abd5228d38ac535540af1a04e772616eda3df4fdb4b15"}}'
+        // emailAccount: 'test2023abc@outlook.com',
+        // walletJson:'{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}'
+        tx: {to: '0x0648ceA573a37aD78738c9ED861dD8Ad9Ca53beC', chainId: 137, value: '0x2386f26fc10000'}
+      }
+      CrescentSDK.connect(params);
     }
-    let destroy = CrescentSDK.LoadingEntry(allParams);
-  }
 
-  function loadMain(params) {
-    const element = document.getElementById('parent-div1');
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
+    function logout() {
+      CrescentSDK.logout();
     }
 
-    function removeLoading() {
-      const element2 = document.getElementById('parent-div2');
-      while (element2.firstChild) {
-        element2.removeChild(element2.firstChild);
+    function closePop() {
+      const element = document.getElementById('parent_div');
+      element.style.display = "none";
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
       }
     }
 
-    function onComplete(obj) {
-      destroy();
-    }
-
-    let paramMap  = !!params ? params : {};
-    const allParams = {
-      container: element,
-      width: 360,
-      height: 360,
-      language: 'zh',
-      onComplete,
-      removeLoading,
-      ...paramMap
-    }
-    let destroy = CrescentSDK.CrescentEntry(allParams);
-  }
-
-  // loadSelectEmail();
-  //initLoad({platform: 3});
-  // loadMain({initView: "SetPassword"});
-  // loadMain({initView: "Main"});
-  // loadMain({initView: "CreateLoading", emailAccount: 'test2023abc@outlook.com', platform: 3})
-
-  // initParams();
-  // button.addEventListener("click", func);
-</script>
+  </script>
 
 </body>
 </html>
