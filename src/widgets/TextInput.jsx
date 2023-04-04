@@ -14,6 +14,12 @@ export default (props)=>{
         props.onTextChange(content);
     }
 
+    function handleKeyDown(event) {
+        if (event.key === 'Enter') {
+            props.onEnter && props.onEnter();
+        }
+    }
+
     return (
         <div className={'widget-textinput-base-layout'} style={props.style}>
             {!props.tipHide && (
@@ -26,6 +32,7 @@ export default (props)=>{
                        placeholder={props.placeholder}
                        value={text}
                        onChange={handleTextChange}
+                       onKeyDown={handleKeyDown}
                 />
                 {text !== '' && (
                     <img className={'widget-textinput-edittext-clear'} src={ic_clear} onClick={() => {

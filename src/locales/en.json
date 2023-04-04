@@ -87,7 +87,8 @@
   "insufficient_gas_token": "Insufficient gas or token assets for trading",
   "network_error": "Network Error",
   "verification": "Verification",
-  "verification_need_verify_desc": "A new login has been detected. You need to verify account ownership via email.",
+  "login_or_register": "Sign in / Sign up",
+  "verification_need_verify_desc": "You haven’t logged in on this browser. Please verify your email to sign in or sign up.",
   "verification_send_email_to_verify": "Send email to verify",
   "verification_email_receiving": "Email receiving...",
   "verification_send_fail_dec_1": "Verification failed? Try ",
@@ -98,5 +99,6 @@
   "verification_body": "Body:",
   "verification_i_have_sent": "I have sent",
   "verification_pop_title": "Why need to send email ?",
-  "verification_pop_desc": "Crescent implemented DKIM system on-chain to verify email and maintain privacy. So you have to send email to verify the ownership of email account first."
+  "verification_pop_desc": "Crescent implemented DKIM system on-chain to verify email and maintain privacy. So you have to send email to verify the ownership of email account first.",
+  "copy_success": "Copy successful"
 }

@@ -1,6 +1,23 @@
 export default () => {
     return(`
-     
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        
+        input::-webkit-credentials-auto-fill-button {
+            display: none !important;
+            visibility: hidden;
+            pointer-events: none;
+            position: absolute; 
+            right: 0;
+        }
+        
+        div::-webkit-scrollbar {
+          display: none;
+        }
+        
         :root {
             --base-bg-color: #000000;
             --gradient-color-1: #42FD86;

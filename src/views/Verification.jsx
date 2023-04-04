@@ -9,19 +9,19 @@ import ic_back_white from "../assets/ic_back_white.png";
 import ic_copy from "../assets/ic_copy.png";
 import NavigateContext from "../contexts/NavigateContext";
 import {RPCHOST} from "../helpers/Config";
-import {callToNativeMsg, isFromWeb, printToNative} from "../helpers/Utils";
 import {handleFetch} from "../helpers/FatchUtils";
 import {LOCAL_STORAGE_EMAIL, LOCAL_STORAGE_PUBLIC_ADDRESS} from "../helpers/StorageUtils";
-import {getSender} from "../helpers/UserOp";
+import PopContext from "../contexts/PopContext";
 
 export default (props)=>{
+    const { showOnlyCopy } = useContext(PopContext);
+    const { navigate } = useContext(NavigateContext);
     const sendEmail = props.params?.sendEmail;
     const publicKey = props.params?.publicKey;
     const emailBrand = props.params?.emailBrand;
     const [page, setPage] = useState(1);
     const [popVisible, setPopVisible] = useState(false);
     const { t } = useTranslation();
-    const { navigate } = useContext(NavigateContext);
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -30,7 +30,6 @@ export default (props)=>{
             }
             const url = RPCHOST + "/api/v1/getEmailInfo?publicKey=" + publicKey;
             try {
-                printToNative(url)
                 const json = await handleFetch(url);
                 const data = json.data;
                 if (data) {
@@ -57,7 +56,7 @@ export default (props)=>{
                 <div className={'verification-page'}>
                     <div className={'verification-title-layout'}>
                         <span className={'verification-title-text'}>
-                            {t('verification')}
+                            {t('login_or_register')}
                         </span>
                         <img className={'verification-info-icon'} src={ic_question} onClick={() => setPopVisible(true)}/>
                     </div>
@@ -116,7 +115,8 @@ export default (props)=>{
                                 {sendEmail}
                             </span>
                             <img className={'verification-page3-send-to-email-copy-icon'} src={ic_copy} onClick={() => {
-                                navigator.clipboard.writeText(sendEmail);
+                                showOnlyCopy(sendEmail);
+
                             }}/>
                         </div>
                         <span className={'verification-page3-body-text'}>
@@ -127,7 +127,7 @@ export default (props)=>{
                                 {'PK:' +  publicKey}
                             </span>
                             <img className={'verification-page3-pk-copy-icon'} src={ic_copy} onClick={() => {
-                                navigator.clipboard.writeText('PK:' + publicKey);
+                                showOnlyCopy('PK:' + publicKey);
                             }}/>
                         </div>
                         <img className={'verification-page3-email-img'} src={img_email}/>

@@ -7,7 +7,8 @@ import {callToNativeMsg} from "../helpers/Utils";
 export default (props) => {
     const { t } = useTranslation();
     const [copiedPop, setCopiedPop] = useState(false);
-    const [isTxHash, setIsTxHash] = useState(false);
+    const [copyType, setCopyType] = useState(0);
+
 
     const showAddressCopied = (text) => {
         try {
@@ -15,7 +16,7 @@ export default (props) => {
             navigator.clipboard.writeText(text);
         } catch (err) {
         }
-        setIsTxHash(false);
+        setCopyType(1);
         setCopiedPop(true);
         setTimeout(() => {
             setCopiedPop(false);
@@ -28,7 +29,19 @@ export default (props) => {
             navigator.clipboard.writeText(text);
         } catch (err) {
         }
-        setIsTxHash(true);
+        setCopyType(2);
+        setCopiedPop(true);
+        setTimeout(() => {
+            setCopiedPop(false);
+        }, 2000);
+    }
+
+    const showOnlyCopy = (text) => {
+        try {
+            navigator.clipboard.writeText(text);
+        } catch (err) {
+        }
+        setCopyType(3);
         setCopiedPop(true);
         setTimeout(() => {
             setCopiedPop(false);
@@ -37,17 +50,17 @@ export default (props) => {
 
     const renderCopiedPop = () => {
         return (
-            <div className={'pop-provider-address-copied-layout'}>
+            <div className={'pop-provider-address-copied-layout'} style={copyType === 3 ? {backgroundColor: 'var(--system-color-2)'} : {}}>
                 <img className={'pop-provider-address-copied-icon'} src={ic_success_white}/>
                 <div className={'pop-provider-address-copied-text'}>
-                    {isTxHash ? t('hash_copied_to_clipboard') : t('address_copied')}
+                    {copyType === 2 ? t('hash_copied_to_clipboard') : copyType === 3 ? t('copy_success') : t('address_copied')}
                 </div>
             </div>
         );
-    }
+    };
 
     return (
-        <PopContext.Provider value={{ showAddressCopied, showTxHashCopied }}>
+        <PopContext.Provider value={{ showAddressCopied, showTxHashCopied, showOnlyCopy }}>
             {props.children}
             {copiedPop && renderCopiedPop()}
         </PopContext.Provider>

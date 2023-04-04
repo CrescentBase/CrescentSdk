@@ -593,7 +593,7 @@ export default (props)=>{
                             <span className={'send-step2-gas-price-and-limit-item-row-tip'}>
                                 {suggestedGasFees?.isEIP1559 ? t('tip') : t('gas_price')}
                             </span>
-                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasPriceInput} value={customGasPrice}/>
+                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasPriceInput} value={customGasPrice} onWheel={(e) => e.preventDefault()} />
                         </div>
                         <div className={'send-line'}/>
                     </div>
@@ -603,7 +603,7 @@ export default (props)=>{
                             <span className={'send-step2-gas-price-and-limit-item-row-tip'}>
                                 {t('gas_limit')}
                             </span>
-                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasLimitInput} value={customGasLimit}/>
+                            <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleGasLimitInput} value={customGasLimit} onWheel={(e) => e.preventDefault()} />
                         </div>
                         <div className={'send-line'}/>
                     </div>
@@ -881,7 +881,7 @@ export default (props)=>{
                             </div>
                             <div className={'send-input-token-layout'}>
                                 <ImageWithFallback className={'send-input-token-icon'} src={asset.image} defaultSrc={ic_token_default}/>
-                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput}/>
+                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleBalanceInput} value={balanceInput} onWheel={(e) => e.preventDefault()} />
                                 {false && (
                                     <span className={'send-input-token-max'} onClick={() => {
                                         changeBalanceInput(asset.fullAmount);
@@ -894,7 +894,7 @@ export default (props)=>{
                             <span className={'send-equal'}>≈</span>
                             <div className={'send-input-token-layout'}>
                                 <img className={'send-input-token-icon'} src={ic_currency_usd}/>
-                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleDollerInput} value={dollerInput} disabled={!asset.price}/>
+                                <input className={'send-input'} placeholder={'0.00'} type={'number'} onChange={handleDollerInput} value={dollerInput} disabled={!asset.price} onWheel={(e) => e.preventDefault()} />
                                 <span className={'send-input-dollar-usd'}>
                                     USD
                                 </span>

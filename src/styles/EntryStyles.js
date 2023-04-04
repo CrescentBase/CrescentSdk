@@ -42,6 +42,10 @@ export default () => {
             transform: translate(-50%, -50%);
         }
         
+        .pop-provider-bg_black {
+            background: var(--system-color-2);
+        }
+        
         .pop-provider-address-copied-icon {
             width: 28px;
             height: 28px;

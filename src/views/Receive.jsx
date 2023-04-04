@@ -49,7 +49,7 @@ export default (props)=>{
                     </span>
 
                     <div className={'receive-chain'}>
-                        {t('token_on_net', {symbol: asset.symbol, chain: NetworkConfig[asset.chainType].name, addr: getAddrStr()})}
+                        {t('token_on_net', {symbol: asset.symbol, chain: NetworkConfig[asset.chainType].Name, addr: getAddrStr()})}
                     </div>
 
                     <span className={'receive-to-this-address'}>
