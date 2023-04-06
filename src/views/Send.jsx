@@ -759,7 +759,7 @@ export default (props)=>{
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
         const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
 
-        const blockProvider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v1/rpc/" + chainId)
+        const blockProvider = new ethers.providers.JsonRpcProvider("https://wallet.crescentbase.com/api/v2/rpc/" + chainId)
         const blockNumber = await blockProvider.getBlockNumber();
         walletNew.signMessage(ethers.utils.arrayify(txId)).then(async signedTx => {
             try {

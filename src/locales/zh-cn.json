@@ -86,7 +86,7 @@
   "network_error": "网络异常",
   "verification": "验证",
   "login_or_register": "登录 / 注册",
-  "verification_need_verify_desc": "你尚未在此浏览器登录。请验证你的电子邮件以登录或注册。",
+  "verification_need_verify_desc": "你尚未在此浏览器登录，请验证你的电子邮件以登录或注册。",
   "verification_send_email_to_verify": "发送邮件验证",
   "verification_email_receiving": "邮件接收中...",
   "verification_send_fail_dec_1": "验证失败? 尝试手动 ",

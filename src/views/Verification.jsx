@@ -28,7 +28,7 @@ export default (props)=>{
             if (document.hidden || page != 2) {
                 return;
             }
-            const url = RPCHOST + "/api/v1/getEmailInfo?publicKey=" + publicKey;
+            const url = RPCHOST + "/api/v2/getEmailInfo?publicKey=" + publicKey;
             try {
                 const json = await handleFetch(url);
                 const data = json.data;

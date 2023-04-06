@@ -22,13 +22,12 @@ const testUo = {
 	"nonce": "0x0",
 	"initCode": "0x",
 	"callData": "0x",
-	"callGas": "0x0",
-	"verificationGas": "0x186A0",
+	"callGasLimit": "0x0",
+	"verificationGasLimit": "0x186A0",
 	"preVerificationGas": "0x5208",
 	"maxFeePerGas": "0x0",
 	"maxPriorityFeePerGas": "0x0",
-	"paymaster": "0x0000000000000000000000000000000000000000",
-	"paymasterData": "0x",
+	"paymasterAndData": "0x",
 	"signature": "0x"
 };
 
@@ -261,15 +260,15 @@ export async function getBasicGasEstimates(wallet, chainType, asset, tx, toAddre
 		try {
 			const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
 			if (asset.nativeCurrency) {
-				const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
+				const url = 'https://wallet.crescentbase.com/api/v2/rpc/';
 				const rpcUrl = `${url}${chainId}`;
 				const code = await getCode(rpcUrl, toAddress);
 				console.csLog('=====code = ', code);
-				if (code > 30) {
-					uo = await getUserOperationByToken(wallet, provider, chainId, sender, toAddress, null, null, value);
-				} else {
+				// if (code > 30) {
+				// 	uo = await getUserOperationByToken(wallet, provider, chainId, sender, toAddress, null, null, value);
+				// } else {
 					uo = await getUserOperationByNativeCurrency(wallet, provider, chainId, sender, toAddress, value);
-				}
+				// }
 			} else {
 				uo = await getUserOperationByToken(wallet, provider, chainId, sender, asset.tokenAddress, toAddress, value);
 			}

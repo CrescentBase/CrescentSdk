@@ -114,7 +114,7 @@ export default (props)=>{
                                     }
                                     if (op != null) {
                                         console.csLog('====pre = ', op);
-                                        if (!op.paymasterData || op.paymasterData === '0x') {
+                                        if (!op.paymasterAndData || op.paymasterAndData === '0x') {
                                             console.csLog('===emailAccount = ', emailAccount);
                                             console.csLog('===paymasterUrl url = ', paymasterUrl)
                                             const paymasterData = await getPaymasterData(paymasterUrl, op, emailAccount, pk, chainId)
@@ -126,7 +126,7 @@ export default (props)=>{
                                     }
                                 }
                                 console.csLog('===chainId = ', chainId, ' ; op = ', op);
-                                if (op && op.paymasterData && op.paymasterData !== '0x') {
+                                if (op && op.paymasterAndData && op.paymasterAndData !== '0x') {
                                     if (!hasSendTemps.includes(chainId)) {
                                         console.csLog('====hasSendTemps no include');
                                         const hasSend = await checkAndSendOp(op, sender, pk, chainId);

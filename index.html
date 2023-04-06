@@ -67,14 +67,14 @@
       const params = {
         container: element,
         language: 'zh',
-        paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp",
+        paymasterUrl: "https://wallet.crescentbase.com/api/v2/signOp",
         onConnectSuccess: (info) => {
           const email = info.email;
           const address = info.address;
           console.log('email:', email);
           console.log('address:', address);
-          const spanElement = document.getElementById('user_id');
-          spanElement.innerText = `Email: ${email} \n Address: ${address}`;
+          // const spanElement = document.getElementById('user_id');
+          // spanElement.innerText = `Email: ${email} \n Address: ${address}`;
         },
         // emailAccount: 'xlu4337@outlook.com',
         // walletJson: '{"address":"e55df1714bdd343e5b1fd85ceb4197d8a16bbdcd","id":"e765dca0-8bbd-4623-a333-fe4c9e7bad54","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ab48bf64c4d6ffa63c66e0234d967e66"},"ciphertext":"9cdc7c936ba6341ec4f55fda02293a751d00ac899a517777bed4eb545d688e03","kdf":"scrypt","kdfparams":{"salt":"11eb1a988ae0fa56dcdcd709eacd0dddc412c4b461c6118202155a9c2ae77638","n":256,"dklen":32,"p":1,"r":8},"mac":"90b5a203e73d0ed1156abd5228d38ac535540af1a04e772616eda3df4fdb4b15"}}'

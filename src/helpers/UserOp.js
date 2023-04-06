@@ -9,21 +9,20 @@ import {printToNative} from "./Utils";
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
 
-export const entryPoint = "0xDd6c867f9267977FeA8D33e375190f2044cB346E";
+export const entryPoint = "0x22DAe313353AD967abC517E421BC1323a4aE65EE";
 
 export const UserOperationDefault = {
     sender: ethers.constants.AddressZero,
     nonce: 0,
     initCode: '0x',
     callData: '0x',
-    callGas: 0,
-    paymaster: ethers.constants.AddressZero,
-    paymasterData: '0x',
+    callGasLimit: 0,
+    paymasterAndData: '0x',
     signature: '0x',
     maxFeePerGas: 0,
     maxPriorityFeePerGas: 0,
     preVerificationGas: 0,
-    verificationGas: 10e6
+    verificationGasLimit: 10e6
 };
 
 export const getExecFromEntryPointCallData = (to, value, data) => {
@@ -87,7 +86,7 @@ export const getUserOperationByTx = async (wallet, provider, chainId, sender, tx
     if (tx.data && tx.data.length > 2) {
         data = getExecFromEntryPointCallData(tx.to, value, tx.data);
     } else {
-        const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
+        const url = 'https://wallet.crescentbase.com/api/v2/rpc/';
         const rpcUrl = `${url}${chainId}`;
         const code = await getCode(rpcUrl, sender);
         if (code > 30) {
@@ -134,13 +133,14 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         console.csLog('====uo 222= ', uo);
         const result = await provider.send("eth_estimateUserOperationGas", [uo, entryPoint]);
         console.csLog('====result = ', result);
-        console.csLog('====result.verificationGas = ', result.verificationGas);
-        console.csLog('===new BigNumber(result.verificationGas) = ', new BigNumber(result.verificationGas));
+        console.csLog('====result.verificationGasLimit = ', result.verificationGasLimit);
+        console.csLog('===new BigNumber(result.verificationGasLimit) = ', new BigNumber(result.verificationGas));
         console.csLog('===new BigNumber(result.verificationGas).multipliedBy(1.5) = ', new BigNumber(result.verificationGas).multipliedBy(1.5));
-        uo.verificationGas = '0x' + new BigNumber(result.verificationGas).multipliedBy(3).toString(16);
-        console.csLog('===uo.verificationGas = ', uo.verificationGas);
+        uo.verificationGasLimit = '0x' + new BigNumber(result.verificationGas).multipliedBy(3).toString(16);
+        console.csLog('===uo.verificationGas = ', uo.verificationGasLimit);
         uo.preVerificationGas = result.preVerificationGas;
-        uo.callGas = result.callGas;
+        uo.callGasLimit = result.callGasLimit;//result.callGasLimit;
+        console.csLog('===uo.callGasLimit = ', uo.callGasLimit);
         // if (String(chainId) === '42161') {
         //     if (new BigNumber(uo.callGas).lt(new BigNumber(800000))) {
         //         uo.callGas = '0x' + new BigNumber(800000).toString(16);
@@ -167,7 +167,7 @@ export const sendUserOperation = async (provider, uo) => {
 
 
 export const getGasLimit = (uo) => {
-    return Number(uo.callGas) + Number(uo.verificationGas) + Number(uo.preVerificationGas);
+    return Number(uo.callGasLimit) + Number(uo.verificationGasLimit) + Number(uo.preVerificationGas);
 }
 
 export const packUserOp = (op) => {
@@ -178,13 +178,12 @@ export const packUserOp = (op) => {
             { type: 'uint256', name: 'nonce' },
             { type: 'bytes', name: 'initCode' },
             { type: 'bytes', name: 'callData' },
-            { type: 'uint256', name: 'callGas' },
-            { type: 'uint256', name: 'verificationGas' },
+            { type: 'uint256', name: 'callGasLimit' },
+            { type: 'uint256', name: 'verificationGasLimit' },
             { type: 'uint256', name: 'preVerificationGas' },
             { type: 'uint256', name: 'maxFeePerGas' },
             { type: 'uint256', name: 'maxPriorityFeePerGas' },
-            { type: 'address', name: 'paymaster' },
-            { type: 'bytes', name: 'paymasterData' },
+            { type: 'bytes', name: 'paymasterAndData' },
             { type: 'bytes', name: 'signature' }
         ],
         name: 'userOp',
@@ -218,7 +217,7 @@ export const hasSender = async (rpcUrl, sender) => {
 }
 
 export const getCreateOP = async (sender, pk, chainId) => {
-    const url = `https://wallet.crescentbase.com/api/v1/getCreateOP?sender=${sender}&pk=${pk}&chain_id=${chainId}`;
+    const url = `https://wallet.crescentbase.com/api/v2/getCreateOP?sender=${sender}&pk=${pk}&chain_id=${chainId}`;
     console.csLog('===url = ', url);
     const result = await handleFetch(url);
     console.csLog('===getCreateOP = ', result);
@@ -249,7 +248,7 @@ export const getPaymasterData = async (paymasterUrl, op, email, pk, chainId) => 
 }
 
 export const checkAndSendOp = async (op, sender, owner, chainId) => {
-    const url = 'https://wallet.crescentbase.com/api/v1/rpc/';
+    const url = 'https://wallet.crescentbase.com/api/v2/rpc/';
     const hasSendUrl = `${url}${chainId}`;
     const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`//`${url}${chainId}`;
     try {
@@ -269,7 +268,7 @@ export const checkAndSendOp = async (op, sender, owner, chainId) => {
 }
 
 export const getSender = async (email) => {
-    const url = RPCHOST + "/api/v1/getAAddress?email=" + email;
+    const url = RPCHOST + "/api/v2/getAAddress?email=" + email;
     try {
         printToNative(url)
         const json = await handleFetch(url);
@@ -300,7 +299,7 @@ export const getNonce = async (sender, chainId) => {
         }
     ];
     const contractAddress = sender;
-    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v1/rpc/' + chainId);
+    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v2/rpc/' + chainId);
     const contract = new ethers.Contract(contractAddress, abi, provider);
     const nonce = await contract.nonce();
     return nonce;
@@ -329,7 +328,7 @@ export const containOwner = async (sender, owner, chainId) => {
         }
     ];
     const contractAddress = sender;
-    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v1/rpc/' + chainId);
+    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v2/rpc/' + chainId);
     const contract = new ethers.Contract(contractAddress, abi, provider);
     const isOwner = await contract.containOwner(owner);
     return isOwner;

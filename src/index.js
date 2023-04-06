@@ -11,7 +11,7 @@ import {
 
 const originalConsoleLog = console.log;
 function log(...args) {
-    if (false) {
+    if (true) {
         originalConsoleLog(...args);
     }
 }
