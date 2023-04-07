@@ -10,7 +10,7 @@ import zh from "./locales/zh-cn.json";
 import Loading from "./views/Loading";
 import {LOCAL_STORAGE_LANGUAGE} from "./helpers/StorageUtils";
 
-const EmailEntry = (props) => {
+const LoadingEntry = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
     const style = getStyle(props.style);
@@ -57,4 +57,4 @@ const EmailEntry = (props) => {
     return unmount;
 }
 
-export default EmailEntry;
+export default LoadingEntry;

@@ -7,11 +7,12 @@ import i18n from "i18next";
 import {initReactI18next} from "react-i18next";
 import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
-import CreateLoading from "./views/CreateLoading";
 import SelectEmail from "./views/SelectEmail";
 import {LOCAL_STORAGE_LANGUAGE} from "./helpers/StorageUtils";
+import CrescentView from "./views/CrescentView";
+import NavigateProvider from "./contexts/NavigateProvider";
 
-const LoadingEntry = (props) => {
+const EmailEntry = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
     const style = getStyle(props.style);
@@ -42,7 +43,9 @@ const LoadingEntry = (props) => {
                 <div style={{width: props.width, height: props.height}}>
                     <div className={'content'} id={'crescent-content'}>
                         <div className={'content-inter'}>
-                            <SelectEmail />
+                            <NavigateProvider>
+                                <SelectEmail />
+                            </NavigateProvider>
                         </div>
                     </div>
                 </div>
@@ -59,4 +62,4 @@ const LoadingEntry = (props) => {
     return unmount;
 }
 
-export default LoadingEntry;
+export default EmailEntry;

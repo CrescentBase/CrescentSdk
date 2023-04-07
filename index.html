@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <title>Development</title>
   <script src="./dist/umd/index.bundle.js"></script>
+<!--  <script src="./index.bundle.js?v=2"></script>-->
 
   <style>
     body {
@@ -91,7 +92,7 @@
       const params = {
         container: element,
         language: 'zh',
-        paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp",
+        paymasterUrl: "https://wallet.crescentbase.com/api/v2/signOp",
         onSendSuccess: (txHash) => {
           console.log('txHash: ', txHash)
           const spanElement = document.getElementById('user_id');
