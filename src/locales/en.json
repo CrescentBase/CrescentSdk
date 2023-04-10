@@ -95,10 +95,13 @@
   "verification_send_fail_dec_2": "send",
   "verification_send_fail_dec_3": " an email for \n manual verification.",
   "verification_send_email_desc": "Please send the following email content for verification.",
-  "verification_send_to": "Send to:",
-  "verification_body": "Body:",
+  "verification_send_to": "to",
+  "verification_body": "Email Content (Body)",
   "verification_i_have_sent": "I have sent",
   "verification_pop_title": "Why need to send email ?",
   "verification_pop_desc": "Crescent implemented DKIM system on-chain to verify email and maintain privacy. So you have to send email to verify the ownership of email account first.",
-  "copy_success": "Copy successful"
+  "copy_success": "Copy successful",
+  "verification_click_auto_generated": "Click the button below to log into your email and send an auto-generated email for verification.",
+  "verification_subject-not-required": "Subject(title) is not required",
+  "verification_haven_not_logged_in": "You haven’t logged in on this browser. Please log into your email and send the following email content for verification."
 }

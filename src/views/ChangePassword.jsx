@@ -78,6 +78,7 @@ export default (props)=>{
                         } else {
                             const options = {scrypt: {N: 256}};
                             wallet.encrypt(password, options).then((keystoreKey) => {
+                                console.csLog('===keystoreKey = ', keystoreKey);
                                 localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
                             });
                             navigate("Setting")

@@ -1,15 +1,37 @@
 import {ethers} from "ethers";
 import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils.js';
 import {handleFetch, rpcFetch} from "./FatchUtils.js";
-import {HOST, NetworkConfig, RPCHOST} from "./Config";
+import {RPCHOST} from "./Config";
 import BigNumber from "bignumber.js";
-import {LOCAL_STORAGE_PUBLIC_ADDRESS} from "./StorageUtils";
+import {
+    LOCAL_STORAGE_ENTRY_POINTS,
+} from "./StorageUtils";
 import {printToNative} from "./Utils";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
 
-export const entryPoint = "0x22DAe313353AD967abC517E421BC1323a4aE65EE";
+export let entryPoints = [];
+
+export const setEntryPoint = (entryP) => {
+    entryPoints = entryP;
+    localStorage.setItem(LOCAL_STORAGE_ENTRY_POINTS, JSON.stringify(entryP));
+}
+
+export const getEntryPoint = (chainId) => {
+    if (entryPoints.length === 0) {
+        const jsonEntryPoints = JSON.parse(localStorage.getItem(LOCAL_STORAGE_ENTRY_POINTS)) || [];
+        if (jsonEntryPoints.length > 0) {
+            const entryPoint = jsonEntryPoints.filter(item => String(item.chainId) === String(chainId));
+            if (entryPoint.length > 0) {
+                return entryPoint[0]['entryPoint'];
+            }
+        }
+    } else {
+        return entryPoints.filter(item => String(item.chainId) === String(chainId))[0]['entryPoint'];
+    }
+    return undefined;
+}
 
 export const UserOperationDefault = {
     sender: ethers.constants.AddressZero,
@@ -131,7 +153,7 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         uo.signature = signedTx;
         printToNative(uo.toString());
         console.csLog('====uo 222= ', uo);
-        const result = await provider.send("eth_estimateUserOperationGas", [uo, entryPoint]);
+        const result = await provider.send("eth_estimateUserOperationGas", [uo, getEntryPoint(chainId)]);
         console.csLog('====result = ', result);
         console.csLog('====result.verificationGasLimit = ', result.verificationGasLimit);
         console.csLog('===new BigNumber(result.verificationGasLimit) = ', new BigNumber(result.verificationGas));
@@ -161,8 +183,8 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
 //         "code": -32500
 
 //0x7e1ed8acbab7d76bbf9754355d3236a20499cfa723a61266c1b417b1310836da
-export const sendUserOperation = async (provider, uo) => {
-    return await provider.send("eth_sendUserOperation", [uo, entryPoint]);
+export const sendUserOperation = async (provider, uo, chainId) => {
+    return await provider.send("eth_sendUserOperation", [uo, getEntryPoint(chainId)]);
 }
 
 
@@ -199,7 +221,7 @@ export const getRequestId = (op, chainId) => {
     const userOpHash = keccak256(packUserOp(op, true))
     const enc = defaultAbiCoder.encode(
         ['bytes32', 'address', 'uint256'],
-        [userOpHash, entryPoint, chainId])
+        [userOpHash, getEntryPoint(chainId), chainId])
     return keccak256(enc)
 }
 
@@ -228,7 +250,10 @@ export const getCreateOP = async (sender, pk, chainId) => {
 }
 
 export const sendOp = async (rpcUrl, op, chainId) => {
-    const body = {jsonrpc:"2.0",method:"eth_sendUserOperation",params:[op, entryPoint],id:8};
+    if (!getEntryPoint(chainId)) {
+        throw new Error(`sendOp error entrypoint is null`);
+    }
+    const body = {jsonrpc:"2.0",method:"eth_sendUserOperation",params:[op, getEntryPoint(chainId)],id:8};
     const result = await rpcFetch(rpcUrl, body);
     console.csLog('===result = ', chainId, result);
     if (!result || !result.result) {

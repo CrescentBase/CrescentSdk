@@ -81,27 +81,58 @@ export default (props)=>{
                     />
                 </div>
             ) : isWeb ? (
-                <div className={'flex-width-full flex-full'}>
-                    <div className={'select-email-email-layout-inter'} style={isWeb ? { paddingLeft: 47, paddingRight: 47 } : {}}>
-                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('gmail')}>
-                            <img className={'select-email-email-logo'} src={ic_login_google} />
+                <div className={'flex-width-full flex-full flex-col'}>
+                    <div className={'select-email-email-layout-inter'} style={{ paddingLeft: 47, paddingRight: 47 }}>
+                        <div className={'select-email-email-wrap-web'}>
+                            <div className={'select-email-email-wrap'} onClick={() => chooseWeb('gmail')}>
+                                <img className={'select-email-email-logo'} src={ic_login_google} />
+                            </div>
                             <div className={'select-email-email-name'}>
                                 Google
                             </div>
                         </div>
-                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('outlook')}>
-                            <img className={'select-email-email-logo'} src={ic_login_outlook} />
+
+                        <div className={'select-email-email-wrap-web'}>
+                            <div className={'select-email-email-wrap'} onClick={() => chooseWeb('outlook')}>
+                                <img className={'select-email-email-logo'} src={ic_login_outlook} />
+                            </div>
                             <div className={'select-email-email-name'}>
                                 Outlook
                             </div>
                         </div>
-                        <div className={'select-email-email-wrap'} onClick={() => chooseWeb('yahoo')}>
-                            <img className={'select-email-email-logo'} src={ic_login_yahoo} />
+
+                        <div className={'select-email-email-wrap-web'}>
+                            <div className={'select-email-email-wrap'} onClick={() => chooseWeb('yahoo')}>
+                                <img className={'select-email-email-logo'} src={ic_login_yahoo} />
+                            </div>
                             <div className={'select-email-email-name'}>
                                 Yahoo
                             </div>
                         </div>
                     </div>
+
+                    <div className={'select-email-email-layout-inter'} style={{ marginTop: 16, paddingLeft: 47, paddingRight: 47 }}>
+                        <div className={'select-email-email-wrap-web'}>
+                            <div className={'select-email-email-wrap'} onClick={() => chooseWeb('163')}>
+                                <img className={'select-email-email-logo'} src={ic_login_163} />
+                            </div>
+                            <div className={'select-email-email-name'}>
+                                163
+                            </div>
+                        </div>
+
+                        <div className={'select-email-email-wrap-web'}>
+                            <div className={'select-email-email-wrap'} onClick={() => chooseWeb('aol')}>
+                                <img className={'select-email-email-logo'} src={ic_login_aol} />
+                            </div>
+                            <div className={'select-email-email-name'}>
+                                Aol
+                            </div>
+                        </div>
+
+                        <div className={'select-email-email-wrap-empty'} />
+                    </div>
+                    <div style={{flex: 100000}}/>
                 </div>
             ) : (
                 <div className={'select-email-email-layout'}>

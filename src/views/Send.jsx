@@ -29,7 +29,13 @@ import {
 import {getSuggestedGasEstimates, getEthGasFee, getFiatGasFee, getEthGasFeeBignumber} from "../helpers/custom-gas";
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
-import {containOwner, getNonce, getRequestId, METHOD_ID_TRANSFER, sendUserOperation} from "../helpers/UserOp";
+import {
+    containOwner,
+    getNonce,
+    getRequestId,
+    METHOD_ID_TRANSFER,
+    sendUserOperation
+} from "../helpers/UserOp";
 import {
     LOCAL_STORAGE_ONGOING_INFO,
     LOCAL_STORAGE_PUBLIC_ADDRESS
@@ -766,7 +772,7 @@ export default (props)=>{
                 uo.signature = signedTx;
                 console.csLog('===sendTransaction = uo = ', uo);
                 printToNative(uo.toString());
-                const txHash = await sendUserOperation(provider, uo);
+                const txHash = await sendUserOperation(provider, uo, chainId);
                 if (isWeb) {
                     onSendSuccess && onSendSuccess(txHash);
                 } else {

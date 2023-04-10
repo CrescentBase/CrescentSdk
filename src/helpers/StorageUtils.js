@@ -9,3 +9,4 @@ export const LOCAL_STORAGE_WALLET_KEYSTORE = 'storage_wallet_keystore';
 export const LOCAL_STORAGE_HAS_SEND_TEMP = "storage_has_send_temp";
 export const LOCAL_STORAGE_HAS_SEND_TEMP_DATE = "storage_has_send_temp_date";
 export const LOCAL_STORAGE_PAYSTER_OP = "storage_paymaster_ops";
+export const LOCAL_STORAGE_ENTRY_POINTS = "storage_entry_points";

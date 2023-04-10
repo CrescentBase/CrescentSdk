@@ -14,8 +14,19 @@ export default () => {
             right: 0;
         }
         
-        div::-webkit-scrollbar {
-          display: none;
+        input[type="number"],
+        textarea {
+          -moz-appearance: textfield;
+          -webkit-appearance: textfield;
+          appearance: textfield;
+        }
+        
+        div {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+          ::-webkit-scrollbar {
+            display: none;
+          }
         }
         
         :root {

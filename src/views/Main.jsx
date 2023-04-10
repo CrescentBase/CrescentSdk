@@ -21,7 +21,7 @@ import img_transak from "../assets/img_transak.png"
 import ic_token_default from "../assets/ic_token_default.png"
 
 import {useTranslation} from "react-i18next";
-import {ChainType, HOST, NetworkConfig, EnableChainTypes, RPCHOST} from "../helpers/Config";
+import {ChainType, HOST, NetworkConfig, EnableChainTypes} from "../helpers/Config";
 import SwipeView from "../widgets/SwipeView";
 import Button from "../widgets/Button";
 import ConfigContext from "../contexts/ConfigContext";
@@ -33,7 +33,13 @@ import {
     LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
 } from "../helpers/StorageUtils";
-import {checkAndSendOp, getCreateOP, getPaymasterData} from "../helpers/UserOp";
+import {
+    checkAndSendOp,
+    getCreateOP,
+    getPaymasterData,
+    setEntryPoint,
+    entryPoints
+} from "../helpers/UserOp";
 import {handleFetch} from "../helpers/FatchUtils";
 import ImageWithFallback from "../widgets/ImageWithFallback";
 
@@ -63,6 +69,27 @@ export default (props)=>{
     const goAsset = (item) => {
         navigate('Asset', { asset: item });
     }
+
+    const fetchEntryPoint = () => {
+        const url = `https://wallet.crescentbase.com/api/v2/getEntryPoints`;
+        handleFetch(url).then((result) => {
+            if (result && result.ret === 200 && result.errmsg === "ok" && result.data.length > 0) {
+                setEntryPoint(result.data);
+            }
+        });
+    }
+
+    useEffect(() => {
+        const interval = setInterval( () => {
+            if (entryPoints.length > 0) {
+                clearInterval(interval);
+                return;
+            }
+            fetchEntryPoint();
+        }, 30 * 1000);
+        fetchEntryPoint();
+        return () => clearInterval(interval);
+    }, [])
 
     useEffect(() => {
         const interval = setInterval(async () => {

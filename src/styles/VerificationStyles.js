@@ -6,7 +6,7 @@ export default () => {
             display: flex;
             flex-direction: column;
             background-color: var(--system-color-2);
-            padding: 36px 25px 0px 25px;
+            padding: 30px 25px 30px 25px;
         }
         
         .verification-page {
@@ -49,6 +49,16 @@ export default () => {
             height: 140px;
             margin-top: 36px;
             align-self: center;
+        }
+        
+        .verification-click-auto-generated {
+            margin-left: 21px;
+            margin-right: 21px;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--medium-color-3);
+            line-height: 16px;
+            text-align: center;
         }
         
         .verification-page2 {
@@ -111,7 +121,7 @@ export default () => {
             display: flex;
             flex-direction: column;
             padding: 20px;
-            margin-top: 19px;
+            margin-top: 16px;
         }
         
         .verification-page3-send-to-text {
@@ -126,7 +136,16 @@ export default () => {
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin-top: 2px;
+            margin-top: 5px;
+        }
+        
+        .verification-page3-line {
+            width: '100%';
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 0px 0px 0px 0px;
+            opacity: 1;
+            margin-top: 9px;   
         }
         
         .verification-page3-send-to-email {
@@ -156,7 +175,7 @@ export default () => {
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin-top: 2px;
+            margin-top: 5px;
             overflow: hidden;
         }
         
@@ -166,7 +185,6 @@ export default () => {
             color: var(--medium-color-3);
             line-height: 16px;
             margin-right: 8px;
-            flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -178,9 +196,18 @@ export default () => {
             cursor: pointer;
         }
         
+        .verification-page3-subject-no-required {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--medium-color-3);
+            line-height: 16px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
         .verification-page3-email-img {
-            width: 140px;
-            height: 140px;
+            width: 100px;
+            height: 100px;
             margin-top: 16px;
             align-self: center;
         }
@@ -194,7 +221,7 @@ export default () => {
             display: flex;
             flex-direction: column;
             position: absolute;
-            top: 66px;
+            top: 60px;
             right: 16px;
         }
         

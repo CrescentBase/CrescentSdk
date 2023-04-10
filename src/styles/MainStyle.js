@@ -270,6 +270,7 @@ export default () => {
             line-height: 12px;
             margin-top: 2px;
             width: 30px;
+            text-align: center;
         }
         
         .main-search-base-layout {

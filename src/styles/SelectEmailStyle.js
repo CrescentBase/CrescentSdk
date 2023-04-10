@@ -62,6 +62,14 @@ export default () => {
             background: var(--medium-color-1);
             border-radius: 10px;
         }
+        
+        .select-email-email-wrap-web {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 68px;
+        }
       
         .select-email-email-wrap-empty {
             width: 68px;
