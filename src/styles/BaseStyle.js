@@ -24,9 +24,10 @@ export default () => {
         div {
           -ms-overflow-style: none;
           scrollbar-width: none;
-          ::-webkit-scrollbar {
-            display: none;
-          }
+        }
+        
+        div::-webkit-scrollbar {
+          display: none;
         }
         
         :root {

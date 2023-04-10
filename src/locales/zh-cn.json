@@ -98,8 +98,8 @@
   "verification_i_have_sent": "我已发送",
   "verification_pop_title": "为什么需要发邮件验证 ?",
   "verification_pop_desc": "Crescent在区块链上实现了DKIM系统，以验证电子邮件并保护隐私。因此，您需要发送电子邮件来验证您拥有该电子邮件账户的所有权。",
-  "copy_success": "复制成功"
+  "copy_success": "复制成功",
   "verification_click_auto_generated": "点击下方按钮，登录您的邮箱并发送自动生成的邮件进行验证。",
-  "verification_subject-not-required": "标题非必须填写，可以为空",
+  "verification_subject-not-required": "标题非必须，可以为空",
   "verification_haven_not_logged_in": "您尚未在此浏览器登录，请登录您的邮箱，发送包含以下信息的邮件进行验证。"
 }
