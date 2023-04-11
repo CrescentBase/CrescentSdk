@@ -425,11 +425,11 @@ export default (props)=>{
                 }
                 asset.searchType = 1;
                 let newData = [...data];
-                newData = newData.filter(item => item.id !== asset.id);
+                newData = newData.filter(item => item.tokenAddress !== asset.tokenAddress);
                 setData(newData);
                 if (!isSearch) {
                     let newDisplayData = [...displayData];
-                    newDisplayData = newDisplayData.filter(item => item.id !== asset.id);
+                    newDisplayData = newDisplayData.filter(item => item.tokenAddress !== asset.tokenAddress);
                     setDisplayData(newDisplayData);
                 }
             }).catch(error => {
