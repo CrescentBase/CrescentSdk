@@ -42,6 +42,7 @@ import {
 } from "../helpers/StorageUtils";
 import ic_token_default from "../assets/ic_token_default.png";
 import ImageWithFallback from "../widgets/ImageWithFallback";
+import BigNumber from "bignumber.js";
 
 export default (props)=>{
     const MAX_SLIDER = 10;
@@ -227,8 +228,12 @@ export default (props)=>{
         const nativeAsset = await fetchNaitveAsset();
         setNativeAsset(nativeAsset);
         console.csLog('===addressInput = ', addressInput);
-        console.csLog('===handleFetchBasicEstimates balanceInput = ', balanceInput);
-        const value = balanceInput ? ethers.utils.parseUnits(balanceInput, asset.decimals).toHexString() : null;
+        console.csLog('===handleFetchBasicEstimates balanceInput = ', balanceInput, asset.decimals);
+        let value = null;
+        if (!!balanceInput) {
+            const valueHex = new BigNumber(balanceInput).multipliedBy(new BigNumber(10).pow(asset.decimals));
+            value = '0x' + parseInt(valueHex.toString(), 10).toString(16);
+        }
         let suggestedGasFees = await getSuggestedGasEstimates(wallet, asset, tx, addressInput, value, t('network_error'));
         if (suggestedGasFees.errorMessage) {
             const regex = `"message\\\\":\\\\"(.*?)\\\\"`

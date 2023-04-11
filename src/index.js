@@ -8,6 +8,7 @@ import {
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS,
     LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE
 } from "./helpers/StorageUtils";
+import {callUrlToNative} from "./helpers/Utils";
 
 const originalConsoleLog = console.log;
 function log(...args) {
@@ -51,6 +52,14 @@ function sendTransaction(props) {
     connect(props)
 }
 
+function fiatOnRamp(props) {
+    let address = props?.walletAddress || localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+    if (address) {
+        const url = `https://global.transak.com/?apiKey=2bd8015d-d8e6-4972-bcca-22770dcbe595&walletAddress=${address}`;
+        window.open(url, "_blank");
+    }
+}
+
 const CrescentSDK = {
     CrescentEntry,
     EmailEntry,
@@ -58,6 +67,7 @@ const CrescentSDK = {
     connect,
     isConnected,
     logout,
+    fiatOnRamp,
     sendTransaction
 }
 
