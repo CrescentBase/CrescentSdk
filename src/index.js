@@ -2,13 +2,13 @@ import CrescentEntry from './CrescentEntry'
 import EmailEntry from "./EmailEntry";
 import LoadingEntry from "./LoadingEntry";
 import connect from "./connect";
+import connect2 from './connect2'
 import {
     LOCAL_STORAGE_EMAIL, LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
     LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
     LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS,
     LOCAL_STORAGE_TEMP_PV, LOCAL_STORAGE_WALLET_KEYSTORE
 } from "./helpers/StorageUtils";
-import {callUrlToNative} from "./helpers/Utils";
 
 const originalConsoleLog = console.log;
 function log(...args) {
@@ -65,6 +65,7 @@ const CrescentSDK = {
     EmailEntry,
     LoadingEntry,
     connect,
+    connect2,
     isConnected,
     logout,
     fiatOnRamp,

@@ -764,7 +764,7 @@ export default (props)=>{
         const bb = nonce.toHexString();
         console.csLog('===bb = ', bb);
         uo.nonce = bb;
-        const txId = getRequestId(uo, chainId);
+        const txId = await getRequestId(uo, chainId);
 
         const provider = new ethers.providers.JsonRpcProvider(`https://bundler-${chainId}.crescentbase.com/rpc`);
         // const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");

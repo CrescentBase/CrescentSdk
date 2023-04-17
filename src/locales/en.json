@@ -103,5 +103,6 @@
   "copy_success": "Copy successful",
   "verification_click_auto_generated": "Click the button below to log into your email and send an auto-generated email for verification.",
   "verification_subject-not-required": "Subject(title) is not required",
-  "verification_haven_not_logged_in": "You haven’t logged in on this browser. Please log into your email and send the following email content for verification."
+  "verification_haven_not_logged_in": "You haven’t logged in on this browser. Please log into your email and send the following email content for verification.",
+  "connect_a_wallet": "Connect a Wallet"
 }

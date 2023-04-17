@@ -5,7 +5,6 @@ import {CURRENCIES} from "./currencies";
 import {
 	getCode,
 	getGasLimit,
-	getRequestId,
 	getUserOperationByNativeCurrency,
 	getUserOperationByToken, getUserOperationByTx,
 	UserOperationDefault

@@ -101,5 +101,6 @@
   "copy_success": "复制成功",
   "verification_click_auto_generated": "点击下方按钮，登录您的邮箱并发送自动生成的邮件进行验证。",
   "verification_subject-not-required": "标题非必须，可以为空",
-  "verification_haven_not_logged_in": "您尚未在此浏览器登录，请登录您的邮箱，发送包含以下信息的邮件进行验证。"
+  "verification_haven_not_logged_in": "您尚未在此浏览器登录，请登录您的邮箱，发送包含以下信息的邮件进行验证。",
+  "connect_a_wallet": "连接钱包"
 }

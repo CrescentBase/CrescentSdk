@@ -13,11 +13,12 @@ export default Object.assign({}, rollup, {
     {
       format: 'umd',
       name: pkg.moduleName,
-      file: 'dist/umd/index.bundle.js'
+      file: 'dist/umd/index.bundle.js',
+      // compact: false
     }
   ],
   plugins: [...rollup.plugins,
     nodePolyfills(),
-    terser()
+    terser(),
   ]
 })

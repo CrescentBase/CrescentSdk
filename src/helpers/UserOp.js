@@ -140,7 +140,7 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
     console.csLog('===bb = ', bb);
     uo.nonce = bb;
 
-    const txId = getRequestId(uo, Number(chainId));
+    const txId = await getRequestId(uo, Number(chainId));
     console.csLog('===txId= ', txId);
 
     const walletNew = wallet.connect(provider);//new ethers.Wallet(privateKey, provider);
@@ -217,12 +217,93 @@ export const packUserOp = (op) => {
     return encoded
 }
 
-export const getRequestId = (op, chainId) => {
-    const userOpHash = keccak256(packUserOp(op, true))
-    const enc = defaultAbiCoder.encode(
-        ['bytes32', 'address', 'uint256'],
-        [userOpHash, getEntryPoint(chainId), chainId])
-    return keccak256(enc)
+export const getRequestId = async (op, chainId) => {
+    const abi = [{
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "nonce",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "initCode",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "callData",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "callGasLimit",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "verificationGasLimit",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "preVerificationGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "maxFeePerGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "maxPriorityFeePerGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "paymasterAndData",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
+                    }
+                ],
+                "internalType": "struct UserOperation",
+                "name": "userOp",
+                "type": "tuple"
+            }
+        ],
+        "name": "getUserOpHash",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }];
+    const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v2/rpc/' + chainId);
+    const contract = new ethers.Contract(getEntryPoint(chainId), abi, provider);
+    const opHash = await contract.getUserOpHash(op);
+    console.csLog('==opHash = ', opHash);
+    return opHash;
+    // const userOpHash = keccak256(packUserOp(op, true))
+    // const enc = defaultAbiCoder.encode(
+    //     ['bytes32', 'address', 'uint256'],
+    //     [userOpHash, getEntryPoint(chainId), chainId])
+    // return keccak256(enc)
 }
 
 
@@ -311,7 +392,7 @@ export const getNonce = async (sender, chainId) => {
     const abi = [
         {
             "inputs": [],
-            "name": "nonce",
+            "name": "getNonce",
             "outputs": [
                 {
                     "internalType": "uint256",
@@ -326,7 +407,8 @@ export const getNonce = async (sender, chainId) => {
     const contractAddress = sender;
     const provider = new ethers.providers.JsonRpcProvider(RPCHOST + '/api/v2/rpc/' + chainId);
     const contract = new ethers.Contract(contractAddress, abi, provider);
-    const nonce = await contract.nonce();
+    const nonce = await contract.getNonce();
+    console.csLog('==getNonce = ', nonce);
     return nonce;
 }
 

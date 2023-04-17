@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+
+  <title>Development</title>
+
+<!--  <script src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js" type="application/javascript"></script>-->
+
+<!--  <script src="./dist/umd/index.js"></script>-->
+  <script src="./dist/umd/index.bundle.js?v=2"></script>
+
+</head>
+<body style="text-align: center; margin: 0px; background-color: transparent; overflow: hidden;">
+
+<div id="parent-id" style="display: flex; position: relative">
+  <div style="display: flex; position: absolute; justify-content: center" id="parent-div1"></div>
+  <div style="display: flex; position: absolute; justify-content: center" id="parent-div2"></div>
+<!--  <div style="display: flex; position: fixed; justify-content: center; align-items: center; height: 100%; width: 100%; background: rgba(0, 0, 0, 0.4)" id="parent-div3"></div>-->
+</div>
+
+<script>
+  localStorage.removeItem('storage_wallet_keystore')
+  // localStorage.setItem('storage_wallet_keystore', '{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}')
+  function initLoad(params) {
+    const keystoreKey = localStorage.getItem('storage_wallet_keystore');
+    console.log('===keystoreKey = ', keystoreKey);
+    if (keystoreKey) {
+      loadMain(params)
+    } else {
+      loadSelectEmail(params);
+    }
+  }
+
+  function loadSelectEmail(params) {
+    const element = document.getElementById('parent-div2');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+    function onComplete(obj) {
+      destroy();
+    }
+
+    let paramMap  = !!params ? params : {};
+    const allParams = {
+      container: element,
+      width: 360,
+      height: 360,
+      // style: '.MainSize {width: 350px; height: 350px} :root {--base-bg-color: #220000;  }',
+      language: 'zh',
+      onComplete,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.EmailEntry(allParams);
+  }
+
+  function loadLoading(params) {
+    const element = document.getElementById('parent-div2');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+    function onComplete(obj) {
+      destroy();
+    }
+
+    let paramMap  = !!params ? params : {};
+    const allParams = {
+      container: element,
+      width: 360,
+      height: 360,
+      language: 'zh',
+      onComplete,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.LoadingEntry(allParams);
+  }
+
+  function loadMain(params) {
+    const element = document.getElementById('parent-div1');
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+
+    function removeLoading() {
+      const element2 = document.getElementById('parent-div2');
+      while (element2.firstChild) {
+        element2.removeChild(element2.firstChild);
+      }
+    }
+
+    function onComplete(obj) {
+      destroy();
+    }
+
+    let paramMap  = !!params ? params : {};
+    const allParams = {
+      container: element,
+      width: 360,
+      height: 360,
+      language: 'zh',
+      onComplete,
+      removeLoading,
+      ...paramMap
+    }
+    let destroy = CrescentSDK.CrescentEntry(allParams);
+  }
+
+  function connect() {
+    // localStorage.removeItem('storage_wallet_keystore');
+    const element = document.getElementById('parent-div3');
+    const params = {
+      container: element,
+      language: 'zh',
+      paymasterUrl: "https://wallet.crescentbase.com/api/v2/signOp",
+      emailAccount: 'xlu4337@outlook.com',
+      walletJson: '{"address":"e55df1714bdd343e5b1fd85ceb4197d8a16bbdcd","id":"e765dca0-8bbd-4623-a333-fe4c9e7bad54","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ab48bf64c4d6ffa63c66e0234d967e66"},"ciphertext":"9cdc7c936ba6341ec4f55fda02293a751d00ac899a517777bed4eb545d688e03","kdf":"scrypt","kdfparams":{"salt":"11eb1a988ae0fa56dcdcd709eacd0dddc412c4b461c6118202155a9c2ae77638","n":256,"dklen":32,"p":1,"r":8},"mac":"90b5a203e73d0ed1156abd5228d38ac535540af1a04e772616eda3df4fdb4b15"}}'
+      // emailAccount: 'test2023abc@outlook.com',
+      // walletJson:'{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}'
+      // tx: {to: '0x0648ceA573a37aD78738c9ED861dD8Ad9Ca53beC', chainId: 137, value: '0x2386f26fc10000'}
+    }
+    let destroy = CrescentSDK.connect(params);
+  }
+
+  // connect()
+
+
+  // loadSelectEmail();
+  // initLoad({platform: 3, paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp"});
+  // loadMain({initView: "Set Password", paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp"});
+  // loadMain({initView: "Main", paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp"});
+  loadMain({initView: "CreateLoading", paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", emailAccount: 'test2023abc@outlook.com', platform: 3})
+  // loadMain({initView: "CreateLoading", paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", emailAccount: 'test2026abc@outlook.com', platform: 3})
+  // loadMain({initView: "CreateLoading", paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", emailAccount: 'wanglulu503@yahoo.com', platform: 3})
+
+  // loadMain({emailAccount: 'test2023abc@outlook.com', paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", walletJson:'{"address":"8a73520b8052d7023d327cf6786533cd22fbcdd5","id":"c2e3af00-e9ee-4a15-8da4-4ead185e1212","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"cd9dcc4506caeb1f0a974eaf4f0bd68c"},"ciphertext":"ba2a2b05936b44eb1ab4c655926a1d65c6c912d762fa39215b3aa9104f5d7ba6","kdf":"scrypt","kdfparams":{"salt":"1f2cc358cce3139f0b8c2ab4289e996f08b3524354f48dd8161390b9161e8c45","n":256,"dklen":32,"p":1,"r":8},"mac":"b947b5662ac7001dc452d86b817534527b396fb880f98909abc5eee6ecc749d6"}}'});
+
+  // loadMain({emailAccount: 'xlu4337@outlook.com', paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", walletJson: '{"address":"e55df1714bdd343e5b1fd85ceb4197d8a16bbdcd","id":"e765dca0-8bbd-4623-a333-fe4c9e7bad54","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ab48bf64c4d6ffa63c66e0234d967e66"},"ciphertext":"9cdc7c936ba6341ec4f55fda02293a751d00ac899a517777bed4eb545d688e03","kdf":"scrypt","kdfparams":{"salt":"11eb1a988ae0fa56dcdcd709eacd0dddc412c4b461c6118202155a9c2ae77638","n":256,"dklen":32,"p":1,"r":8},"mac":"90b5a203e73d0ed1156abd5228d38ac535540af1a04e772616eda3df4fdb4b15"}}'});
+  // loadMain({emailAccount: 'wanglulu503@gmail.com', paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", walletJson: '{"address":"5f4f6fd0ffb59d04f3fc1bd24d3e2defe027f72f","id":"21c1319a-b5ef-4dec-9a97-811f99ec37b9","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"38fe2c1a8f79bda16415c1bf908e7494"},"ciphertext":"561cc88bc99db8d5e16bd64233065dc0f37e6f0d90c063a26f1ff1cc99656a12","kdf":"scrypt","kdfparams":{"salt":"49891f8ee72fe28f59b1689e68e125f1dabde12b1ba5757a46f6063f663b0559","n":256,"dklen":32,"p":1,"r":8},"mac":"54adadf3f94421d11b999846b8e10ce76331f8b0d40ba076bd479b16e3473867"}}'});
+  // loadMain({emailAccount: 'xlu4337@outlook.com', paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", walletJson: '{"address":"04b92c4d3ff23638157c19915374979399d7ee54","id":"8600a559-ebb8-4507-9b69-d471257437ea","version":3,"crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"11ba603b4f7a89bad1f49b04e53c0203"},"ciphertext":"fc10cc79a081de5ee706987017cb3a50e9d768c0715cfe28f4517f926bd458ec","kdf":"scrypt","kdfparams":{"salt":"2a78c0995b0c0bf263ce86ff0df6ed33584b5baffe4bb732dfacf4a303537003","n":256,"dklen":32,"p":1,"r":8},"mac":"84f07df34687bf439627377030dcdb5e240bd7034045ec71cacb378d75e36013"}}'});
+
+  // initParams();
+  // button.addEventListener("click", func);
+  // initLoad({platform: 3, paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", tx: {to: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', data: '0xa9059cbb0000000000000000000000006de6b8b22241a753495ed1c3289abc9bf61f5d2e0000000000000000000000000000000000000000000000000000000000002710', chainId: 137}}); //value: '0x2386f26fc10000',
+  // initLoad({platform: 3, paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", tx: {to: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', data: '0xa9059cbb0000000000000000000000000648cea573a37ad78738c9ed861dd8ad9ca53bec0000000000000000000000000000000000000000000000000000000000002710', chainId: 137}}); //value: '0x2386f26fc10000',
+
+  // initLoad({platform: 3, paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", tx: {to: '0x6De6b8B22241A753495ed1C3289aBc9Bf61F5D2e', chainId: 137, value: '0x114183929889791424'}});
+  // initLoad({platform: 3, paymasterUrl: "https://wallet.crescentbase.com/api/v1/signOp", tx: {to: '0x0648ceA573a37aD78738c9ED861dD8Ad9Ca53beC', chainId: 137, value: '0x2386f26fc10000'}});
+
+</script>
+
+</body>
+</html>
+

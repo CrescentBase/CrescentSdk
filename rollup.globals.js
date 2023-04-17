@@ -6,5 +6,5 @@ export default {
   "bignumber.js": "BigNumber",
   "copy-to-clipboard": "copy",
   "human-standard-token-abi": "abiERC20",
-  "react-lottie": "Lottie"
+  "react-lottie": "Lottie",
 }

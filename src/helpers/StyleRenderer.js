@@ -16,6 +16,7 @@ import SendStyles from "../styles/SendStyles"
 import OngoingTxStyles from "../styles/OngoingTxStyles";
 import CreateLoadingStyles from "../styles/CreateLoadingStyles";
 import VerificationStyles from "../styles/VerificationStyles";
+import SelectPlatformStyle from "../styles/SelectPlatformStyle";
 
 function getStyle(style = '') {
     const allStyle = [
@@ -37,6 +38,7 @@ function getStyle(style = '') {
         OngoingTxStyles(),
         CreateLoadingStyles(),
         VerificationStyles(),
+        SelectPlatformStyle(),
         style
     ].join('');
     return trimStyle(allStyle);

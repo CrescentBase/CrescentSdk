@@ -18,9 +18,14 @@ const LoadingEntry = (props) => {
     const container = createContainer(element, document, style);
 
     const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
+    let userLanguage = navigator.language || navigator.userLanguage;
+    if (userLanguage.indexOf('zh') !== -1) {
+        userLanguage = 'zh';
+    }
+
     if (!i18n.use(initReactI18next).isInitialized) {
         i18n.use(initReactI18next).init({
-            lng: language || props.language || 'en', // 默认语言
+            lng: language || props.language || userLanguage || 'en', // 默认语言
             fallbackLng: 'en', // 备选语言
             debug: true, // 开启 debug 模式
             resources: {

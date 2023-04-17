@@ -248,6 +248,7 @@ export default () => {
             color: var(--system-color-4);
             line-height: 16px;
             margin-top: 6px;
+            text-align: center;
         }
         
         .send-step2-to-layout {
