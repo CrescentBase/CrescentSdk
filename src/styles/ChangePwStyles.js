@@ -20,8 +20,8 @@ export default () => {
             background: var(--system-color-5);
             opacity: 1;
             height: 1px;
-            margin-left: -20px;
-            margin-right: -20px;
+            margin-left: -25px;
+            margin-right: -25px;
         }
         
         .changepw-title-layout {

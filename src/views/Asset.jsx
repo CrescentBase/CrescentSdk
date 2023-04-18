@@ -1,12 +1,13 @@
 import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
-import ic_back_white from "../assets/ic_back_white.png"
-import ic_address from "../assets/ic_address.png"
+// import ic_back_white from "../assets/ic_back_white.png"
+import {getBackIcon, getReceiveIcon, getSendIcon, getHistoryIcon, getAddressIcon} from "../helpers/GetIcon";
+// import ic_address from "../assets/ic_address.png"
 import ic_up from "../assets/ic_up.png"
 import ic_down from "../assets/ic_down.png"
-import ic_send from "../assets/ic_send.png"
-import ic_receive from "../assets/ic_receive.png"
-import ic_history from "../assets/ic_history.png"
+// import ic_send from "../assets/ic_send.png"
+// import ic_receive from "../assets/ic_receive.png"
+// import ic_history from "../assets/ic_history.png"
 import ic_copy from "../assets/ic_copy.png"
 import {useTranslation} from "react-i18next";
 import PopContext from "../contexts/PopContext";
@@ -19,6 +20,11 @@ export default (props)=>{
     const { showAddressCopied } = useContext(PopContext)
     const { navigate } = useContext(NavigateContext);
     const { ChainDisplayNames, isWeb } = useContext(ConfigContext);
+    const ic_back_white = getBackIcon();
+    const ic_address = getAddressIcon();
+    const ic_send = getSendIcon();
+    const ic_receive = getReceiveIcon();
+    const ic_history = getHistoryIcon();
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
@@ -60,22 +66,21 @@ export default (props)=>{
                             </div>
                         </div>
                     </div>
-                    <div className={'flex-full'}/>
+                    <div style={{height: 16}}/>
                     <span className={'asset-balance-tip'}>
                         {t('balance')}
                     </span>
-                        <span className={'asset-balance'}>
+                    <span className={'asset-balance'}>
                         {asset.amount}
                     </span>
-                        <div className={'flex-full'}/>
-                        <span className={'asset-networth-tip'}>
+                    <div style={{height: 16}}/>
+                    <span className={'asset-networth-tip'}>
                         {t('networth')}
                     </span>
                         <span className={'asset-networth'}>
                         {asset.balanceFiatUsd}
                     </span>
 
-                    <div className={'flex-full'}/>
                     <div className={'flex-full'}/>
                     <div className={'asset-action-layout'}>
                         <div className={'asset-action-item-layout'}  onClick={() => navigate('Send', { asset})}>

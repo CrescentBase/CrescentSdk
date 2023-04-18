@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <title>Crescent SDK</title>
   <script src="./dist/umd/index.bundle.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <!--  <script src="./index.bundle.js?v=2"></script>-->
 
   <style>
@@ -43,7 +44,6 @@
       align-items: center;
       height: 100%;
       width: 100%;
-      background: rgba(255, 255, 255, 0.4)
     }
 
     .metamask-wrap {
@@ -64,38 +64,47 @@
 </head>
 <body>
   <div class="base">
-    <span id="user_id"></span>
-    <div class="btn-wrap">
-      <a href="#" onclick="connect()">
-        <div class="metamask-wrap">
-          <img class="metamask-img" src="https://files.crescentbase.com/web-admin/crescent-logo.png" alt="Crescent">
-        </div>
-      </a>
-
-      <a href="#" onclick="connectMetamask()">
-        <div class="metamask-wrap">
-          <img class="metamask-img" src="https://files.crescentbase.com/web-admin/metamask-logo.png" alt="Metamask">
-        </div>
-      </a>
-
-    </div>
 
     <div class="pop-parent" id="parent_div" onclick="closePop()"></div>
   </div>
 
   <script>
 
-    function connectMetamask() {
-      if (typeof window.ethereum !== 'undefined') {
-        window.ethereum.request({ method: 'eth_requestAccounts' });
-      }
-    }
-
+    console.log('==Telegram.WebApp.viewportHeight = ', Telegram.WebApp.viewportHeight)
+    console.log('==Telegram.WebApp.colorScheme = ', Telegram.WebApp.colorScheme);
+    const isLight = false;//Telegram.WebApp.colorScheme === 'light';
     function connect() {
       const element = document.getElementById('parent_div');
       element.style.display = "flex";
       const params = {
+        width: window.innerWidth,
+        height: Telegram.WebApp.viewportHeight,
         container: element,
+        isLight: isLight,
+        style: !isLight ? '' : `
+        :root {
+            --gradient-color-1: #42FD86;
+            --gradient-color-2: #FEF748;
+            --gradient-color-1-alpha: rgba(66, 253, 134, 0.7);
+            --gradient-color-2-alpha: rgba(254, 247, 72, 0.7);
+            --system-color-1: #92F51A;
+            --system-color-2: #ffffff;
+            --system-color-3: rgba(0, 0, 0, 0.5);
+            --system-color-4: #101010;
+            --system-color-5: rgba(153, 153, 153, 0.1);
+            --medium-color-1: rgba(16, 16, 16, 0.05);
+            --medium-color-2: rgba(16, 16, 16, 0.03);
+            --medium-color-3: rgba(16, 16, 16, 0.70);
+            --medium-color-4: rgba(16, 16, 16, 0.40);
+            --medium-color-5: #F4F5F7;
+            --medium-color-6: #1E2124;
+            --function-color-1: #06EB59;
+            --function-color-2: #FF6A3C;
+            --font-color-1: #101010;
+            --font-color-2: rgba(16, 16, 16, 0.40);
+            --font-color-3: #000000;
+            --font-color-4: #000000
+        }`,
         paymasterUrl: "https://wallet.crescentbase.com/api/v2/signOp",
         onConnectSuccess: (info) => {
           const email = info.email;
@@ -113,6 +122,8 @@
       }
       CrescentSDK.connect(params);
     }
+
+    connect();
 
     function closePop() {
       const element = document.getElementById('parent_div');

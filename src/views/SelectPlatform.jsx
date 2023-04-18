@@ -1,10 +1,13 @@
 import React, {useContext, useEffect, useState} from "react";
-import ic_close from '../assets/ic_close.png';
+// import ic_close from '../assets/ic_close.png';
 import ic_connect_crescent from '../assets/ic_connect_crescent.png';
 import ic_connect_metamask from '../assets/ic_connect_metamask.png';
 import {ILocal} from "../locales/i18n";
+import {getCloseIcon} from "../helpers/GetIcon";
+
 
 export default (props)=>{
+    const ic_close = getCloseIcon();
     return (
         <div className={'select-platform'}>
             <div className={'select-platform-title-wrap'}>

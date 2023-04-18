@@ -1,6 +1,7 @@
 import React, {useContext} from "react";
 import NavigateContext from "../contexts/NavigateContext";
-import ic_back_white from "../assets/ic_back_white.png";
+// import ic_back_white from "../assets/ic_back_white.png";
+import {getBackIcon} from "../helpers/GetIcon";
 import img_fire from "../assets/img_fire.png";
 import ic_attention from "../assets/ic_attention.png";
 import ic_copy from "../assets/ic_copy.png";
@@ -16,7 +17,7 @@ export default (props)=>{
     const { navigate } = useContext(NavigateContext);
     const { showTxHashCopied } = useContext(PopContext)
     const { isWeb } = useContext(ConfigContext)
-
+    const ic_back_white = getBackIcon();
     const isEmpty = false;
     const asset = props.params.asset;
 

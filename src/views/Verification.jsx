@@ -5,7 +5,8 @@ import img_email from "../assets/img_email"
 import ic_question from "../assets/ic_question.png"
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
-import ic_back_white from "../assets/ic_back_white.png";
+// import ic_back_white from "../assets/ic_back_white.png";
+import {getBackIcon} from "../helpers/GetIcon";
 import ic_copy from "../assets/ic_copy.png";
 import NavigateContext from "../contexts/NavigateContext";
 import {RPCHOST} from "../helpers/Config";
@@ -16,6 +17,7 @@ import PopContext from "../contexts/PopContext";
 export default (props)=>{
     const { showOnlyCopy } = useContext(PopContext);
     const { navigate } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
     const sendEmail = props.params?.sendEmail;
     const publicKey = props.params?.publicKey;
     const emailBrand = props.params?.emailBrand;

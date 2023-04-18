@@ -97,7 +97,7 @@ export default () => {
         .main-card-balance-text {
             font-size: 30px;
             font-weight: 600;
-            color: var(--system-color-2);
+            color: black;
             line-height: 36px;
             margin-left: 6px;
         }
@@ -266,7 +266,7 @@ export default () => {
         .main-asset-item-action-text {
             font-size: 10px;
             font-weight: 400;
-            color: var(--system-color-1);
+            color: var(--font-color-1);
             line-height: 12px;
             margin-top: 2px;
             width: 30px;
@@ -360,7 +360,7 @@ export default () => {
             position: absolute;
             bottom: 20px;
             padding: 10px 20px;
-            background: var(--medium-color-1);
+            background: var(--medium-color-6);
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
             color: var(--system-color-4);
@@ -379,7 +379,7 @@ export default () => {
             right: 11%;
             top: 50%;
             transform: translateY(-50%);
-            background: var(--medium-color-1);
+            background: var(--medium-color-5);
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
             align-items: center;
@@ -397,7 +397,7 @@ export default () => {
         .main-transak-title {
             font-size: 18px;
             font-weight: 600;
-            color: white;
+            color: var(--font-color-4);
             line-height: 22px;
         }
         
@@ -437,7 +437,7 @@ export default () => {
             right: 20px;
             bottom: 20px;
             align-items: center;
-            background: var(--medium-color-1);
+            background: var(--medium-color-5);
             border-radius: 100px 100px 100px 100px;
             opacity: 1;
         }

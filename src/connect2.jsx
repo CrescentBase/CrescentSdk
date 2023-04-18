@@ -12,11 +12,13 @@ import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
 import {LOCAL_STORAGE_LANGUAGE, LOCAL_STORAGE_WALLET_KEYSTORE} from "./helpers/StorageUtils";
 import {setIsFromWeb} from "./helpers/Utils";
-import ic_close from "./assets/ic_close.png";
+// import ic_close from "./assets/ic_close.png";
 import ic_connect_metamask from "./assets/ic_connect_metamask.png";
 import ic_connect_crescent from "./assets/ic_connect_crescent.png";
+import {getCloseIcon} from "./helpers/GetIcon";
 
 const connect2 = (props) => {
+    const ic_close = getCloseIcon();
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
     const style = getStyle(props.style);

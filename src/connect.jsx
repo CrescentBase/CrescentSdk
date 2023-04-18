@@ -12,10 +12,12 @@ import en from "./locales/en.json";
 import zh from "./locales/zh-cn.json";
 import {LOCAL_STORAGE_LANGUAGE, LOCAL_STORAGE_WALLET_KEYSTORE} from "./helpers/StorageUtils";
 import {setIsFromWeb} from "./helpers/Utils";
+import {setIsLight} from "./helpers/GetIcon";
 
 const connect = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
+    console.log('===props.paymasterUrl = ', props.paymasterUrl);
     const style = getStyle(props.style);
 
     const container = createContainer(element, document, style);
@@ -50,7 +52,8 @@ const connect = (props) => {
 
     // initView = "Verification"
     setIsFromWeb(true);
-
+    setIsLight(props.isLight);
+    
     const content = (
         <ConfigProvider config={{...props, platform: 3, isWeb: true }}>
             <div className="App" style={{ justifyContent: 'center' }}>

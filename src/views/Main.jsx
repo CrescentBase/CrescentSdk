@@ -4,19 +4,20 @@ import PopContext from "../contexts/PopContext";
 import { useSpring, animated } from 'react-spring';
 
 import ic_copy from '../assets/ic_copy.png';
-import ic_setting from '../assets/ic_setting.png'
-import ic_search from '../assets/ic_search.png'
-import ic_buy from '../assets/ic_buy.png'
-import ic_hide from '../assets/ic_hide.png'
-import ic_hide_disable from '../assets/ic_hide_disable.png'
-import ic_add from '../assets/ic_add.png'
-import ic_back_white from '../assets/ic_back_white.png'
-import ic_clear from "../assets/ic_clear.png";
+// import ic_setting from '../assets/ic_setting.png'
+// import ic_search from '../assets/ic_search.png'
+// import ic_buy from '../assets/ic_buy.png'
+// import ic_hide from '../assets/ic_hide.png'
+// import ic_hide_disable from '../assets/ic_hide_disable.png'
+// import ic_add from '../assets/ic_add.png'
+// import ic_back_white from '../assets/ic_back_white.png'
+import {getBackIcon, getAddIcon, getHideIcon, getBuyIcon, getClearIcon, getCloseIcon, getHideDisableIcon, getSearchIcon, getSettingIcon} from "../helpers/GetIcon";
+// import ic_clear from "../assets/ic_clear.png";
 import img_empty_search from "../assets/img_empty_search.png"
 import Lottie from 'react-lottie'
 import loadig_index from '../assets/loadig_index.json'
 import loading_ongoing from '../assets/loading_ongoing.json'
-import ic_close from "../assets/ic_close.png"
+// import ic_close from "../assets/ic_close.png"
 import img_transak from "../assets/img_transak.png"
 import ic_token_default from "../assets/ic_token_default.png"
 
@@ -45,6 +46,15 @@ import ImageWithFallback from "../widgets/ImageWithFallback";
 
 export default (props)=>{
     const { t } = useTranslation();
+    const ic_add = getAddIcon();
+    const ic_hide = getHideIcon();
+    const ic_back_white = getBackIcon();
+    const ic_buy = getBuyIcon();
+    const ic_clear = getClearIcon();
+    const ic_close = getCloseIcon();
+    const ic_search = getSearchIcon();
+    const ic_hide_disable = getHideDisableIcon();
+    const ic_setting = getSettingIcon();
     const [data, setData] = useState([]);
     const [displayData, setDisplayData] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);

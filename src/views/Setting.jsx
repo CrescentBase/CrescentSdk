@@ -1,16 +1,22 @@
 import React, {useContext, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
-import ic_set_language_solid from "../assets/ic_set_language_solid.png"
-import ic_set_safe_solid from "../assets/ic_set_safe_solid.png"
-import ic_back_white from "../assets/ic_back_white.png"
-import ic_setting_enter from "../assets/ic_setting_enter.png"
-import ic_setting_switch from "../assets/ic_setting_switch.png"
+// import ic_set_language_solid from "../assets/ic_set_language_solid.png"
+// import ic_set_safe_solid from "../assets/ic_set_safe_solid.png"
+// import ic_back_white from "../assets/ic_back_white.png"
+import {getBackIcon, getLanguageIcon, getSafeIcon, getSettingEnterIcon, getSettingSwitchIcon} from "../helpers/GetIcon";
+// import ic_setting_enter from "../assets/ic_setting_enter.png"
+// import ic_setting_switch from "../assets/ic_setting_switch.png"
 import { useTranslation } from 'react-i18next';
 import {LOCAL_STORAGE_LANGUAGE} from "../helpers/StorageUtils";
 import ConfigContext from "../contexts/ConfigContext";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
+    const ic_set_language_solid = getLanguageIcon();
+    const ic_set_safe_solid = getSafeIcon();
+    const ic_setting_enter = getSettingEnterIcon();
+    const ic_setting_switch = getSettingSwitchIcon();
     const { isWeb } = useContext(ConfigContext);
     const { t, i18n } = useTranslation();
 

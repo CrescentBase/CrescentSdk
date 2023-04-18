@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import {ILocal} from "../locales/i18n";
-import ic_clear from "../assets/ic_clear.png";
+// import ic_clear from "../assets/ic_clear.png";
+import {getClearIcon} from "../helpers/GetIcon";
+
 
 export default (props)=>{
+    const ic_clear = getClearIcon();
     const [text, setText] = useState('');
 
     const handleTextChange = (event) => {

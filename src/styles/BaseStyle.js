@@ -31,7 +31,6 @@ export default () => {
         }
         
         :root {
-            --base-bg-color: #000000;
             --gradient-color-1: #42FD86;
             --gradient-color-2: #FEF748;
             --gradient-color-1-alpha: rgba(66, 253, 134, 0.7);
@@ -45,8 +44,14 @@ export default () => {
             --medium-color-2: rgba(30,33,36,0.6);
             --medium-color-3: #939DA5;
             --medium-color-4: rgba(147, 157, 165, 0.6);
+            --medium-color-5: #1E2124;
+            --medium-color-6: #1E2124;
             --function-color-1: #25FF74;
             --function-color-2: #FF6A3C;
+            --font-color-1: #A3FF33;
+            --font-color-2: rgba(147,157,165,0.6);
+            --font-color-3: #1E2124;
+            --font-color-4: #ffffff;
         }
   `)
 }

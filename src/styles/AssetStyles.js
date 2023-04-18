@@ -188,7 +188,7 @@ export default () => {
             top: 102px;
             display: flex;
             flex-direction: column;
-            background: var(--medium-color-1);
+            background: var(--medium-color-5);
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
             padding: 12px;

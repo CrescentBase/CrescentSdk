@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import img_logo from '../assets/img_logo.png';
+// import img_logo from '../assets/img_logo.png';
 import ic_login_google from '../assets/ic_login_google.png';
 import ic_login_outlook from '../assets/ic_login_outlook.png';
 import ic_login_163 from '../assets/ic_login_163.png';
@@ -19,9 +19,11 @@ import {
 import loadig_index from "../assets/loadig_index.json";
 import Lottie from "react-lottie";
 import NavigateContext from "../contexts/NavigateContext";
+import {getLogoIcon} from "../helpers/GetIcon";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const img_logo = getLogoIcon();
     const { platform, isWeb } = useContext(ConfigContext);
     const [address, setAddress] = useState('');
     const [loading, setLoading] = useState(false);

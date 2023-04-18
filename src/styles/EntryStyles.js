@@ -16,7 +16,6 @@ export default () => {
             width: 100%;
             overflow-x: hidden;
             background: var(--system-color-2);
-            border-radius: 10px;
         }
         
         .content-inter {
@@ -32,7 +31,7 @@ export default () => {
             flex-direction: column;
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
-            background: var(--medium-color-1);
+            background: var(--medium-color-6);
             justify-content: center;
             align-items: center;
             position: absolute;

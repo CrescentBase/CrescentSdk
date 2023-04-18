@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
-import ic_back_white from "../assets/ic_back_white.png";
+// import ic_back_white from "../assets/ic_back_white.png";
+import {getBackIcon} from "../helpers/GetIcon";
 import ic_copy from "../assets/ic_copy.png";
 import ic_success_green from "../assets/ic_success_green.png";
 import {useTranslation} from "react-i18next";
@@ -17,6 +18,7 @@ import ImageWithFallback from "../widgets/ImageWithFallback";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
     const { showTxHashCopied, showAddressCopied } = useContext(PopContext)
     const { isWeb } = useContext(ConfigContext)
     const [tokens, setTokens] = useState([]);

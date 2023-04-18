@@ -1,5 +1,6 @@
 import React, {useContext} from "react";
-import ic_back_white from "../assets/ic_back_white.png"
+// import ic_back_white from "../assets/ic_back_white.png"
+import {getBackIcon} from "../helpers/GetIcon";
 import NavigateContext from "../contexts/NavigateContext";
 import Button from "../widgets/Button";
 import PopContext from "../contexts/PopContext";
@@ -11,6 +12,7 @@ import ConfigContext from "../contexts/ConfigContext";
 export default (props)=>{
     const { t } = useTranslation();
     const { navigate } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
     const { showAddressCopied } = useContext(PopContext)
     const { isWeb } = useContext(ConfigContext)
     const asset = props.params.asset;

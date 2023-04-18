@@ -225,7 +225,7 @@ export default () => {
             flex-direction: column;
             border-radius: 10px 10px 10px 10px;
             opacity: 1;
-            background: var(--medium-color-1);
+            background: var(--medium-color-5);
             justify-content: center;
             align-items: center;
             position: absolute;

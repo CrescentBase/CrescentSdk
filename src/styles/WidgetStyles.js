@@ -7,7 +7,7 @@ export default () => {
             border-radius: 10px 10px 10px 10px;
             font-size: 14px;
             font-weight: 600;
-            color: var(--medium-color-1);
+            color: var(--font-color-3);
             line-height: 20px;
             display: flex;
             justify-content: center;
@@ -28,7 +28,7 @@ export default () => {
             border-radius: 10px 10px 10px 10px;
             font-size: 14px;
             font-weight: 600;
-            color: var(--medium-color-1);
+            color: var(--font-color-3);
             line-height: 20px;
             display: flex;
             justify-content: center;

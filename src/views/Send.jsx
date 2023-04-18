@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useState} from "react";
-import ic_back_white from "../assets/ic_back_white.png"
-import ic_clear from "../assets/ic_clear.png"
+// import ic_back_white from "../assets/ic_back_white.png"
+import {getBackIcon, getClearIcon, getGasEditIcon} from "../helpers/GetIcon";
+// import ic_clear from "../assets/ic_clear.png"
 import ic_correct from "../assets/ic_correct.png"
-import ic_gas_edit from "../assets/ic_gas_edit.png"
+// import ic_gas_edit from "../assets/ic_gas_edit.png"
 import ic_slider from "../assets/ic_slider.png"
 import ic_gas_fire from "../assets/ic_gas_fire.png"
 import ic_currency_usd from '../assets/ic_currency_usd.png'
@@ -47,6 +48,9 @@ import BigNumber from "bignumber.js";
 export default (props)=>{
     const MAX_SLIDER = 10;
     const { navigate, showOngoing } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
+    const ic_clear = getClearIcon();
+    const ic_gas_edit = getGasEditIcon();
     const { ChainDisplayNames, wallet, isWeb, onSendSuccess } = useContext(ConfigContext);
     const [step, setStep] = useState(1);
     const [addressCorrect, setAddressCorrect] = useState(false);

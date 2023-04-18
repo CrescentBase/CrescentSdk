@@ -3,13 +3,15 @@ import NavigateContext from "../contexts/NavigateContext";
 import {ILocal } from '../locales/i18n'
 import TextInput from "../widgets/TextInput";
 import Button from "../widgets/Button";
-import ic_back_white from "../assets/ic_back_white.png"
+// import ic_back_white from "../assets/ic_back_white.png"
 import { LOCAL_STORAGE_WALLET_KEYSTORE} from "../helpers/StorageUtils";
 import ConfigContext from "../contexts/ConfigContext";
 import {ethers} from "ethers";
+import {getBackIcon} from "../helpers/GetIcon";
 
 export default (props)=>{
     const { navigate } = useContext(NavigateContext);
+    const ic_back_white = getBackIcon();
     const { wallet, isWeb } = useContext(ConfigContext);
     const [comfirmPw, setComfirmPw] = useState("");
     const [isComfirmPwWrong, setIsComfirmPwWrong] = useState(false);
@@ -29,7 +31,6 @@ export default (props)=>{
     const six_digits_at_least = ILocal('six_digits_at_least');
     const enter_again_to_confirm = ILocal('enter_again_to_confirm');
     const password_not_match = ILocal('password_not_match');
-
 
     return (
         <div className={'changepw'} style={isWeb ? { paddingLeft: 25, paddingRight: 25} : {}}>

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
-import img_logo from '../assets/img_logo.png';
+// import img_logo from '../assets/img_logo.png';
 import Button from "../widgets/Button";
 import TextInput from "../widgets/TextInput";
 import {ethers} from "ethers";
@@ -14,9 +14,11 @@ import {AllChainTypes, NetworkConfig} from "../helpers/Config";
 import {useTranslation} from "react-i18next";
 import {getSender} from "../helpers/UserOp";
 import {callToNativeMsg} from "../helpers/Utils";
+import {getLogoIcon} from "../helpers/GetIcon";
 
 export default (props)=>{
     const { t } = useTranslation();
+    const img_logo = getLogoIcon();
     const { navigate } = useContext(NavigateContext);
     const { setWallet, tx, emailAccount, walletJson, platform, isWeb, onConnectSuccess } = useContext(ConfigContext);
     const [password, setPassword] = useState("");
