@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useRef} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import NavigateContext from "../contexts/NavigateContext";
 import PopContext from "../contexts/PopContext";
 import { useSpring, animated } from 'react-spring';
@@ -29,23 +29,30 @@ import ConfigContext from "../contexts/ConfigContext";
 import {callToNativeMsg, callUrlToNative, printToNative} from "../helpers/Utils";
 import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} from "../helpers/number";
 import {
-    LOCAL_STORAGE_EMAIL,
-    LOCAL_STORAGE_GET_OP_DATE, LOCAL_STORAGE_HAS_SEND_TEMP, LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
-    LOCAL_STORAGE_ONGOING_INFO, LOCAL_STORAGE_PAYSTER_OP,
-    LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_SEND_OP_SUCCESS
+    LOCAL_STORAGE_BIND_EMAIL,
+    LOCAL_STORAGE_GET_OP_DATE,
+    LOCAL_STORAGE_HAS_SEND_TEMP,
+    LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
+    LOCAL_STORAGE_ONGOING_INFO,
+    LOCAL_STORAGE_PAYSTER_OP,
+    LOCAL_STORAGE_PUBLIC_ADDRESS,
+    LOCAL_STORAGE_SEND_OP_SUCCESS,
+    LOCAL_STORAGE_TG_FIRST_NAME,
+    LOCAL_STORAGE_TG_LAST_NAME,
+    LOCAL_STORAGE_TG_USERID
 } from "../helpers/StorageUtils";
 import {
     checkAndSendOp,
     getCreateOP,
     getPaymasterData,
     setEntryPoint,
-    entryPoints
+    entryPoints, getBindEmail
 } from "../helpers/UserOp";
 import {handleFetch} from "../helpers/FatchUtils";
 import ImageWithFallback from "../widgets/ImageWithFallback";
 
 export default (props)=>{
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const ic_add = getAddIcon();
     const ic_hide = getHideIcon();
     const ic_back_white = getBackIcon();
@@ -67,7 +74,7 @@ export default (props)=>{
     const [showTransak, setShowTransak] = useState(false);
     const [transationLoading, setTransationLoading] = useState(false);
     const [transationStyle, setTransationStyle] = useSpring(() => ({ width: 0 }));
-    const [emailAccount, setEmailAccount] = useState('');
+    const [tgName, setTgName] = useState('');
     const [account, setAccount] = useState('');
     const [swipeKey, setSwipeKey] = useState('');
     const { platform, ChainDisplayNames, wallet, paymasterUrl, isWeb } = useContext(ConfigContext);
@@ -117,7 +124,7 @@ export default (props)=>{
                     return;
                 }
 
-                const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
+                const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
                 const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const pksync = await wallet.getAddress();
                 const pk = pksync.toLowerCase();
@@ -152,9 +159,8 @@ export default (props)=>{
                                     if (op != null) {
                                         console.csLog('====pre = ', op);
                                         if (!op.paymasterAndData || op.paymasterAndData === '0x') {
-                                            console.csLog('===emailAccount = ', emailAccount);
                                             console.csLog('===paymasterUrl url = ', paymasterUrl)
-                                            const paymasterData = await getPaymasterData(paymasterUrl, op, emailAccount, pk, chainId)
+                                            const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
                                             op = paymasterData;
                                             paymasterOps[chainId] = paymasterData;
                                             localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
@@ -189,14 +195,14 @@ export default (props)=>{
                     printToNative(error)
                     console.csLog('===getCreateOP = ', error);
                 }
-                if (preDate !== 'success') {
-                    const nowDate = new Date().getTime();
-                    if (nowDate - Number(preDate) > 1 * 60 * 60 * 1000) {
-                        callToNativeMsg("error;create", platform);
-                        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
-                        clearInterval(interval);
-                    }
-                }
+                // if (preDate !== 'success') {
+                //     const nowDate = new Date().getTime();
+                //     if (nowDate - Number(preDate) > 1 * 60 * 60 * 1000) {
+                //         callToNativeMsg("error;create", platform);
+                //         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
+                //         clearInterval(interval);
+                //     }
+                // }
 
                 // clearInterval(interval);
             }
@@ -222,10 +228,16 @@ export default (props)=>{
                 // localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
                 // localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
 
+                // getBindEmail().then((result) => {
+                //     if (result) {
+                //         localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, result);
+                //     }
+                // })
+
                 const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 const nowDate = new Date().getTime();
-                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 15 * 60 * 1000) {
-                    localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify([]));
+                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 8 * 60 * 1000) {
+                    localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
                 }
                 setInitLoaded(true);
                 var element = document.getElementById("crescent-content");
@@ -233,9 +245,11 @@ export default (props)=>{
                 const cardHeight = (width - (isWeb ? 50 : 40)) * 1.0 /319.0 * 100;
                 setCardHeight(cardHeight);
                 const address = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
-                const emailAccount = localStorage.getItem(LOCAL_STORAGE_EMAIL);
+                let firstName = localStorage.getItem(LOCAL_STORAGE_TG_FIRST_NAME) || '';
+                const lastName = localStorage.getItem(LOCAL_STORAGE_TG_LAST_NAME) || '';
+                const tgName = i18n.language == 'en' ? (firstName + ' ' + lastName) : (lastName + ' ' + firstName);
                 setAccount(address);
-                emailAccount && setEmailAccount(emailAccount);
+                tgName && setTgName(tgName);
                 fetchData(address);
             }
 
@@ -595,7 +609,7 @@ export default (props)=>{
                 <div className={'main-title-layout'}>
                     <div className={'main-title-email-and-adrress-layout'}>
                         <div className={'main-title-email'}>
-                            {emailAccount}
+                            {tgName}
                         </div>
                         <div className={'main-title-address-layout'} onClick={() => showAddressCopied(account)}>
                             <div className={'main-title-address'}>

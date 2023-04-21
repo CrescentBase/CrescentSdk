@@ -16,7 +16,6 @@ export default (props)=>{
             </div>
             <div className={'select-platform-item'} onClick={async () => {
                 if (typeof window.ethereum !== 'undefined') {
-                    console.log('Metamask is installed!');
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     const address = accounts[0];
                     console.log(address);

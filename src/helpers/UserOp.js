@@ -387,6 +387,32 @@ export const getSender = async (email) => {
     return null;
 }
 
+export const getEncryToken = async (userId) => {
+    const url = RPCHOST + "/api/v2/getToken?channel_id=" + userId;
+    try {
+        printToNative(url)
+        const json = await handleFetch(url);
+        const data = json.data;
+        return data;
+    } catch (error) {
+        printToNative(error);
+        console.csLog("==getSender = ", error);
+    }
+    return null;
+}
+
+export const getBindEmail = async (userId) => {
+    const url = RPCHOST + "/api/v2/getBindEmail?channel_id=" + userId;
+    try {
+        const json = await handleFetch(url);
+        const data = json.data;
+        return data;
+    } catch (error) {
+        printToNative(error);
+        console.csLog("==getSender = ", error);
+    }
+    return null;
+}
 
 export const getNonce = async (sender, chainId) => {
     const abi = [

@@ -17,15 +17,21 @@ import {setIsLight} from "./helpers/GetIcon";
 const connect = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
-    console.log('===props.paymasterUrl = ', props.paymasterUrl);
     const style = getStyle(props.style);
 
     const container = createContainer(element, document, style);
 
     const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
-    let userLanguage = navigator.language || navigator.userLanguage;
-    if (userLanguage.indexOf('zh') !== -1) {
-        userLanguage = 'zh';
+
+    const initData = window.Telegram?.WebApp?.initDataUnsafe;
+    let userLanguage = 'en';
+    if (initData) {
+        const language_code = initData?.user?.language_code;
+        if (language_code) {
+            if (language_code.indexOf('zh') !== -1) {
+                userLanguage = 'zh';
+            }
+        }
     }
 
     if (!i18n.use(initReactI18next).isInitialized) {
@@ -44,16 +50,12 @@ const connect = (props) => {
         });
     }
 
-    let initView = "SelectEmail"
-    const keystoreKey = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE);
-    if (keystoreKey || props.walletJson) {
-        initView = "Login";
-    }
+    let initView = "CreateLoading"
+    // initView = "BindEmail";
 
-    // initView = "Verification"
     setIsFromWeb(true);
     setIsLight(props.isLight);
-    
+
     const content = (
         <ConfigProvider config={{...props, platform: 3, isWeb: true }}>
             <div className="App" style={{ justifyContent: 'center' }}>

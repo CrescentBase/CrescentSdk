@@ -13,6 +13,7 @@ import Receive from "./Receive";
 import OngoingTx from "./OngoingTx";
 import CreateLoading from "./CreateLoading";
 import Verification from "./Verification";
+import BindEmail from "./BindEmail";
 
 export default (props) => {
 
@@ -31,7 +32,8 @@ export default (props) => {
         Receive: <Receive params={params} />,
         OngoingTx: <OngoingTx params={params} />,
         CreateLoading: <CreateLoading params={params} />,
-        Verification: <Verification params={params} />
+        Verification: <Verification params={params} />,
+        BindEmail: <BindEmail params={params} />
     }
 
     return (

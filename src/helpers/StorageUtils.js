@@ -10,3 +10,7 @@ export const LOCAL_STORAGE_HAS_SEND_TEMP = "storage_has_send_temp";
 export const LOCAL_STORAGE_HAS_SEND_TEMP_DATE = "storage_has_send_temp_date";
 export const LOCAL_STORAGE_PAYSTER_OP = "storage_paymaster_ops";
 export const LOCAL_STORAGE_ENTRY_POINTS = "storage_entry_points";
+export const LOCAL_STORAGE_TG_FIRST_NAME = "storage_tg_first_name"
+export const LOCAL_STORAGE_TG_LAST_NAME = "storage_tg_last_name"
+export const LOCAL_STORAGE_TG_USERID = "storage_tg_userid"
+export const LOCAL_STORAGE_BIND_EMAIL = 'storage_bind_email'
