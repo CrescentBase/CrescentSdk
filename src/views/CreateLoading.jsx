@@ -35,49 +35,95 @@ export default (props)=>{
     const { setWallet, navigateType } = useContext(ConfigContext);
 
     // const { removeLoading, emailAccount } = useContext(ConfigContext);
+    const defaultUserData = {
+        user: {
+            id: 5783315738, //5783315738,
+            first_name: 'c',
+            last_name: 'yh'
+        }
+    };
+
+    const goto = (page) => {
+        // console.csLog('===goto===', page)
+        navigate(page);
+    }
+
 
     useEffect(() => {
         if (navigateType === 'delete') {
             deleteAccount();
         }
+        // localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, "{\"address\":\"0bf1462550515dfc38ebd18ff23dcef0f43176f3\",\"id\":\"32871fb4-fbe0-421e-a058-65d92c62ca9b\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"4e8c4e85efb88b39a15a12f2f0142397\"},\"ciphertext\":\"d7587099d955f9feec7f67604dd8dd9a93260405d0a64e49aa8d15364411d787\",\"kdf\":\"scrypt\",\"kdfparams\":{\"salt\":\"00918130837488bb8da5c942351761a3f3b4caed922fb1e717dfe4a69460925e\",\"n\":256,\"dklen\":32,\"p\":1,\"r\":8},\"mac\":\"a76c63b1b48f07c553c39610d92f878d1bf57cde83cde75ebb2fb5f389e9384a\"}}");
+
         const initData = window.Telegram.WebApp.initDataUnsafe;
-        if (initData && initData.user && initData.user.id) {
-            const firstName = initData.user.first_name || '';
-            const lastName = initData.user.last_name || '';
-            localStorage.setItem(LOCAL_STORAGE_TG_FIRST_NAME, firstName);
-            localStorage.setItem(LOCAL_STORAGE_TG_LAST_NAME, lastName);
+        if (!initData || !initData.user || !initData.user.id) {
+            return;
         }
 
         const walletKeystore = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE);
-        const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
-        const useId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
-        console.csLog('====walletKeystore = ', walletKeystore);
+        if (!walletKeystore) {
+            deleteAccount();
+        }
 
-        if (walletKeystore && sender && useId) {
-            const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(useId).substring(4, 6);
-            ethers.Wallet.fromEncryptedJson(walletKeystore, pp).then((wallet) => {
+
+        const firstName = initData.user.first_name || '';
+        const lastName = initData.user.last_name || '';
+        localStorage.setItem(LOCAL_STORAGE_TG_FIRST_NAME, firstName);
+        localStorage.setItem(LOCAL_STORAGE_TG_LAST_NAME, lastName);
+
+        const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+        const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
+        console.csLog('===walletKeystore = ', walletKeystore);
+        const uploadUserId = '@TG@' + initData.user.id;
+        if (walletKeystore && sender && userId && userId === uploadUserId) {
+            let encryKeystore;
+            const json = JSON.parse(walletKeystore);
+            encryKeystore = json[uploadUserId];
+            const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(userId).substring(4, 6);
+            ethers.Wallet.fromEncryptedJson(encryKeystore, pp).then((wallet) => {
                 setWallet(wallet);
                 if (navigateType === 'setting') {
-                    navigate("BindEmail");
+                    goto("Setting");
                 } else {
-                    navigate("Main");
+                    goto("Main");
                 }
-            })
+            }).catch((e) => {
+                window.Telegram.WebApp.showAlert(String(e));
+                console.csLog('===e1 == ', e);
+            });
             return;
         }
+
         setLoading(true);
         async function loadData() {
-            const initData = window.Telegram.WebApp.initDataUnsafe;
-            if (!initData || !initData.user || !initData.user.id) {
-                return;
+            deleteOtherAccountInfo();
+            if (walletKeystore) {
+                const json = JSON.parse(walletKeystore);
+                if (json[uploadUserId]) {
+                    const encryKeystore = json[uploadUserId];
+                    const sender = await getSender(uploadUserId);
+                    if (!sender) {
+                        return;
+                    }
+                    const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(userId).substring(4, 6);
+                    ethers.Wallet.fromEncryptedJson(JSON.stringify(encryKeystore), pp).then((wallet) => {
+                        localStorage.setItem(LOCAL_STORAGE_TG_USERID, uploadUserId);
+                        localStorage.setItem(LOCAL_STORAGE_PUBLIC_ADDRESS, sender);
+                        setWallet(wallet);
+                        if (navigateType === 'setting') {
+                            goto("Setting");
+                        } else {
+                            goto("Main");
+                        }
+                    })
+                    return;
+                }
             }
-            const userId = initData.user.id
 
             // const userId = 5783315738;
             // const firstName = 'abck';
             // const lastName = '';
 
-            const uploadUserId = '@TG@' + userId;
             const sender = await getSender(uploadUserId);
             if (!sender) {
                 return;
@@ -86,7 +132,6 @@ export default (props)=>{
             const privateKey = ethers.Wallet.createRandom().privateKey;
             const wallet = new ethers.Wallet(privateKey);
             let publicAddress = await wallet.getAddress();
-            console.csLog('====publicAddress = ', publicAddress);
             publicAddress = publicAddress.toLowerCase(); // publicAddress|id|signature   //发送信息
 
             const result = await sendMessage(wallet, publicAddress, uploadUserId);
@@ -101,13 +146,30 @@ export default (props)=>{
             const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(uploadUserId).substring(4, 6);
             const options = {scrypt: {N: 256}};
             wallet.encrypt(pp, options).then((keystoreKey) => {
-                localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, keystoreKey);
-                navigate("Main");
-            });
+                const baseWallKeystore = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE) || '{}';
+                const json = JSON.parse(baseWallKeystore);
+                json[uploadUserId] = keystoreKey; //也许可以
+                // console.csLog('===JSON.stringify(json) = ', JSON.stringify(json));
+                localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, JSON.stringify(json));
+                goto("Main");
+            }).catch((e) => {
+                console.csLog('===e2 == ', e);
+            });;
         }
         loadData();
 
     }, []);
+
+    const deleteOtherAccountInfo = () => {
+        localStorage.removeItem(LOCAL_STORAGE_TEMP_PV);
+        localStorage.removeItem(LOCAL_STORAGE_ONGOING_INFO);
+        localStorage.removeItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+        localStorage.removeItem(LOCAL_STORAGE_EMAIL);
+        localStorage.removeItem(LOCAL_STORAGE_WALLET_KEYSTORE);
+        localStorage.removeItem(LOCAL_STORAGE_TG_USERID);
+        localStorage.removeItem(LOCAL_STORAGE_ENTRY_POINTS);
+        localStorage.removeItem(LOCAL_STORAGE_LANGUAGE);
+    }
 
     const deleteAccount = () => {
         localStorage.removeItem(LOCAL_STORAGE_TEMP_PV);

@@ -29,10 +29,10 @@ export default (props)=>{
 
             <div className={'setting-title-line'} style={isWeb ? { paddingLeft: -25, paddingRight: -25} : {}}/>
             <div className={'setting-content-layout'}>
-                <div className={'setting-item-wrap'} onClick={() => navigate("BindEmail")}>
+                <div className={'setting-item-wrap'} onClick={() => navigate("SecurityCenter")}>
                     <img className={'setting-item-icon'} src={ic_set_safe_solid}/>
                     <div className={'setting-item-name'}>
-                        {t('bind_with_email')}
+                        {t('security_center')}
                     </div>
                     <div className={'flex-full'}/>
                     <img className={'setting-item-arrow'} src={ic_setting_enter}/>

@@ -46,7 +46,7 @@ import {
     getCreateOP,
     getPaymasterData,
     setEntryPoint,
-    entryPoints, getBindEmail
+    entryPoints, getBindEmail, sendbindEmailByChainId
 } from "../helpers/UserOp";
 import {handleFetch} from "../helpers/FatchUtils";
 import ImageWithFallback from "../widgets/ImageWithFallback";
@@ -109,6 +109,7 @@ export default (props)=>{
     }, [])
 
     useEffect(() => {
+        // return;
         const interval = setInterval(async () => {
             if (wallet) {
                 const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
@@ -163,7 +164,7 @@ export default (props)=>{
                                             const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
                                             op = paymasterData;
                                             paymasterOps[chainId] = paymasterData;
-                                            localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
+                                            // localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
                                             console.csLog('====paymasterData = ', op);
                                         }
                                     }
@@ -189,7 +190,7 @@ export default (props)=>{
                         localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
                     }
                     if (hasSendTemps.length > 0) {
-                        localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
+                        // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
                     }
                 } catch (error) {
                     printToNative(error)
@@ -227,12 +228,31 @@ export default (props)=>{
                 // localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 // localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
                 // localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
-
-                // getBindEmail().then((result) => {
-                //     if (result) {
-                //         localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, result);
-                //     }
-                // })
+                const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
+                getBindEmail(userId).then((result) => {
+                    if (result) {
+                        const type = result.type;
+                        if (type === 'NoBind') {
+                            localStorage.removeItem(LOCAL_STORAGE_BIND_EMAIL);
+                        } else if (type === 'Binding') {
+                            localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, JSON.stringify(result));
+                            const email = result.email;
+                            const hmua = result.hmua;
+                            const unbind = result.UnBind;
+                            const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
+                            console.csLog('===getBindEmail localstorage sendOps = ', sendOps);
+                            for (const chainId of unbind) {
+                                if (sendOps.includes(String(chainId))) {
+                                    sendbindEmailByChainId(paymasterUrl, wallet, hmua, chainId);
+                                }
+                            }
+                        } else {
+                            localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, JSON.stringify(result));
+                        }
+                        console.csLog('===getBindEmail = ', result);
+                        // localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, result);
+                    }
+                })
 
                 const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
                 const nowDate = new Date().getTime();

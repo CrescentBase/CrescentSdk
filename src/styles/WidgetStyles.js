@@ -53,6 +53,7 @@ export default () => {
             display: flex;
             justify-content: space-between;
             width: 100%;
+            align-items: center;
         }
         
         .widget-textinput-edittext {
@@ -68,7 +69,7 @@ export default () => {
             background-color: transparent;
             outline: none;
             cursor: pointer;
-            width: 100%
+            flex: 1;
         }
         
         .widget-textinput-edittext::placeholder {
@@ -102,6 +103,17 @@ export default () => {
             display: flex;
             margin-top: 4px;
             user-select: none;
+        }
+        
+        .widget-textinput-right-text {
+            font-size: 12px;
+            font-weight: 400;
+            color: #101010;
+            line-height: 16px;
+            color: var(--system-color-4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
             
   `)

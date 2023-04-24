@@ -1,12 +1,14 @@
 import {ethers} from "ethers";
 import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils.js';
 import {handleFetch, rpcFetch} from "./FatchUtils.js";
-import {RPCHOST} from "./Config";
+import {ChainType, EnableChainTypes, NetworkConfig, RPCHOST} from "./Config";
 import BigNumber from "bignumber.js";
 import {
-    LOCAL_STORAGE_ENTRY_POINTS,
+    LOCAL_STORAGE_ENTRY_POINTS, LOCAL_STORAGE_PUBLIC_ADDRESS, LOCAL_STORAGE_TG_USERID,
 } from "./StorageUtils";
 import {printToNative} from "./Utils";
+import {getSuggestedGasEstimates} from "./custom-gas";
+import {calcGas, fixGas, MAX_SLIDER, updateUoGasFees} from "./GasUtils";
 
 export const METHOD_ID_EXEC_FROM_ENTRY_POINT = "0x80c5c7d0";
 export const METHOD_ID_TRANSFER = '0xa9059cbb';
@@ -62,6 +64,19 @@ export const getTransferCallData = (to, amount) => {
         [to, amount]
     ).substring(2);
 }
+
+export const getUpdateHmuaCallData = (hmua) => {
+    return '0x6d8df8b6' + defaultAbiCoder.encode(
+        ['bytes32'],
+        [hmua]
+    ).substring(2);
+}
+
+export const getUserOperationByHmua = async (wallet, provider, chainId, sender, hmua) => {
+    const data = getUpdateHmuaCallData(hmua);
+    return getUserOperation(wallet, provider, chainId, sender, data);
+}
+
 
 export const getWalletTransferCallData = (contractAddress, toAddress, value, amount) => {
     let data = '0x';
@@ -128,14 +143,10 @@ export const getUserOperation = async (wallet, provider, chainId, sender, callDa
         sender,
         callData
     }
-    const kk = {
-        ...uo
-    }
-    console.csLog('====uo = ', kk);
     console.csLog('====callData = ', callData);
 
     const nonce = await getNonce(sender, chainId);
-    console.csLog('====nonce = ', nonce);
+    console.csLog('====nonce = ', nonce, ' ; chainId = ', chainId);
     const bb = nonce.toHexString();
     console.csLog('===bb = ', bb);
     uo.nonce = bb;
@@ -344,7 +355,9 @@ export const sendOp = async (rpcUrl, op, chainId) => {
 }
 
 export const getPaymasterData = async (paymasterUrl, op, email, pk, chainId) => {
+    console.csLog('===getPaymasterData pre = ', chainId, op);
     const body = { op, email: email, public_key: pk, chain_id: chainId };
+    console.csLog('===body = ', body);
     const result = await rpcFetch(paymasterUrl, body);
     console.csLog('===getPaymaster result = ', chainId, result);
     if (!result || !result.data) {
@@ -396,7 +409,7 @@ export const getEncryToken = async (userId) => {
         return data;
     } catch (error) {
         printToNative(error);
-        console.csLog("==getSender = ", error);
+        console.csLog("==getEncryToken = ", error);
     }
     return null;
 }
@@ -409,7 +422,21 @@ export const getBindEmail = async (userId) => {
         return data;
     } catch (error) {
         printToNative(error);
-        console.csLog("==getSender = ", error);
+        console.csLog("==getBindEmail = ", error);
+    }
+    return null;
+}
+
+export const unBindEmail = async (userId) => {
+    const url = RPCHOST + "/api/v2/unBindEmail?channel_id=" + userId;
+    try {
+        const json = await handleFetch(url);
+        const data = json.data;
+        console.csLog('====unBindEmail = ', json);
+        return data;
+    } catch (error) {
+        printToNative(error);
+        console.csLog("==getBindEmail = ", error);
     }
     return null;
 }
@@ -465,4 +492,70 @@ export const containOwner = async (sender, owner, chainId) => {
     const contract = new ethers.Contract(contractAddress, abi, provider);
     const isOwner = await contract.containOwner(owner);
     return isOwner;
+}
+
+export const sendbindEmailByChainId = async(paymasterUrl, wallet, hmua, chainId) => {
+    console.csLog('====sendbindEmailByChainId = ', chainId, ' ; hmua: = ', hmua);
+    const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
+    const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+    const pksync = await wallet.getAddress();
+    const pk = pksync.toLowerCase();
+    try {
+        let chainType = ChainType.Ethereum;
+        for (const chainTy of EnableChainTypes) {
+            if (chainTy !== ChainType.All) {
+                const MainChainId = NetworkConfig[chainTy].MainChainId;
+                if (String(chainId) === MainChainId) {
+                    chainType = chainTy;
+                }
+            }
+        }
+        const provider = new ethers.providers.JsonRpcProvider(`https://bundler-${chainId}.crescentbase.com/rpc`);
+        let suggestedGasFees = await getSuggestedGasEstimates(wallet, {chainType}, null, null, null, null, hmua);
+        if (suggestedGasFees.errorMessage) {
+            return;
+        }
+        const gasSpeedSelected = chainType === ChainType.Bsc ? 0 : MAX_SLIDER / 2
+        suggestedGasFees = fixGas(suggestedGasFees, chainType);
+        let gWei = calcGas(suggestedGasFees, gasSpeedSelected);
+        if (suggestedGasFees?.isEIP1559) {
+            gWei = gWei.add(suggestedGasFees?.estimatedBaseFee);
+        }
+        updateUoGasFees(suggestedGasFees, gWei);
+
+        let uo = suggestedGasFees.uo;
+
+        if (uo != null) {
+            if (!uo.paymasterAndData || uo.paymasterAndData === '0x') {
+                const paymasterData = await getPaymasterData(paymasterUrl, uo, userId, pk, chainId)
+                uo = paymasterData;
+                uo.signature = '0x';
+                const txId = await getRequestId(uo, Number(chainId));
+                const walletNew = wallet.connect(provider);
+                const signedTx = await walletNew.signMessage(ethers.utils.arrayify(txId));
+                uo.signature = signedTx;
+            }
+        }
+        const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`;
+        await sendOp(targetUrl, uo, chainId);
+    } catch (e) {
+        console.csLog("===sendbindEmailByChainId", e);
+    }
+    console.csLog('====sendbindEmailByChainId end = ', chainId);
+}
+
+export const sendbindEmail = async(paymasterUrl, wallet, hmua) => {
+    // for (const chainType of EnableChainTypes) {
+    //     if (chainType !== ChainType.All) {
+    //         const chainId = NetworkConfig[chainType].MainChainId;
+    //         await sendbindEmailByChainId(paymasterUrl, wallet, hmua, chainId);
+    //     }
+    // }
+    const promises = EnableChainTypes.filter(chainType => chainType !== ChainType.All)
+        .map(async (chainType) => {
+            const chainId = NetworkConfig[chainType].MainChainId;
+            await sendbindEmailByChainId(paymasterUrl, wallet, hmua, chainId);
+        });
+    await Promise.all(promises);
+    return;
 }

@@ -52,6 +52,7 @@ export default () => {
             --font-color-2: rgba(147,157,165,0.6);
             --font-color-3: #1E2124;
             --font-color-4: #ffffff;
+            --custom-color-1: #939DA5;
         }
   `)
 }

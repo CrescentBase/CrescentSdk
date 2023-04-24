@@ -44,9 +44,9 @@ import {
 import ic_token_default from "../assets/ic_token_default.png";
 import ImageWithFallback from "../widgets/ImageWithFallback";
 import BigNumber from "bignumber.js";
+import {MAX_SLIDER, calcGas, fixGas, updateUoGasFees} from '../helpers/GasUtils';
 
 export default (props)=>{
-    const MAX_SLIDER = 10;
     const { navigate, showOngoing } = useContext(NavigateContext);
     const ic_back_white = getBackIcon();
     const ic_clear = getClearIcon();
@@ -248,7 +248,7 @@ export default (props)=>{
             setTransactionErrorPop(true);
             return;
         }
-        suggestedGasFees = fixGas(suggestedGasFees);
+        suggestedGasFees = fixGas(suggestedGasFees, asset.chainType);
         setSuggestedGasFees(suggestedGasFees);
         const customGasPrice = renderShortValue(
             weiToGwei(
@@ -281,7 +281,7 @@ export default (props)=>{
         if (suggestedGasFeesInFunction?.isEIP1559 !== suggestedGasFees?.isEIP1559) {
             return;
         }
-        suggestedGasFeesInFunction = fixGas(suggestedGasFeesInFunction);
+        suggestedGasFeesInFunction = fixGas(suggestedGasFeesInFunction, asset.chainType);
         if (
             (suggestedGasFeesInFunction.isEIP1559 &&
                 !suggestedGasFeesInFunction.estimatedBaseFee.eq(suggestedGasFees.estimatedBaseFee)) ||
@@ -384,29 +384,6 @@ export default (props)=>{
         //     this.state.suggestedGasFees?.estimatedBaseFee,
         //     limitGas
         // );
-    };
-
-    const calcGas = (suggestedGasFees, gasSpeedSelected) => {
-        const gasFees = suggestedGasFees;
-        if (!gasFees) {
-            return ethers.BigNumber.from(0);
-        }
-        let gwei;
-        const average = MAX_SLIDER / 2;
-        if (gasSpeedSelected === average) {
-            gwei = gasFees.averageGwei;
-        } else if (gasSpeedSelected < average) {
-            gwei = gasFees.averageGwei
-                .sub(gasFees.safeLowGwei)
-                .mul(gasSpeedSelected).div(average)
-                .add(gasFees.safeLowGwei);
-        } else {
-            gwei = gasFees.fastGwei
-                .sub(gasFees.averageGwei)
-                .mul((gasSpeedSelected - average)).div(average)
-                .add(gasFees.averageGwei);
-        }
-        return gwei;
     };
 
     const inputAddressChange = (text) => {
@@ -675,20 +652,6 @@ export default (props)=>{
         return asset.symbol + '(' + addr + ')';
     };
 
-    const fixGas = suggestedGasFees => {
-        if (suggestedGasFees.fastGwei.lte(suggestedGasFees.averageGwei)) {
-            suggestedGasFees.fastGwei = suggestedGasFees.averageGwei.mul(3).div(2);
-        }
-        if (asset.chainType === ChainType.Bsc) {
-            suggestedGasFees.safeLowGwei = suggestedGasFees.averageGwei;
-            suggestedGasFees.averageGwei = suggestedGasFees.fastGwei.add(suggestedGasFees.safeLowGwei).div(2);
-        } else if (suggestedGasFees.safeLowGwei.gte(suggestedGasFees.averageGwei)) {
-            suggestedGasFees.safeLowGwei = suggestedGasFees.averageGwei.div(2);
-        }
-
-        return suggestedGasFees;
-    };
-
     const checkBalanceWei = async (asset, balanceInput, readyValue = true) => {
         const balanceInfo = await fetchBalanceInfo(asset);
         if (!balanceInfo || balanceInfo.length === 0 || (!asset.nativeCurrency && balanceInfo.length === 1)) {
@@ -745,22 +708,13 @@ export default (props)=>{
             return;
         }
         const uo = suggestedGasFees.uo;
-        let maxFeePerGas, maxPriorityFeePerGas;
+        let maxFeePerGas;
         if (selectGas) {
             maxFeePerGas = selectTotalGas;
         } else {
             maxFeePerGas = customTotalGas;
         }
-        console.csLog('===uo = ', uo);
-        console.csLog('====maxFeePerGas = ', maxFeePerGas);
-        console.csLog('====maxFeePerGas.toHexString() = ', maxFeePerGas.toHexString());
-        uo.maxFeePerGas = maxFeePerGas.toHexString();
-        if (suggestedGasFees.isEIP1559) {
-            maxPriorityFeePerGas = maxFeePerGas.sub(suggestedGasFees.estimatedBaseFee);
-            uo.maxPriorityFeePerGas = maxPriorityFeePerGas.toHexString();
-        } else {
-            uo.maxPriorityFeePerGas = uo.maxFeePerGas;
-        }
+        updateUoGasFees(suggestedGasFees, maxFeePerGas)
         const chainId = NetworkConfig[asset.chainType].MainChainId;
         const account = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS)
         const nonce = await getNonce(account, chainId);

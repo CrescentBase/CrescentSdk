@@ -51,7 +51,7 @@ const connect = (props) => {
     }
 
     let initView = "CreateLoading"
-    // initView = "BindEmail";
+    // initView = "SecurityCenter";
 
     setIsFromWeb(true);
     setIsLight(props.isLight);

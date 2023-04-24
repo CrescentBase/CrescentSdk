@@ -14,7 +14,6 @@ import ic_set_language_solid_white from "../assets/ic_set_language_solid.png"
 import ic_set_language_solid_black from "../assets/ic_set_language_solid_black.png"
 import ic_set_safe_solid_white from "../assets/ic_set_safe_solid.png"
 import ic_set_safe_solid_black from "../assets/ic_set_safe_solid_black.png"
-
 import ic_address_white from "../assets/ic_address.png"
 import ic_address_black from "../assets/ic_address_black.png"
 import ic_buy_white from "../assets/ic_buy.png"
@@ -37,6 +36,15 @@ import ic_setting_switch_white from "../assets/ic_setting_switch.png"
 import ic_setting_switch_black from "../assets/ic_setting_switch_black.png"
 import img_logo_white from "../assets/img_logo"
 import img_logo_black from "../assets/img_logo_black"
+
+import ic_unbind_black from "../assets/ic_unbind_black.png"
+import ic_unbind from "../assets/ic_unbind.png"
+
+import img_warn_black from "../assets/img_warn_black"
+import img_warn from "../assets/img_warn"
+
+import img_safe_black from "../assets/img_safe_black"
+import img_safe from "../assets/img_safe"
 
 export let isLight = false;
 
@@ -194,5 +202,29 @@ export function getLogoIcon() {
         return img_logo_black;
     } else {
         return img_logo_white;
+    }
+}
+
+export function getUnbindIcon() {
+    if (isLight) {
+        return ic_unbind_black;
+    } else {
+        return ic_unbind;
+    }
+}
+
+export function getBindWarnIcon() {
+    if (isLight) {
+        return img_warn_black;
+    } else {
+        return img_warn;
+    }
+}
+
+export function getBindSafeIcon() {
+    if (isLight) {
+        return img_safe_black;
+    } else {
+        return img_safe;
     }
 }

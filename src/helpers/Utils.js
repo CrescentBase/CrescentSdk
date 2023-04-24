@@ -86,5 +86,5 @@ export const callUrlToNative = (url, paramPlatform) => {
 }
 
 export const printToNative = (text) => {
-    callToNativeMsg("print;" + String(text))
+    // callToNativeMsg("print;" + String(text))
 }

@@ -37,14 +37,25 @@ export default (props)=>{
                        onChange={handleTextChange}
                        onKeyDown={handleKeyDown}
                 />
-                {text !== '' && (
+                {text !== '' && !props.disableDelete && (
                     <img className={'widget-textinput-edittext-clear'} src={ic_clear} onClick={() => {
                         setTextContent("");
                     }}/>
                 )}
+                {props.rightText && (
+                    <span className={'widget-textinput-right-text'}
+                          style={ {cursor: props.rightClickEnable ? 'pointer' : 'not-allowed', color: props.rightTextColor || ' var(--system-color-4)' }}
+                        onClick={() => {
+                            if (props.rightClickEnable) {
+                                props.onRightTextClick && props.onRightTextClick();
+                            }
+                        }}>
+                        {props.rightText}
+                    </span>
+                )}
             </div>
             <div className={'widget-textinput-line'}/>
-            <div className={'widget-textinput-wrong-tip'}>{(text !== "" && props.showWrong) && props.wrongText}&nbsp;</div>
+            <div className={'widget-textinput-wrong-tip'}>{((text !== "" || props.ignoreText) && props.showWrong) && props.wrongText}&nbsp;</div>
         </div>
     );
 }

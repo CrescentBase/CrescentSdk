@@ -17,7 +17,7 @@ import OngoingTxStyles from "../styles/OngoingTxStyles";
 import CreateLoadingStyles from "../styles/CreateLoadingStyles";
 import VerificationStyles from "../styles/VerificationStyles";
 import SelectPlatformStyle from "../styles/SelectPlatformStyle";
-import BindEmailStyles from "../styles/BindEmailStyles";
+import SecurityCenterStyles from "../styles/SecurityCenterStyles";
 
 function getStyle(style = '') {
     const allStyle = [
@@ -40,7 +40,7 @@ function getStyle(style = '') {
         CreateLoadingStyles(),
         VerificationStyles(),
         SelectPlatformStyle(),
-        BindEmailStyles(),
+        SecurityCenterStyles(),
         style
     ].join('');
     return trimStyle(allStyle);
