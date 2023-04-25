@@ -165,10 +165,13 @@ export default (props)=>{
         localStorage.removeItem(LOCAL_STORAGE_ONGOING_INFO);
         localStorage.removeItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
         localStorage.removeItem(LOCAL_STORAGE_EMAIL);
-        localStorage.removeItem(LOCAL_STORAGE_WALLET_KEYSTORE);
+        localStorage.removeItem(LOCAL_STORAGE_GET_OP_DATE);
+        localStorage.removeItem(LOCAL_STORAGE_SEND_OP_SUCCESS);
+        localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
+        localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
         localStorage.removeItem(LOCAL_STORAGE_TG_USERID);
-        localStorage.removeItem(LOCAL_STORAGE_ENTRY_POINTS);
-        localStorage.removeItem(LOCAL_STORAGE_LANGUAGE);
+        localStorage.removeItem(LOCAL_STORAGE_PAYSTER_OP);
+        localStorage.removeItem(LOCAL_STORAGE_BIND_EMAIL);
     }
 
     const deleteAccount = () => {
