@@ -313,7 +313,7 @@ export default (props) => {
                         {t('email_address_not_bound')}
                     </span>
                     <span className={'security-center-page1-level-state-desc'}>
-                        {t('if_tg_delete_warn')}
+                        {t('email_address_not_bound_desc')}
                     </span>
                     <Button style={{marginTop: 30}} text={t('bind_email')} disable={false} onClick={() => {
                         setPage(3);
