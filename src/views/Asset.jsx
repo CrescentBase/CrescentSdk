@@ -28,9 +28,20 @@ export default (props)=>{
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
+    const [viewportHeight, setViewportHeight] = useState(0);
+
+    function setViewportData() {
+        const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
+        setViewportHeight(viewpartHeight);
+    }
+
+    useEffect(() => {
+        window.Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+        setViewportData();
+    }, [])
 
     return (
-        <div className={'asset'}>
+        <div className={'asset'} style={{height: viewportHeight}}>
             <div className={'asset-base'} onClick={() => {
                 if (showAddressPop) {
                     setShowAddressPop(false);
@@ -60,7 +71,7 @@ export default (props)=>{
                                 {asset.price !== null && (
                                     <div className={'asset-price-change-text'} style={asset.change24h < 0 ? {color: 'var(--function-color-2)'} : {}}>
                                         <img className={'asset-price-change-icon'} src={asset.change24h < 0 ? ic_down : ic_up}/>
-                                        {asset.change24h}
+                                        {asset.change24h}%
                                     </div>
                                 )}
                             </div>

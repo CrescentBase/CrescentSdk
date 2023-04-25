@@ -42,7 +42,18 @@ export default (props) => {
     const [hasBindEmail, setHasBindEmail] = useState(null);
     const [bindSuccess, setBindSuccess] = useState(false);
     const [beginBind, setBeginBind] = useState(false);
-//http://127.0.0.1:5260/index.html
+    const [viewportHeight, setViewportHeight] = useState(0);
+
+    function setViewportData() {
+        const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
+        setViewportHeight(viewpartHeight);
+    }
+
+    useEffect(() => {
+        window.Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+        setViewportData();
+    }, [])
+
     useEffect(() => {
         const bindEmail = localStorage.getItem(LOCAL_STORAGE_BIND_EMAIL);
         console.csLog('===LOCAL_STORAGE_BIND_EMAIL = ', bindEmail);
@@ -319,12 +330,6 @@ export default (props) => {
                     </div>
                     <span className={'security-center-page2-level-state'}>
                         {t('security_safe_desc_1')}
-                        <span className={'security-center-page1-crescentwallet'} onClick={() => {
-                            window.open('https://www.crescentbase.com', "_blank");
-                        }}>
-                            {t('crescentWallet')}
-                        </span>
-                        {t('security_safe_desc_2')}
                     </span>
                     <span className={'security-center-page2-email-text'}>
                         {t('email')}
@@ -357,7 +362,7 @@ export default (props) => {
                     )}
                 </div>
             ) : page === 3 ? (
-                <div className={'security-center-base'}>
+                <div className={'security-center-base'} style={{ flex: 'initial', height: viewportHeight - 56 }}>
                     <div className={'flex-width-full flex-full flex-col'}>
                         <div className={'select-email-email-layout-inter'} style={{marginTop: 30, paddingLeft: 20, paddingRight: 20}}>
                             <div className={'select-email-email-wrap-web'}>
@@ -447,7 +452,7 @@ export default (props) => {
                         rightText={isCounting ? String(countdown) + 's' : t('send_verification_code')}
                         rightClickEnable={!isCounting}
                         onRightTextClick={handleSendVerificationCode}
-                        rightTextColor={isCounting ? 'var(--medium-color-3)' : undefined}
+                        rightTextColor={(isCounting || !inputEmail) ? 'var(--medium-color-4)' : undefined}
                         onTextChange={(text) => {
                            setInputEmailCode(text);
                            if (!emailCodeError) {

@@ -7,7 +7,7 @@ export default () => {
             border-radius: 10px 10px 10px 10px;
             font-size: 14px;
             font-weight: 600;
-            color: var(--font-color-3);
+            color: black;
             line-height: 20px;
             display: flex;
             justify-content: center;
@@ -24,11 +24,11 @@ export default () => {
             user-select: none;
             width: 100%;
             height: 44px;
-            background: var(--medium-color-4);
+            background: rgba(147, 157, 165, 0.60);
             border-radius: 10px 10px 10px 10px;
             font-size: 14px;
             font-weight: 600;
-            color: var(--font-color-3);
+            color: black;
             line-height: 20px;
             display: flex;
             justify-content: center;
@@ -73,7 +73,7 @@ export default () => {
         }
         
         .widget-textinput-edittext::placeholder {
-            color: var(--medium-color-3);
+            color: var(--medium-color-4);
         }
         
         .widget-textinput-edittext:focus {
