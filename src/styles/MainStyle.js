@@ -276,12 +276,14 @@ export default () => {
         .main-search-base-layout {
             display: flex;
             flex-direction: column;
+            height: 41px;
         }
         
         .main-search-wrap-layout {
             display: flex;
             flex-direction: row;
             align-items: center;
+            height: 20px;
             margin: 16px 0px 4px 0px
         }
         
@@ -369,6 +371,15 @@ export default () => {
             line-height: 20px;
             left: 50%;
             transform: translateX(-50%);
+        }
+        
+        .main-transak-layout-wrap {
+            display: flex;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            background: var(--system-color-3);
         }
         
         .main-transak-layout {

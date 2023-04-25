@@ -70,17 +70,17 @@ export default () => {
             font-weight: 400;
             color: var(--medium-color-3);
             line-height: 16px;
-            color: var(--medium-color-3);
             margin-top: 24px;
         }
         
         .receive-chain {
             padding: 4px 10px;
-            background: rgba(163,255,51,0.15);
+            background: var(--system-color-5);
             border-radius: 4px 4px 4px 4px;
             opacity: 1;
             font-weight: 400;
-            color: var(--system-color-1);
+            font-size: 12px;
+            color: var(--system-color-4);
             line-height: 16px;
             margin-top: 4px;
         }

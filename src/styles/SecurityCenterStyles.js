@@ -108,9 +108,9 @@ export default () => {
         
         .security-center-page2-level-state {
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 400;
             color: var(--system-color-4);
-            line-height: 20px;
+            line-height: 16px;
             margin-top: 8px;
         }
         
@@ -149,10 +149,10 @@ export default () => {
             border-radius: 10px;
             height: 44px;
             width: 100%;;
-            border: 1px solid var(--medium-color-3);
+            border: 1px solid #939DA5;
             font-size: 14px;
             font-weight: 600;
-            color: var(--medium-color-3);
+            color: #939DA5;
             line-height: 20px;
             cursor: pointer;
             justify-content: center;
@@ -174,7 +174,6 @@ export default () => {
             left: 0;
             right: 0;
             top: 0;
-            bottom: 0;
             background: var(--system-color-3);
         }
         

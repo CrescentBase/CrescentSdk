@@ -144,7 +144,7 @@ export default () => {
             opacity: 1;
             font-size: 12px;
             font-weight: 600;
-            color: var(--system-color-2);
+            color: black;
             line-height: 16px;
             margin-top: 10px;
             display: flex;
@@ -420,11 +420,11 @@ export default () => {
         
         .send-slider-track {
             position: relative;
-            background: #A3FF33;
+            background: var(--system-color-1);
         }
         
         .send-slider-track.send-slider-track-1 {
-            background: #1E2124;
+            background: var(--medium-color-1);
         }
         
         .send-slider-horizontal .send-slider-track {

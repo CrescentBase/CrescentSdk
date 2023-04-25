@@ -82,6 +82,17 @@ export default (props)=>{
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
     const [ongoingNum, setOngoingNum] = useState(1);
+    const [viewportHeight, setViewportHeight] = useState(0);
+
+    function setViewportData() {
+        const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
+        setViewportHeight(viewpartHeight);
+    }
+
+    useEffect(() => {
+        window.Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+        setViewportData();
+    }, [])
 
     const goAsset = (item) => {
         navigate('Asset', { asset: item });
@@ -698,16 +709,18 @@ export default (props)=>{
                         <div className={'main-asset-item-line'}/>
                     </div>
                 ) : (
-                    <div className={'main-asset-top-layout'}>
-                        <div className={'main-assetlist-text'}>
-                            {t('asset_list')}
+                    <div className={'main-search-base-layout'}>
+                        <div className={'main-asset-top-layout'}>
+                            <div className={'main-assetlist-text'}>
+                                {t('asset_list')}
+                            </div>
+                            <div className={'flex-full'}/>
+                            <img src={ic_search} className={'main-asset-search-icon'} onClick={() => {
+                                setIsSearch(true)
+                                setSwipeKey('');
+                            }}/>
+                            <img src={ic_buy} className={'main-asset-buy-icon'} onClick={() => setShowTransak(true)}/>
                         </div>
-                        <div className={'flex-full'}/>
-                        <img src={ic_search} className={'main-asset-search-icon'} onClick={() => {
-                            setIsSearch(true)
-                            setSwipeKey('');
-                        }}/>
-                        <img src={ic_buy} className={'main-asset-buy-icon'} onClick={() => setShowTransak(true)}/>
                     </div>
                 )}
 
@@ -767,29 +780,31 @@ export default (props)=>{
             )}
 
             {showTransak && (
-                <div className={'main-transak-layout'}>
-                    <img className={'main-transak-close-icon'} src={ic_close} onClick={() => setShowTransak(false)}/>
-                    <span className={'main-transak-title'}>
+                <div className={'main-transak-layout-wrap'} style={{height: viewportHeight}}>
+                    <div className={'main-transak-layout'}>
+                        <img className={'main-transak-close-icon'} src={ic_close} onClick={() => setShowTransak(false)}/>
+                        <span className={'main-transak-title'}>
                         {t('buy_crypto_title')}
-                    </span>
-                    <div className={'main-transak-content1'} style={{ whiteSpace: "pre-line" }}>
-                        {t('buy_crypto_content1')}
-                    </div>
-                    <img className={'main-transak-icon'} src={img_transak}/>
-                    <span className={'main-transak-content2'}>
-                        <span
-                            className={'main-transak-click-here'}
-                            onClick={() => {
-                                const url = "https://www.notion.so/Coverage-Payment-Methods-Fees-Limits-30c0954fbdf04beca68622d9734c59f9";
-                                callUrlToNative(url, platform);
-                            }}
-                        >{t('buy_crypto_click_here')}</span>{t('buy_crypto_content2')}
-                    </span>
-                    <div style={{display: 'flex', width: '100%'}}>
-                        <Button text={t('buy_now')} style={{height: 36, marginTop: 24, marginBottom: 24, marginLeft: 20, marginRight: 20}} onClick={() => {
-                            clickToTransak();
-                            setShowTransak(false);
-                        }}/>
+                        </span>
+                            <div className={'main-transak-content1'} style={{ whiteSpace: "pre-line" }}>
+                                {t('buy_crypto_content1')}
+                            </div>
+                            <img className={'main-transak-icon'} src={img_transak}/>
+                            <span className={'main-transak-content2'}>
+                            <span
+                                className={'main-transak-click-here'}
+                                onClick={() => {
+                                    const url = "https://www.notion.so/Coverage-Payment-Methods-Fees-Limits-30c0954fbdf04beca68622d9734c59f9";
+                                    callUrlToNative(url, platform);
+                                }}
+                            >{t('buy_crypto_click_here')}</span>{t('buy_crypto_content2')}
+                        </span>
+                        <div style={{display: 'flex', width: '100%'}}>
+                            <Button text={t('buy_now')} style={{height: 36, marginTop: 24, marginBottom: 24, marginLeft: 20, marginRight: 20}} onClick={() => {
+                                clickToTransak();
+                                setShowTransak(false);
+                            }}/>
+                        </div>
                     </div>
                 </div>
             )}
