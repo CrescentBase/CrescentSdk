@@ -206,7 +206,7 @@ export default () => {
             width: 239px;
             font-size: 13px;
             font-weight: 400;
-            color: rgba(16,16,16,0.7);
+            color: var(--medium-color-3);
             line-height: 16px;
             display: flex;
             justify-content: center;

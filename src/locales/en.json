@@ -53,7 +53,7 @@
   "address": "Address",
   "paste": "PASTE",
   "to_network": "To Network",
-  "send_note": "Recipient will receive {{fromToken}} on {{network}} network as {{toToken}}",
+  "send_note": "Recipient will receive {{fromToken}} on {{network}} network.",
   "amount": "Amount",
   "amount_available": "{{amount}} Available",
   "max": "MAX",

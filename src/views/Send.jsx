@@ -870,7 +870,7 @@ export default (props)=>{
                             </div>
                             <div className={'send-line'}/>
                             <div className={'flex-width-full'}>
-                                <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={{marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
+                                <Button text={t('next')} disable={!addressCorrect || balanceInput > asset.fullAmount || balanceInput <= 0} style={isWeb ? {marginTop: 36} : {marginTop: 36, marginLeft: 20, marginRight: 20}} onClick={() => {//
                                     //setInvalidAddressPop(true);
                                     setStep(2);
                                     handleFetchBasicEstimates(asset, addressInput, balanceInput);

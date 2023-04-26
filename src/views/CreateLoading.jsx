@@ -105,8 +105,8 @@ export default (props)=>{
                     if (!sender) {
                         return;
                     }
-                    const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(userId).substring(4, 6);
-                    ethers.Wallet.fromEncryptedJson(JSON.stringify(encryKeystore), pp).then((wallet) => {
+                    const pp = sender.substring(0, 4) + sender.substring(sender.length - 2) + String(uploadUserId).substring(4, 6);
+                    ethers.Wallet.fromEncryptedJson(encryKeystore, pp).then((wallet) => {
                         localStorage.setItem(LOCAL_STORAGE_TG_USERID, uploadUserId);
                         localStorage.setItem(LOCAL_STORAGE_PUBLIC_ADDRESS, sender);
                         setWallet(wallet);

@@ -71,7 +71,7 @@ export default (props)=>{
                                 {asset.price !== null && (
                                     <div className={'asset-price-change-text'} style={asset.change24h < 0 ? {color: 'var(--function-color-2)'} : {}}>
                                         <img className={'asset-price-change-icon'} src={asset.change24h < 0 ? ic_down : ic_up}/>
-                                        {asset.change24h}%
+                                        {' ' + asset.change24h}%
                                     </div>
                                 )}
                             </div>

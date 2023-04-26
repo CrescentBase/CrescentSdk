@@ -44,6 +44,7 @@ export default () => {
             height: 50px;
             min-width: 50px;
             min-height: 50px;
+            border-radius: 6px;
         }
         
         .asset-top-right-layout {
