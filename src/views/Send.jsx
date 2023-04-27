@@ -438,7 +438,8 @@ export default (props)=>{
     const changeDollerInput = (text) => {
         setDollerInput(text);
         if (asset.price && text > 0) {
-            setBalanceInput(String(Number(text) / asset.price));
+            const balanceText = String(Number(text) / asset.price);
+            setBalanceInput(formatInput(balanceText, asset.decimals));
         }
         if (!text) {
             setBalanceInput('');
