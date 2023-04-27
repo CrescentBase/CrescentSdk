@@ -397,10 +397,8 @@ export default (props)=>{
 
     const handleBalanceInput = (event) => {
         let text = event.target.value;
-        const bn = new BigNumber(text).dp(asset.decimals ?? 0);
-        if (bn.isNaN()) {
-            text = "";
-        } else {
+        const bn = new BigNumber(text).dp(asset.decimals ?? 18, BigNumber.ROUND_DOWN);
+        if (!bn.isNaN()) {
             text = bn.toString();
         }
         changeBalanceInput(text);
