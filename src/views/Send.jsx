@@ -397,11 +397,27 @@ export default (props)=>{
 
     const handleBalanceInput = (event) => {
         let text = event.target.value;
-        const bn = new BigNumber(text).dp(asset.decimals ?? 18, BigNumber.ROUND_DOWN);
-        if (!bn.isNaN()) {
-            text = bn.toString();
-        }
+        text = formatInput(text, asset.decimals);
         changeBalanceInput(text);
+    }
+
+    const formatInput = (amount, decimals) => {
+        if (!amount) {
+            return amount;
+        }
+        if (decimals && amount.includes('.') && isDecimalValue(amount)) {
+            const comps = amount.split('.');
+            if (comps.length > 2) {
+                return amount;
+            }
+            let fraction = comps[1];
+            if (fraction.length <= decimals) {
+                return amount;
+            }
+            fraction = fraction.substr(0, decimals);
+            return '' + comps[0] + '.' + fraction;
+        }
+        return amount;
     }
 
     const changeBalanceInput = (text) => {
