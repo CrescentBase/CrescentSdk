@@ -67,6 +67,7 @@ export default (props) => {
             setHasBindEmail(json.email);
             setPage(2);
         }
+        handleGetBindInfo();
         // sendbindEmail(paymasterUrl, wallet, '0x' + 'c8bde157a17b55f78a1c28956ba107bab9ea0235ee63331cd16609fa470e3774');
     }, [])
 
@@ -80,13 +81,14 @@ export default (props) => {
                 localStorage.removeItem(LOCAL_STORAGE_BIND_EMAIL);
             } else if (type === 'Binding') {
                 localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, JSON.stringify(result));
-                const email = result.email;
-                const hmua = result.hmua;
-                const unbind = result.UnBind;
+                setBindSuccess(false);
+                setHasBindEmail(result.email);
+                setPage(2);
             } else {
                 localStorage.setItem(LOCAL_STORAGE_BIND_EMAIL, JSON.stringify(result));
                 setBindSuccess(true);
                 setHasBindEmail(result.email);
+                setPage(2);
                 return true;
             }
             console.csLog('===getBindEmail = ', result);

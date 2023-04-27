@@ -366,6 +366,24 @@ export const getPaymasterData = async (paymasterUrl, op, email, pk, chainId) => 
     return result.data;
 }
 
+export const checkUpChain = async (op, sender, owner, chainId) => {
+    const url = 'https://wallet.crescentbase.com/api/v2/rpc/';
+    const hasSendUrl = `${url}${chainId}`;
+    try {
+        const hasSenderResult = await hasSender(hasSendUrl, sender);
+        if (hasSenderResult) {
+            const hasOwner = await containOwner(sender,owner, chainId)
+            if (hasOwner) {
+                return true;
+            }
+        }
+    } catch (e) {
+        printToNative(e);
+        console.error("checkUpChain ", e);
+    }
+    return false;
+}
+
 export const checkAndSendOp = async (op, sender, owner, chainId) => {
     const url = 'https://wallet.crescentbase.com/api/v2/rpc/';
     const hasSendUrl = `${url}${chainId}`;

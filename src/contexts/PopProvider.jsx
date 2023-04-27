@@ -37,10 +37,12 @@ export default (props) => {
     }
 
     const showOnlyCopy = (text) => {
-        try {
-            navigator.clipboard.writeText(text);
-        } catch (err) {
-        }
+        navigator.clipboard.writeText(text).then(() => {
+            console.csLog("successfully copied");
+        }).catch(() => {
+            console.csLog("something went wrong");
+        });
+
         setCopyType(3);
         setCopiedPop(true);
         setTimeout(() => {

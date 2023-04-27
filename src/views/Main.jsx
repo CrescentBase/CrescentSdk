@@ -31,10 +31,10 @@ import {renderAmount, renderShortValue, renderBalanceFiat, renderFullAmount} fro
 import {
     LOCAL_STORAGE_BIND_EMAIL,
     LOCAL_STORAGE_GET_OP_DATE,
-    LOCAL_STORAGE_HAS_SEND_TEMP,
-    LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
+    // LOCAL_STORAGE_HAS_SEND_TEMP,
+    // LOCAL_STORAGE_HAS_SEND_TEMP_DATE,
     LOCAL_STORAGE_ONGOING_INFO,
-    LOCAL_STORAGE_PAYSTER_OP,
+    // LOCAL_STORAGE_PAYSTER_OP,
     LOCAL_STORAGE_PUBLIC_ADDRESS,
     LOCAL_STORAGE_SEND_OP_SUCCESS,
     LOCAL_STORAGE_TG_FIRST_NAME,
@@ -46,7 +46,7 @@ import {
     getCreateOP,
     getPaymasterData,
     setEntryPoint,
-    entryPoints, getBindEmail, sendbindEmailByChainId
+    entryPoints, getBindEmail, sendbindEmailByChainId, checkUpChain, sendOp
 } from "../helpers/UserOp";
 import {handleFetch} from "../helpers/FatchUtils";
 import ImageWithFallback from "../widgets/ImageWithFallback";
@@ -129,70 +129,36 @@ export default (props)=>{
                     clearInterval(interval);
                     return;
                 }
-                const hasSendTemps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP)) || [];
-                console.csLog('===hasSendTemps = ', hasSendTemps);
-                if (hasSendTemps.length >= EnableChainTypes.length - 1) {
-                    clearInterval(interval);
-                    return;
-                }
 
                 const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
                 const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
                 const pksync = await wallet.getAddress();
                 const pk = pksync.toLowerCase();
-                let preDate = localStorage.getItem(LOCAL_STORAGE_GET_OP_DATE);
-                if (!preDate) {
-                    preDate = String(new Date().getTime());
-                    localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
-                }
                 console.csLog('===sendOps = ', sendOps);
                 try {
-                    if (preDate === "fail") {
-                        callToNativeMsg("error;create", platform);
-                        clearInterval(interval);
-                        return;
-                    }
                     for (const chainType of EnableChainTypes) {
                         if (chainType !== ChainType.All) {
                             const chainId = NetworkConfig[chainType].MainChainId;
                             if (!sendOps.includes(chainId)) {
-                                const paymasterOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_PAYSTER_OP)) || [];
-                                const payOp = paymasterOps[chainId]
-                                let op;
-                                if (payOp) {
-                                    console.csLog('====hasPayOp = ', payOp);
-                                    op = payOp;
-                                } else {
-                                    op = await getCreateOP(sender, pk, chainId);
-                                    if (op !== null && preDate !== 'success') {
-                                        preDate = 'success';
-                                        localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, preDate);
+                                let op = await getCreateOP(sender, pk, chainId);;
+                                if (op != null) {
+                                    console.csLog('====pre = ', op);
+                                    const hasSend = await checkUpChain(op, sender, pk, chainId);
+                                    if (hasSend) {
+                                        sendOps.push(chainId);
+                                        continue;
                                     }
-                                    if (op != null) {
-                                        console.csLog('====pre = ', op);
-                                        if (!op.paymasterAndData || op.paymasterAndData === '0x') {
-                                            console.csLog('===paymasterUrl url = ', paymasterUrl)
-                                            const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
-                                            op = paymasterData;
-                                            paymasterOps[chainId] = paymasterData;
-                                            // localStorage.setItem(LOCAL_STORAGE_PAYSTER_OP, JSON.stringify(paymasterOps));
-                                            console.csLog('====paymasterData = ', op);
-                                        }
+                                    if (!op.paymasterAndData || op.paymasterAndData === '0x') {
+                                        console.csLog('===paymasterUrl url = ', paymasterUrl)
+                                        const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
+                                        op = paymasterData;
+                                        console.csLog('====paymasterData = ', op);
                                     }
                                 }
                                 console.csLog('===chainId = ', chainId, ' ; op = ', op);
                                 if (op && op.paymasterAndData && op.paymasterAndData !== '0x') {
-                                    if (!hasSendTemps.includes(chainId)) {
-                                        console.csLog('====hasSendTemps no include');
-                                        const hasSend = await checkAndSendOp(op, sender, pk, chainId);
-                                        if (hasSend) {
-                                            sendOps.push(chainId);
-                                        }
-                                        hasSendTemps.push(chainId);
-                                        localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE, String(new Date().getTime()));
-                                    } else {
-                                        console.csLog('====hasSendTemps.includes(chainId)');
-                                    }
+                                    const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`
+                                    sendOp(targetUrl, op, chainId);
                                 }
                             }
                         }
@@ -200,9 +166,9 @@ export default (props)=>{
                     if (sendOps.length > 0) {
                         localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
                     }
-                    if (hasSendTemps.length > 0) {
-                        // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
-                    }
+                    // if (hasSendTemps.length > 0) {
+                    //     // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
+                    // }
                 } catch (error) {
                     printToNative(error)
                     console.csLog('===getCreateOP = ', error);
@@ -265,11 +231,11 @@ export default (props)=>{
                     }
                 })
 
-                const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
-                const nowDate = new Date().getTime();
-                if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 8 * 60 * 1000) {
-                    localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
-                }
+                // const hasSendTempDate = localStorage.getItem(LOCAL_STORAGE_HAS_SEND_TEMP_DATE);
+                // const nowDate = new Date().getTime();
+                // if (hasSendTempDate && nowDate - Number(hasSendTempDate) > 8 * 60 * 1000) {
+                //     localStorage.removeItem(LOCAL_STORAGE_HAS_SEND_TEMP);
+                // }
                 setInitLoaded(true);
                 var element = document.getElementById("crescent-content");
                 var width = element.clientWidth;
