@@ -119,72 +119,77 @@ export default (props)=>{
         return () => clearInterval(interval);
     }, [])
 
-    useEffect(() => {
-        // return;
-        const interval = setInterval(async () => {
-            if (wallet) {
-                const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
-                console.csLog('===sendOps = ', sendOps);
-                if (sendOps.length >= EnableChainTypes.length - 1) {
-                    clearInterval(interval);
-                    return;
-                }
+    const checkAndSendOp = async (wallet, interval) => {
+        if (wallet) {
+            const sendOps = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEND_OP_SUCCESS)) || [];
+            console.csLog('===sendOps = ', sendOps);
+            if (sendOps.length >= EnableChainTypes.length - 1) {
+                clearInterval(interval);
+                return;
+            }
 
-                const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
-                const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
-                const pksync = await wallet.getAddress();
-                const pk = pksync.toLowerCase();
-                console.csLog('===sendOps = ', sendOps);
-                try {
-                    for (const chainType of EnableChainTypes) {
-                        if (chainType !== ChainType.All) {
-                            const chainId = NetworkConfig[chainType].MainChainId;
-                            if (!sendOps.includes(chainId)) {
-                                let op = await getCreateOP(sender, pk, chainId);;
-                                if (op != null) {
-                                    console.csLog('====pre = ', op);
-                                    const hasSend = await checkUpChain(op, sender, pk, chainId);
-                                    if (hasSend) {
-                                        sendOps.push(chainId);
-                                        continue;
-                                    }
-                                    if (!op.paymasterAndData || op.paymasterAndData === '0x') {
-                                        console.csLog('===paymasterUrl url = ', paymasterUrl)
-                                        const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
-                                        op = paymasterData;
-                                        console.csLog('====paymasterData = ', op);
-                                    }
+            const userId = localStorage.getItem(LOCAL_STORAGE_TG_USERID);
+            const sender = localStorage.getItem(LOCAL_STORAGE_PUBLIC_ADDRESS);
+            const pksync = await wallet.getAddress();
+            const pk = pksync.toLowerCase();
+            console.csLog('===sendOps = ', sendOps);
+            try {
+                for (const chainType of EnableChainTypes) {
+                    if (chainType !== ChainType.All) {
+                        const chainId = NetworkConfig[chainType].MainChainId;
+                        if (!sendOps.includes(chainId)) {
+                            let op = await getCreateOP(sender, pk, chainId);;
+                            if (op != null) {
+                                console.csLog('====pre = ', op);
+                                const hasSend = await checkUpChain(op, sender, pk, chainId);
+                                if (hasSend) {
+                                    sendOps.push(chainId);
+                                    continue;
                                 }
-                                console.csLog('===chainId = ', chainId, ' ; op = ', op);
-                                if (op && op.paymasterAndData && op.paymasterAndData !== '0x') {
-                                    const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`
-                                    sendOp(targetUrl, op, chainId);
+                                if (!op.paymasterAndData || op.paymasterAndData === '0x') {
+                                    console.csLog('===paymasterUrl url = ', paymasterUrl)
+                                    const paymasterData = await getPaymasterData(paymasterUrl, op, userId, pk, chainId)
+                                    op = paymasterData;
+                                    console.csLog('====paymasterData = ', op);
                                 }
+                            }
+                            console.csLog('===chainId = ', chainId, ' ; op = ', op);
+                            if (op && op.paymasterAndData && op.paymasterAndData !== '0x') {
+                                const targetUrl = `https://bundler-${chainId}.crescentbase.com/rpc`
+                                sendOp(targetUrl, op, chainId);
                             }
                         }
                     }
-                    if (sendOps.length > 0) {
-                        localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
-                    }
-                    // if (hasSendTemps.length > 0) {
-                    //     // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
-                    // }
-                } catch (error) {
-                    printToNative(error)
-                    console.csLog('===getCreateOP = ', error);
                 }
-                // if (preDate !== 'success') {
-                //     const nowDate = new Date().getTime();
-                //     if (nowDate - Number(preDate) > 1 * 60 * 60 * 1000) {
-                //         callToNativeMsg("error;create", platform);
-                //         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
-                //         clearInterval(interval);
-                //     }
+                if (sendOps.length > 0) {
+                    localStorage.setItem(LOCAL_STORAGE_SEND_OP_SUCCESS, JSON.stringify(sendOps));
+                }
+                // if (hasSendTemps.length > 0) {
+                //     // localStorage.setItem(LOCAL_STORAGE_HAS_SEND_TEMP, JSON.stringify(hasSendTemps));
                 // }
-
-                // clearInterval(interval);
+            } catch (error) {
+                printToNative(error)
+                console.csLog('===getCreateOP = ', error);
             }
+            // if (preDate !== 'success') {
+            //     const nowDate = new Date().getTime();
+            //     if (nowDate - Number(preDate) > 1 * 60 * 60 * 1000) {
+            //         callToNativeMsg("error;create", platform);
+            //         localStorage.setItem(LOCAL_STORAGE_GET_OP_DATE, 'fail');
+            //         clearInterval(interval);
+            //     }
+            // }
+
+            // clearInterval(interval);
+        }
+    }
+
+    useEffect(() => {
+        // return;
+        const interval = setInterval( () => {
+            checkAndSendOp(wallet, interval);
         }, 30 * 1000);
+        checkAndSendOp(wallet, interval);
         return () => clearInterval(interval);
     }, [wallet]);
 
@@ -261,7 +266,7 @@ export default (props)=>{
             }
             fetchOnGoings();
         }
-    }, [navigator]);
+    }, [navigator, wallet]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
