@@ -201,7 +201,8 @@ export default (props)=>{
             setBalanceInput(balanceInput);
             setAsset(asset);
             setStep(2);
-            const checkSuc = await checkBalanceWei(asset, balanceInput, false);
+
+            const checkSuc = !balanceInput ? true : await checkBalanceWei(asset, balanceInput, false);
             if (checkSuc) {
                 handleFetchBasicEstimates(asset, addressInput, balanceInput);
             }
@@ -736,10 +737,13 @@ export default (props)=>{
     }
 
     const sendTransaction = async () => {
-        const checkSuc = await checkBalanceWei(asset, balanceInput);
-        if (!checkSuc) {
-            return;
+        if (balanceInput) {
+            const checkSuc = await checkBalanceWei(asset, balanceInput);
+            if (!checkSuc) {
+                return;
+            }
         }
+
         const uo = suggestedGasFees.uo;
         let maxFeePerGas, maxPriorityFeePerGas;
         if (selectGas) {
