@@ -94,7 +94,7 @@ export default (props)=>{
 
     const loginGoogle = useGoogleLogin({
         onSuccess: responseGoogle,
-        scope: 'https://www.googleapis.com/auth/admin.directory.customer.readonly'
+        // scope: 'https://www.googleapis.com/auth/admin.directory.customer.readonly'
     });
 
 
