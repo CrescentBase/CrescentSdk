@@ -126,6 +126,6 @@
   "only_email_provider": "Only email providers that support the DKIM security protocol are allowed for binding. After binding, even if your TG account is deleted, you can still retrieve your assets by email.",
   "invalid_email_address": "Invalid email address",
   "wrong_verification_code": "Wrong verification code",
-  "request_verification_frequently": "Request verification code too frequently"
-
+  "request_verification_frequently": "Request verification code too frequently",
+  "create_social_account": "Access or create your wallet by social account "
 }

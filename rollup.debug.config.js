@@ -14,8 +14,8 @@ export default Object.assign({}, rollup, {
     dev({
       proxy: [{ from: '/track', to:'http://example.com' }],
     }),
-    livereload({
-      watch: ['dist', 'src']
-    })
+    // livereload({
+    //   watch: ['dist', 'src']
+    // })
   ]
 })

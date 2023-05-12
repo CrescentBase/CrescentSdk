@@ -484,7 +484,7 @@ export default (props) => {
                 </div>
             )}
             {unbindPop && (
-                <div className={'security-center-pop-layout-wrap'} style={{height: viewportHeight}} onClick={() => {
+                <div className={'security-center-pop-layout-wrap'} onClick={() => {
                     setUnbindPop(false);
                 }}>
                     <div className={'security-center-pop-layout'} onClick={e => e.stopPropagation()}>

@@ -299,7 +299,7 @@ export default (props)=>{
         <div className={'select-email'} style={!updateUI ? {display: 'none'} : {}}>
             <img className={'select-email-logo'} style={isWeb ? { marginTop: 60 } : {}} src={img_logo}/>
             <div className={'select-email-with-email'} style={isWeb ? { marginTop: 48, marginBottom: 16 } : {}}>
-                {ILocal('login')}
+                {ILocal('create_social_account')}
             </div>
 
             {loading ? (

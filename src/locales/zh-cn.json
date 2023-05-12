@@ -125,5 +125,6 @@
   "only_email_provider": "仅可通过支持DKIM安全协议的邮箱进行绑定。绑定后即使您的TG账户被注销，您仍可通过邮箱找回您的资产。",
   "invalid_email_address": "无效的邮箱地址",
   "wrong_verification_code": "验证码错误",
-  "request_verification_frequently": "操作过于频繁，请稍后再试。"
+  "request_verification_frequently": "操作过于频繁，请稍后再试。",
+  "create_social_account": "通过社交网络ID来登录或创建你的钱包"
 }

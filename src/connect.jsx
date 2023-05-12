@@ -18,6 +18,7 @@ import { GoogleOAuthProvider, useGoogleLogin, GoogleLogin } from '@react-oauth/g
 const connect = (props) => {
     const document = ensureDocument(props.document)
     const element = props.container || document.body;
+
     const style = getStyle(props.style);
 
     const container = createContainer(element, document, style);
