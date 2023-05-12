@@ -69,10 +69,20 @@ const connect2 = (props) => {
                 </div>
                 <div className={'select-platform-item'} onClick={async () => {
                     if (typeof window.ethereum !== 'undefined') {
-                        console.log('Metamask is installed!');
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        const address = accounts[0];
-                        console.log(address);
+                        // console.log('Metamask is installed!');
+                        window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
+                            // console.log('===accounts = ', accounts);
+                            if (accounts && accounts.length > 0) {
+                                const address = accounts[0];
+                                props.onConnectSuccess && props.onConnectSuccess({address});
+                                // console.log(address);
+                            }
+                        }).catch(err => {
+                            console.csLog('err = ', err);
+                        });
+                    } else {
+                        props.onConnectFail && props.onConnectFail({msg: 'Metamask not installed', type: 1});
+                        // console.log('Metamask not installed!');
                     }
                 }}>
                     <span className={'select-platform-item-title'}>MetaMask</span>
