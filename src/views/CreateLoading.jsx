@@ -48,17 +48,11 @@ export default (props)=>{
         navigate(page);
     }
 
-
-    useEffect(() => {
-        if (navigateType === 'delete') {
-            deleteAccount();
-        }
-        // localStorage.setItem(LOCAL_STORAGE_WALLET_KEYSTORE, "{\"address\":\"0bf1462550515dfc38ebd18ff23dcef0f43176f3\",\"id\":\"32871fb4-fbe0-421e-a058-65d92c62ca9b\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"4e8c4e85efb88b39a15a12f2f0142397\"},\"ciphertext\":\"d7587099d955f9feec7f67604dd8dd9a93260405d0a64e49aa8d15364411d787\",\"kdf\":\"scrypt\",\"kdfparams\":{\"salt\":\"00918130837488bb8da5c942351761a3f3b4caed922fb1e717dfe4a69460925e\",\"n\":256,\"dklen\":32,\"p\":1,\"r\":8},\"mac\":\"a76c63b1b48f07c553c39610d92f878d1bf57cde83cde75ebb2fb5f389e9384a\"}}");
-
-        const initData = window.Telegram.WebApp.initDataUnsafe;
-        if (!initData || !initData.user || !initData.user.id) {
-            return;
-        }
+    const connect = (userInfo) => {
+        // const initData = window.Telegram.WebApp.initDataUnsafe;
+        // if (!initData || !initData.user || !initData.user.id) {
+        //     return;
+        // }
 
         const walletKeystore = localStorage.getItem(LOCAL_STORAGE_WALLET_KEYSTORE);
         if (!walletKeystore) {
@@ -88,7 +82,7 @@ export default (props)=>{
                     goto("Main");
                 }
             }).catch((e) => {
-                window.Telegram.WebApp.showAlert(String(e));
+                // window.Telegram.WebApp.showAlert(String(e));
                 console.csLog('===e1 == ', e);
             });
             return;
@@ -157,8 +151,8 @@ export default (props)=>{
             });;
         }
         loadData();
+    }
 
-    }, []);
 
     const deleteOtherAccountInfo = () => {
         localStorage.removeItem(LOCAL_STORAGE_TEMP_PV);
@@ -215,7 +209,7 @@ export default (props)=>{
     }
 
     return (
-        <div className={'create-loading'} style={{marginTop: window.Telegram.WebApp.viewportStableHeight/2 - 70}}>
+        <div className={'create-loading'} >
             {loading && (
                 <Lottie options={{
                     loop: true,

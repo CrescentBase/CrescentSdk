@@ -22,16 +22,9 @@ const connect = (props) => {
     const container = createContainer(element, document, style);
 
     const language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE);
-
-    const initData = window.Telegram?.WebApp?.initDataUnsafe;
-    let userLanguage = 'en';
-    if (initData) {
-        const language_code = initData?.user?.language_code;
-        if (language_code) {
-            if (language_code.indexOf('zh') !== -1) {
-                userLanguage = 'zh';
-            }
-        }
+    let userLanguage = navigator.language || navigator.userLanguage;
+    if (userLanguage.indexOf('zh') !== -1) {
+        userLanguage = 'zh';
     }
 
     if (!i18n.use(initReactI18next).isInitialized) {
@@ -50,7 +43,7 @@ const connect = (props) => {
         });
     }
 
-    let initView = "CreateLoading"
+    let initView = "SelectEmail"
     // initView = "SecurityCenter";
 
     setIsFromWeb(true);

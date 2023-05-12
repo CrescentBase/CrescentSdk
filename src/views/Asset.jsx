@@ -31,14 +31,14 @@ export default (props)=>{
     const [viewportHeight, setViewportHeight] = useState(0);
 
     function setViewportData() {
-        const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
-        setViewportHeight(viewpartHeight);
+        // const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
+        // setViewportHeight(viewpartHeight);
     }
 
-    useEffect(() => {
-        window.Telegram.WebApp.onEvent('viewportChanged', setViewportData);
-        setViewportData();
-    }, [])
+    // useEffect(() => {
+    //     window.Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+    //     setViewportData();
+    // }, [])
 
     return (
         <div className={'asset'} style={{height: viewportHeight}}>
