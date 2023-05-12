@@ -42,7 +42,7 @@ export default (props) => {
     const [hasBindEmail, setHasBindEmail] = useState(null);
     const [bindSuccess, setBindSuccess] = useState(false);
     const [beginBind, setBeginBind] = useState(false);
-    const [viewportHeight, setViewportHeight] = useState(0);
+    // const [viewportHeight, setViewportHeight] = useState(0);
 
     function setViewportData() {
         // const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
@@ -364,7 +364,7 @@ export default (props) => {
                     )}
                 </div>
             ) : page === 3 ? (
-                <div className={'security-center-base'} style={{ flex: 'initial', height: viewportHeight - 56 }}>
+                <div className={'security-center-base'}>
                     <div className={'flex-width-full flex-full flex-col'}>
                         <div className={'select-email-email-layout-inter'} style={{marginTop: 30, paddingLeft: 20, paddingRight: 20}}>
                             <div className={'select-email-email-wrap-web'}>

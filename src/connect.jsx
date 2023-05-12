@@ -13,6 +13,7 @@ import zh from "./locales/zh-cn.json";
 import {LOCAL_STORAGE_LANGUAGE, LOCAL_STORAGE_WALLET_KEYSTORE} from "./helpers/StorageUtils";
 import {setIsFromWeb} from "./helpers/Utils";
 import {setIsLight} from "./helpers/GetIcon";
+import { GoogleOAuthProvider, useGoogleLogin, GoogleLogin } from '@react-oauth/google';
 
 const connect = (props) => {
     const document = ensureDocument(props.document)
@@ -49,22 +50,26 @@ const connect = (props) => {
     setIsFromWeb(true);
     setIsLight(props.isLight);
 
+    // console.log('===props.googleClientId = ', props.googleClientId);
+
     const content = (
-        <ConfigProvider config={{...props, platform: 3, isWeb: true }}>
-            <div className="App" style={{ justifyContent: 'center' }}>
-                <div style={{width: props.width || 400, height: props.height || 520}} onClick={e => e.stopPropagation()}>
-                    <div className={'content'} id={'crescent-content'}>
-                        <PopProvider>
-                            <div className={'content-inter'}>
-                                <NavigateProvider initView={initView}>
-                                    <CrescentView id={'CrescentViewId'}/>
-                                </NavigateProvider>
-                            </div>
-                        </PopProvider>
+        <GoogleOAuthProvider clientId={props.googleClientId}>
+            <ConfigProvider config={{...props, platform: 3, isWeb: true }}>
+                <div className="App" style={{ justifyContent: 'center' }}>
+                    <div style={{width: props.width || 400, height: props.height || 520}} onClick={e => e.stopPropagation()}>
+                        <div className={'content'} id={'crescent-content'}>
+                            <PopProvider>
+                                <div className={'content-inter'}>
+                                    <NavigateProvider initView={initView}>
+                                        <CrescentView id={'CrescentViewId'}/>
+                                    </NavigateProvider>
+                                </div>
+                            </PopProvider>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </ConfigProvider>
+            </ConfigProvider>
+        </GoogleOAuthProvider>
     );
     const root = ReactDOMClient.createRoot(container);
     root.render(content);

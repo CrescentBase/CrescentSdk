@@ -32,6 +32,7 @@
     "build": "rm -rf dist && npx rollup --config rollup.module.config.js && npx rollup --config rollup.bundle.config.js"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.11.0",
     "bignumber.js": "^9.1.1",
     "copy-to-clipboard": "^3.3.1",
     "crypto-js": "^4.1.1",

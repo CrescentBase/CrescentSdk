@@ -28,7 +28,7 @@ export default (props)=>{
     const asset = props.params.asset;
     const { t } = useTranslation();
     const [showAddressPop, setShowAddressPop] = useState(false);
-    const [viewportHeight, setViewportHeight] = useState(0);
+    // const [viewportHeight, setViewportHeight] = useState(0);
 
     function setViewportData() {
         // const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
@@ -41,7 +41,7 @@ export default (props)=>{
     // }, [])
 
     return (
-        <div className={'asset'} style={{height: viewportHeight}}>
+        <div className={'asset'}>
             <div className={'asset-base'} onClick={() => {
                 if (showAddressPop) {
                     setShowAddressPop(false);

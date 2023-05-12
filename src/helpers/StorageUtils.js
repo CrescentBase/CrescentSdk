@@ -14,3 +14,4 @@ export const LOCAL_STORAGE_TG_FIRST_NAME = "storage_tg_first_name"
 export const LOCAL_STORAGE_TG_LAST_NAME = "storage_tg_last_name"
 export const LOCAL_STORAGE_TG_USERID = "storage_tg_userid"
 export const LOCAL_STORAGE_BIND_EMAIL = 'storage_bind_email'
+export const LOCAL_STORAGE_USER_INFO = 'storage_user_info';

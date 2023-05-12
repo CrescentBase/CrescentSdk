@@ -104,10 +104,9 @@
     const params = {
       container: element,
       paymasterUrl: "https://wallet.crescentbase.com/api/v2/signOp",
+      googleClientId: "1033913496793-oncfdcou216ab7msidlvodhkuhka003e.apps.googleusercontent.com",
       onConnectSuccess: (info) => {
-        const email = info.email;
         const address = info.address;
-        console.log('email:', email);
         console.log('address:', address);
       },
     }

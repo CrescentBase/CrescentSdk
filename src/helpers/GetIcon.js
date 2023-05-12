@@ -49,7 +49,7 @@ import img_safe from "../assets/img_safe"
 export let isLight = false;
 
 export const setIsLight = (isL) => {
-    console.log('====isLight = ', isL);
+    // console.log('====isLight = ', isL);
     isLight = isL;
 }
 

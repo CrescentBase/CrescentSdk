@@ -82,7 +82,7 @@ export default (props)=>{
     const { showAddressCopied } = useContext(PopContext);
     const [initLoaded, setInitLoaded] = useState(false);
     const [ongoingNum, setOngoingNum] = useState(1);
-    const [viewportHeight, setViewportHeight] = useState(0);
+    // const [viewportHeight, setViewportHeight] = useState(0);
 
     function setViewportData() {
         // const viewpartHeight = Math.round(window.Telegram.WebApp.viewportHeight, 2);
@@ -751,7 +751,7 @@ export default (props)=>{
             )}
 
             {showTransak && (
-                <div className={'main-transak-layout-wrap'} style={{height: viewportHeight}}>
+                <div className={'main-transak-layout-wrap'}>
                     <div className={'main-transak-layout'}>
                         <img className={'main-transak-close-icon'} src={ic_close} onClick={() => setShowTransak(false)}/>
                         <span className={'main-transak-title'}>

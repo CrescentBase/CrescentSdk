@@ -3,7 +3,7 @@ import rollup from './rollup.bundle.config'
 import serve from 'rollup-plugin-serve'
 import dev from 'rollup-plugin-dev'
 
-let port = Math.ceil(Math.random()*10000); ;
+let port = 3000;//Math.ceil(Math.random()*10000); ;
 export default Object.assign({}, rollup, {
   plugins: [...rollup.plugins,
     serve({
